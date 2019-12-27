@@ -1,0 +1,12 @@
+html
+    head
+        title A multiplayer game
+        script(src="/socket.io/socket.io.js")
+        link(rel='stylesheet', href='/static/css/index.css')
+    body
+        h1 Hello World  
+        h3 Pug is in here boiii
+        p You are #{name}
+        canvas(id="canvas")
+        a(href="/josh") Click for Josh
+    script(src="/static/game.js")
