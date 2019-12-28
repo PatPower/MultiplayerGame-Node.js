@@ -1,10 +1,36 @@
 var socket = io();
 var currPlayer = {}
+var bcanvas = document.getElementById('canvas');
+var pcanvas = document.getElementById('player');
+var otherpcanvas = document.getElementById('otherPlayers');
+
+// Background
+bcanvas.width = 840;
+bcanvas.height = 600;
+var boxSide = 40;
+var numRow = Math.floor(bcanvas.width/boxSide);
+var numCol = Math.floor(bcanvas.height/boxSide);
+var bgcxt = bcanvas.getContext('2d');
+for (var i = 0; i < numRow; i++) {
+    for (var j = 0; j < numCol; j++) {
+        bgcxt.strokeRect(boxSide*i,boxSide*j,boxSide,boxSide);
+    }
+}
+
+// Current Player
+pcanvas.width = 840;
+pcanvas.height = 600;
+var pcxt = pcanvas.getContext('2d');
+
+// Other Players
+otherpcanvas.width = 840;
+otherpcanvas.height = 600;
+var opcxt = pcanvas.getContext('2d');
 
 
-socket.on('message', function (data) {
-    console.log(data);
-});
+
+// When player joins
+socket.emit('new player', pname);
 
 var movement = {
     up: false,
@@ -14,7 +40,6 @@ var movement = {
 }
 
 var canMove = true; var firstKeyHold = true;
-var canShift = false;
 document.addEventListener('keydown', function (event) {
     if (event.keyCode == 87) {movement.up = true;} //W 
     if (event.keyCode == 68) {movement.right = true;} //D
@@ -32,6 +57,8 @@ document.addEventListener('keyup', function (event) {
     firstKeyHold = true
 });
 
+// TimeoutCounter limits how fast the user can move from the client side
+// FirstKeyHold makes the first press take a bit longer to move the player to allow easier tap movement 
 var timeoutCounter = 0;
 setInterval(function(){
     if(timeoutCounter >= 1) {timeoutCounter--; return false;}
@@ -41,37 +68,10 @@ setInterval(function(){
     }
 },40);
 
-socket.emit('new player', pname);
 
-/** 
-setInterval(function () {
-    socket.emit('movement', movement);
-}, 1000 / 60);
-*/
 
-var bcanvas = document.getElementById('canvas');
-bcanvas.width = 840;
-bcanvas.height = 600;
-var boxSide = 40;
-var numRow = Math.floor(bcanvas.width/boxSide);
-var numCol = Math.floor(bcanvas.height/boxSide);
-console.log('row: ' + numRow + '\n' + "col: " + numCol)
-var bgcxt = bcanvas.getContext('2d');
-for (var i = 0; i < numRow; i++) {
-    for (var j = 0; j < numCol; j++) {
-        bgcxt.strokeRect(boxSide*i,boxSide*j,boxSide,boxSide);
-    }
-}
 
-var pcanvas = document.getElementById('player');
-pcanvas.width = 840;
-pcanvas.height = 600;
-var pcxt = pcanvas.getContext('2d');
 
-var otherpcanvas = document.getElementById('otherPlayers');
-pcanvas.width = 840;
-pcanvas.height = 600;
-var opcxt = pcanvas.getContext('2d');
 
 // squaresObj[].i
 // squaresObj[].j
