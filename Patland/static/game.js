@@ -1,6 +1,6 @@
 var socket = io();
 var currPlayer = {}
-var bcanvas = document.getElementById('canvas');
+var bcanvas = document.getElementById('overlay');
 var pcanvas = document.getElementById('player');
 var otherpcanvas = document.getElementById('otherPlayers');
 
@@ -25,12 +25,17 @@ var pcxt = pcanvas.getContext('2d');
 // Other Players
 otherpcanvas.width = 840;
 otherpcanvas.height = 600;
-var opcxt = pcanvas.getContext('2d');
-
-
+var opcxt = otherpcanvas.getContext('2d');
 
 // When player joins
 socket.emit('new player', pname);
+
+// Server sends info needed to setup client
+socket.on('setup', function(playerList, currentPlayer) {
+    currPlayer = currentPlayer;
+    projectSquares(playerList);
+    projectSquare(currentPlayer);
+});
 
 var movement = {
     up: false,
@@ -68,31 +73,23 @@ setInterval(function(){
     }
 },40);
 
-
-
-
-
-
-// squaresObj[].i
-// squaresObj[].j
-// squaresObj[].color
+// Projects all the squares in the squaresObj object
 function projectSquares(squaresObj) {
     for (var index in squaresObj) {
         projectSquare(squaresObj[index]);
     }
 }
 
-// squaresObj[].i
-// squaresObj[].j
-// squaresObj[].color
+// Projects a square using the i and j in playerObj. Sets the current player as cyan.
 function projectSquare(playerObj) {
+    // Other players
     if (playerObj.id != currPlayer.id) {
         opcxt.fillStyle = playerObj.color
         opcxt.fillRect(boxSide*playerObj.i,boxSide*playerObj.j,boxSide,boxSide);
         opcxt.fillStyle = 'blue'
         opcxt.font = "12px Arial";
         opcxt.fillText(playerObj.name, boxSide*playerObj.i, boxSide*playerObj.j+10);
-    } else {
+    } else { // Current players
         pcxt.fillStyle = 'cyan';
         pcxt.fillRect(boxSide*playerObj.i,boxSide*playerObj.j,boxSide,boxSide);
         pcxt.fillStyle = 'blue'
@@ -102,11 +99,20 @@ function projectSquare(playerObj) {
 }
 /**
  * 
- * @param {*} squareObj The player being removed from the screen
+ * @param {*} playerObj The player being removed from the screen
  */
-function removeProjectedPlayer(squareObj) {
-    pcxt.fillStyle = "white";
-    pcxt.fillRect(boxSide*squareObj.i,boxSide*squareObj.j,boxSide,boxSide);
+function removeProjectedPlayer(playerObj) {
+    // Other players
+    //console.log(playerObj)
+    if (playerObj.id != currPlayer.id) {
+        //opcxt.fillStyle = "white";
+        opcxt.clearRect(boxSide*playerObj.i,boxSide*playerObj.j,boxSide,boxSide);
+        console.log("other")
+    } else { // Current players
+        //pcxt.fillStyle = "white";
+        pcxt.clearRect(boxSide*playerObj.i,boxSide*playerObj.j,boxSide,boxSide);
+        console.log("curr")
+    }
 }
 
 socket.on('playerMove', function (oldP, newP) {
@@ -114,14 +120,15 @@ socket.on('playerMove', function (oldP, newP) {
     projectSquare(newP);
 });
 
-socket.on('setup', function(playerList, currentPlayer) {
-    currPlayer = currentPlayer;
-    projectSquares(playerList);
-    projectSquare(currentPlayer);
+socket.on('playerProject', function (playerObj) {
+    projectSquare(playerObj);
 });
 
-socket.on('playerRemove', function(player) {
-    removeProjectedPlayer(player);
+socket.on('playerRemove', function(playerObj) {
+    removeProjectedPlayer(playerObj);
     console.log("player removee")
 })
 
+socket.on('message', function(msg) {
+    console.log(msg);
+})

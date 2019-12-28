@@ -1,8 +1,17 @@
-#canvas {
+#viewport {
+    position: relative;
+}
+
+canvas {
+    background-color: transparent;
+}
+
+#background {
     width: 840px;
     height: 600px;
     border: 5px solid black;
     position: absolute;
+    z-index: 0;
 }
 
 #otherPlayers {
@@ -10,10 +19,49 @@
     height: 600px;
     border: 5px solid green;
     position: absolute;
+    z-index: 1;
 }
 
 #player {
     width: 840px;
     height: 600px;
     border: 5px solid green;
+    position: absolute;
+    z-index: 2;
+}
+
+#overlay {
+    width: 840px;
+    height: 600px;
+    border: 5px solid black;
+    position: absolute;
+    z-index: 3;
+}
+
+/* The whole thing */
+.custom-menu {
+    display: none;
+    z-index: 1000;
+    position: absolute;
+    overflow: hidden;
+    border: 1px solid #CCC;
+    white-space: nowrap;
+    font-family: sans-serif;
+    background: #FFF;
+    color: #333;
+    border-radius: 5px;
+    padding: 0;
+}
+
+/* Each of the items in the list */
+.custom-menu li {
+    padding: 8px 12px;
+    cursor: pointer;
+    list-style-type: none;
+    transition: all .3s ease;
+    user-select: none;
+}
+
+.custom-menu li:hover {
+    background-color: #DEF;
 }

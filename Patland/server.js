@@ -34,17 +34,29 @@ io.on('connection', function(socket) {
             color: 'red'
         }
         io.to(socket.id).emit('setup', players, players[socket.id]);
-        io.sockets.emit('playerMove', {}, players[socket.id]);
-        moveLog[socket.id] = [(new Date).getTime()];
+        console.log(players[socket.id])
+        io.sockets.emit('playerProject', players[socket.id]);
+        moveLog[socket.id] = [];
+        moveLog[socket.id].push((new Date).getTime());
         console.log(pname);
     });
 
     socket.on('disconnect', function() {
-        io.sockets.emit('playerRemove', players[socket.id]);
-        delete players[socket.id];
+        console.log(socket.id)
+        // Check if player exists
+        if (players[socket.id]) {
+            io.sockets.emit('playerRemove', players[socket.id]);
+            delete players[socket.id];
+        }
     });
 
     socket.on('movement', function(data) {
+
+        // Checks if user exists
+        if (!moveLog[socket.id]) {
+            io.to(socket.id).emit('message', "Not connected");
+            return
+        }
         var currMoveLog = moveLog[socket.id];
         
         // Checks if the user has moved more than MAXSPEED tiles in 2 seconds

@@ -2,15 +2,23 @@ html
     head
         title A multiplayer game
         script(src="/socket.io/socket.io.js")
+        script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js")
+        script(src="/static/customContextMenu.js")
         link(rel='stylesheet', href='/static/css/index.css')
         script.
             var pname = '#{name}';
     body
         h1 Hello World  
         h3 Pug is in here boiii
+        ul(class='custom-menu')
+            li(data-action="first") First T
         p You are #{name}
-        div(style="position: relative;")
-            canvas(id="canvas")
+        button Toggle
+        p Test
+        div(id="viewport")
+            canvas(id="background")
             canvas(id="otherPlayers")
             canvas(id="player")
-    script(src="/static/game.js")
+            canvas(id="overlay")
+        script(src="/static/game.js")
+    
