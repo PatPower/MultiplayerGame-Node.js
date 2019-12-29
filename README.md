@@ -9,3 +9,4 @@ Features (maybe):
 - Building
 - Fast traveling
 - pvp????
+- no bugs (haha)
