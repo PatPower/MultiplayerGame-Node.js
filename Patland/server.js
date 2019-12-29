@@ -12,7 +12,7 @@ app.set('view engine', 'pug');
 app.use('/static', express.static(__dirname + '/static'));// Routing
 
 app.get('/', (req, res) => {
-    res.render('index', {name: 'Pat'})
+    res.render('index')
 });
 
 server.listen(port, function(){
@@ -33,12 +33,11 @@ io.on('connection', function(socket) {
             name: pname,
             color: 'red'
         }
+        console.log(players)
         io.to(socket.id).emit('setup', players, players[socket.id]);
-        console.log(players[socket.id])
         io.sockets.emit('playerProject', players[socket.id]);
         moveLog[socket.id] = [];
         moveLog[socket.id].push((new Date).getTime());
-        console.log(pname);
     });
 
     socket.on('disconnect', function() {

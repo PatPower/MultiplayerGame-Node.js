@@ -1,3 +1,4 @@
+var name = "Pat";
 $(document).ready(function(){
     $("button").click(function(){
       $("p").toggle(1000);
@@ -30,7 +31,6 @@ $(document).bind("mousedown", function (e) {
     }
 });
 
-
 // If the menu element is clicked
 $(".custom-menu li").click(function(){
     
@@ -46,3 +46,15 @@ $(".custom-menu li").click(function(){
     // Hide it AFTER the action was triggered
     $(".custom-menu").hide(100);
   });
+
+  function show_prompt() {
+    
+    do {
+        name=prompt("Please enter your name (max length 5)");
+    }
+    while(name.length > 5){
+        $('#myinput').val(name);
+    }
+}
+
+show_prompt();

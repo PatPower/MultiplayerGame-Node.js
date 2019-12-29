@@ -1,5 +1,6 @@
 var socket = io();
 var currPlayer = {}
+var playerList = {}
 var bcanvas = document.getElementById('overlay');
 var pcanvas = document.getElementById('player');
 var otherpcanvas = document.getElementById('otherPlayers');
@@ -28,12 +29,15 @@ otherpcanvas.height = 600;
 var opcxt = otherpcanvas.getContext('2d');
 
 // When player joins
-socket.emit('new player', pname);
+socket.emit('new player', name);
 
 // Server sends info needed to setup client
-socket.on('setup', function(playerList, currentPlayer) {
+// pList is a list of playerObj
+// currentPlayer is the currentplayerObj
+socket.on('setup', function(pList, currentPlayer) {
     currPlayer = currentPlayer;
-    projectSquares(playerList);
+    playerList = pList;
+    projectSquares(pList);
     projectSquare(currentPlayer);
 });
 
@@ -84,9 +88,10 @@ function projectSquares(squaresObj) {
 function projectSquare(playerObj) {
     // Other players
     if (playerObj.id != currPlayer.id) {
-        opcxt.fillStyle = playerObj.color
+        opcxt.fillStyle = playerObj.color;
+        console.log(playerObj.color)
         opcxt.fillRect(boxSide*playerObj.i,boxSide*playerObj.j,boxSide,boxSide);
-        opcxt.fillStyle = 'blue'
+        opcxt.fillStyle = 'blue';
         opcxt.font = "12px Arial";
         opcxt.fillText(playerObj.name, boxSide*playerObj.i, boxSide*playerObj.j+10);
     } else { // Current players
@@ -102,33 +107,61 @@ function projectSquare(playerObj) {
  * @param {*} playerObj The player being removed from the screen
  */
 function removeProjectedPlayer(playerObj) {
+    var otherPlayer = findPlayerByCoords(playerObj)
+    // If player is found and removed player has not disconnected
+    if (otherPlayer && playerList[playerObj.id]) {
+        if (playerObj.id == currPlayer.id) {
+            pcxt.clearRect(boxSide*playerObj.i,boxSide*playerObj.j,boxSide,boxSide);
+        }
+        projectSquare(otherPlayer);
+        return;
+    }
     // Other players
-    //console.log(playerObj)
     if (playerObj.id != currPlayer.id) {
-        //opcxt.fillStyle = "white";
         opcxt.clearRect(boxSide*playerObj.i,boxSide*playerObj.j,boxSide,boxSide);
-        console.log("other")
     } else { // Current players
-        //pcxt.fillStyle = "white";
         pcxt.clearRect(boxSide*playerObj.i,boxSide*playerObj.j,boxSide,boxSide);
-        console.log("curr")
+    }
+}
+
+function findPlayerByCoords(playerObj) {
+    for (id in playerList) {
+        // Finds the user with the same coords thats not itself
+        console.log(playerList[id])
+        if (playerList[id].i == playerObj.i && playerList[id].j == playerObj.j && id != playerObj.id && id != currPlayer.id) {
+            console.log(playerList[id])
+            return playerList[id];
+        }
     }
 }
 
 socket.on('playerMove', function (oldP, newP) {
     removeProjectedPlayer(oldP)
+    // Finds the moving player in the playerList array
+    var playerObj = playerList[newP.id];
+    if (playerObj) {
+        // Change the i, j values for the player in the playerList array
+        playerObj.i = newP.i
+        playerObj.j = newP.j
+    } else {
+        console.log("Error: playerObj not found in playerMove");
+        return;
+    }
+    // Shows the new location of the player
     projectSquare(newP);
 });
 
 socket.on('playerProject', function (playerObj) {
+    playerList[playerObj.id] = playerObj;
     projectSquare(playerObj);
 });
 
 socket.on('playerRemove', function(playerObj) {
     removeProjectedPlayer(playerObj);
-    console.log("player removee")
-})
+    delete playerList[playerObj.id]
+    console.log(playerObj)
+});
 
 socket.on('message', function(msg) {
     console.log(msg);
-})
+});
