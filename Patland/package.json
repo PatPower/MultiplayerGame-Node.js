@@ -9,6 +9,7 @@
   "dependencies": {
     "ejs": "^3.0.1",
     "express": "^4.17.1",
+    "jquery-contextmenu": "^2.9.0",
     "pug": "^2.0.4",
     "socket.io": "^2.3.0"
   }

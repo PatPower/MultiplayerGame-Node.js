@@ -1,60 +1,54 @@
-var name = "Pat";
-$(document).ready(function(){
-    $("button").click(function(){
-      $("p").toggle(1000);
+
+var canvasRectPos = document.getElementById("overlay").getBoundingClientRect();
+
+$(function () {
+    $.contextMenu({
+        selector: '#overlay',
+        callback: function (key, options) {
+            var m = "clicked: " + key;
+            window.console && console.log(m) || alert(m);
+        },
+        autoHide: true,
+        hideOnSecondTrigger: true,
+        build: function ($triggerElement, e) {
+            return findMenuObj(e.offsetX, e.offsetY)
+        },
+        zIndex: 4
     });
+
+    $('.context-menu-one').on('click', function (e) {
+        console.log('clicked', this);
+    })
 });
 
-$(document).bind("contextmenu", function (event) {
-    
-    // Avoid the real one
-    event.preventDefault();
-    
-    // Show contextmenu
-    $(".custom-menu").finish().toggle(100).
-    
-    // In the right position (the mouse)
-    css({
-        top: event.pageY + "px",
-        left: event.pageX + "px"
-    });
-});
-
-// If the document is clicked somewhere
-$(document).bind("mousedown", function (e) {
-    
-    // If the clicked element is not the menu
-    if (!$(e.target).parents(".custom-menu").length > 0) {
-        
-        // Hide it
-        $(".custom-menu").hide(100);
-    }
-});
-
-// If the menu element is clicked
-$(".custom-menu li").click(function(){
-    
-    // This is the triggered action name
-    switch($(this).attr("data-action")) {
-        
-        // A case for each action. Your actions here
-        case "first": alert("first"); break;
-        case "second": alert("second"); break;
-        case "third": alert("third"); break;
-    }
-  
-    // Hide it AFTER the action was triggered
-    $(".custom-menu").hide(100);
-  });
-
-  function show_prompt() {
-    
-    do {
-        name=prompt("Please enter your name (max length 5)");
-    }
-    while(name.length > 5){
-        $('#myinput').val(name);
-    }
+function findMenuObj(x, y) {
+    var i = Math.floor(x / boxSide);
+    var j = Math.floor(y / boxSide)
+    console.log(i + "  " + j)
+    return {
+        items: {
+            "ground": { name: `${locationMap[i][j].ground}` },
+            "strucutre": { name: `${locationMap[i][j].structure.name}` },
+            "players": {
+                name: "Players:",
+                visible: function (key, opt) {
+                    return (locationMap[i][j].players.length > 0);
+                },
+                items: (function () {
+                    var players = {}
+                    for (index in locationMap[i][j].players) {
+                        players[`${index}`] = { name: locationMap[i][j].players[index].name }
+                    }
+                    console.log(players)
+                    return players;
+                })()
+            },
+            "sep1": "---------",
+            "quit": {
+                name: "Hello", icon: function () {
+                    return 'context-menu-icon context-menu-icon-quit';
+                }
+            }
+        }
+    };
 }
-
-show_prompt();
