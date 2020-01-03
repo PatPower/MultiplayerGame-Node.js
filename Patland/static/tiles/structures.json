@@ -1,0 +1,18 @@
+[
+    {
+        "id": 0,
+        "name": "air",
+        "armor": -1,
+        "health": 1,
+        "passable": true,
+        "owner": "game"
+    },
+    {
+        "id": 1,
+        "name": "wall",
+        "armor": 1,
+        "health": 1,
+        "passable": false,
+        "owner": "game"
+    }
+]

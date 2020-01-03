@@ -34,6 +34,7 @@ io.on('connection', function(socket) {
             color: 'red'
         }
         console.log(players)
+        io.to(socket.id).emit('pregamesetup', []);
         io.to(socket.id).emit('setup', players, players[socket.id]);
         io.sockets.emit('playerProject', players[socket.id]);
         moveLog[socket.id] = [];

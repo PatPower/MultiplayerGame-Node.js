@@ -1,5 +1,5 @@
 
-var canvasRectPos = document.getElementById("overlay").getBoundingClientRect();
+//var canvasRectPos = document.getElementById("overlay").getBoundingClientRect();
 
 $(function () {
     $.contextMenu({
@@ -27,7 +27,7 @@ function findMenuObj(x, y) {
     console.log(i + "  " + j)
     return {
         items: {
-            "ground": { name: `${locationMap[i][j].ground}` },
+            "ground": { name: `${locationMap[i][j].ground.name}` },
             "strucutre": { name: `${locationMap[i][j].structure.name}` },
             "players": {
                 name: "Players:",

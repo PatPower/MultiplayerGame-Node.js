@@ -3,9 +3,10 @@ var currPlayer = {} // Current Player Object
 var playerList = {}
 
 // Setup the canvases
-var bgcxt = setupBackground(document.getElementById('overlay'));
-var pcxt = setupCurrentPlayer(document.getElementById('player'));
-var opcxt = setupOtherPlayers(document.getElementById('otherPlayers'));
+var bgcxt;
+var pcxt;
+var opcxt;
+var ovlycxt;
 
 // Send to server that a player joined
 socket.emit('new player', name);
@@ -15,6 +16,10 @@ socket.emit('new player', name);
 // currentPlayer is the currentplayerObj
 socket.on('setup', function (pList, currentPlayer) {
     setupLocationMap([...Array(numRow)].map(e => Array(numCol)),[...Array(numRow)].map(e => Array(numCol)), pList, [...Array(numRow)].map(e => Array(numCol)));
+    bgcxt = setupBackground(document.getElementById('background'));
+    pcxt = setupCurrentPlayer(document.getElementById('player'));
+    opcxt = setupOtherPlayers(document.getElementById('otherPlayers'));
+    ovly = setupOverlay(document.getElementById('overlay'));
     currPlayer = currentPlayer;
     playerList = pList;
     projectSquares(pList);
@@ -57,12 +62,25 @@ setInterval(function () {
     }
 }, 40);
 
-/**
- * 
- * @param {*} canvas The canvas element
- */
+
 function setupBackground(canvas) {
     // Background
+    canvas.width = cWidth;
+    canvas.height = cHeight;
+    var bgcxt = canvas.getContext('2d');
+    for (var i = 0; i < numRow; i++) {
+        for (var j = 0; j < numCol; j++) {
+            if (locationMap[i][j].ground.backgroundColor) {
+                bgcxt.fillStyle = locationMap[i][j].ground.backgroundColor;
+                bgcxt.fillRect(boxSide * i, boxSide * j, boxSide, boxSide);
+            }
+            bgcxt.strokeRect(boxSide * i, boxSide * j, boxSide, boxSide);
+        }
+    }
+    return bgcxt;
+}
+
+function setupOverlay(canvas) {
     canvas.width = cWidth;
     canvas.height = cHeight;
     var bgcxt = canvas.getContext('2d');
