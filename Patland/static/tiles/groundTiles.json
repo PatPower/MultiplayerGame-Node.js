@@ -1,0 +1,17 @@
+[
+    {
+        "id": 0,
+        "name": "grass",
+        "backgroundColor": "green"
+    },
+    {
+        "id": 1,
+        "name": "stone",
+        "backgroundColor": "grey"
+    },
+    {
+        "id": 2,
+        "name": "table",
+        "backgroundColor": null
+    }
+]
