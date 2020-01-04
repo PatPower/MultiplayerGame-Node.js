@@ -2,7 +2,7 @@
     {
         "id": 0,
         "name": "grass",
-        "backgroundColor": "green"
+        "backgroundColor": "rgb(73, 196, 89)"
     },
     {
         "id": 1,
