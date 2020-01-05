@@ -4,15 +4,13 @@
         "name": "air",
         "armor": -1,
         "health": 1,
-        "owner": "game",
-        "sprite": null
+        "passable": true
     },
     {
         "id": 1,
         "name": "rock",
         "armor": 1,
         "health": 1,
-        "owner": "game",
-        "sprite": "/static/img/rock.png"
+        "passable": false
     }
 ]
