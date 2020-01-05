@@ -1,6 +1,7 @@
 var express = require('express');
 var app = express();
 var http = require('http');
+var fs = require('fs');
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 
@@ -28,21 +29,25 @@ var players = {};
 var moveLog = {};
 
 // TODO: calculate and move these variables to a different file
+const CWIDTH = 840;
+const CHEIGHT = 600;
+const BOXSIDE = 40;
+const NUMCOL = Math.floor(CWIDTH / BOXSIDE);
+const NUMROW = Math.floor(CHEIGHT / BOXSIDE);
+
 const MAXSPEED = 30;
 const WORLDLIMIT = 100;
-const HORIZONTALRADIUS = 10;
-const VERTICALRADIUS = 7;
+const HORIZONTALRADIUS = Math.floor(NUMCOL / 2);
+const VERTICALRADIUS = Math.floor(NUMROW / 2);
 const MILLISECONDMAX = 2000;
+const structureJson = getStructureJson();
 
-const cWidth = 840;
-const cHeight = 600;
-const boxSide = 40;
 
-const NUMROW = Math.floor(cWidth / boxSide);
-const NUMCOL = Math.floor(cHeight / boxSide);
+
 
 // Add the WebSocket handlers
 io.on('connection', function (socket) {
+
     socket.on('new player', function (pname) {
         var player;
         // TODO: make a system to save a player and load it
@@ -61,22 +66,17 @@ io.on('connection', function (socket) {
             players[socket.id] = player;
             addPlayerLocation(player);
         }
-        console.log(players) // remove later
         // TODO: Send the player a 2D list of players around them
         // TODO: ALSO SEND THE BACKGROUND AND STRUCTURES
-        io.to(socket.id).emit('setup', players, players[socket.id]);
+        io.to(socket.id).emit('setup', players, players[socket.id], getLocal2DGround(player), getLocal2DStructure(player));
         // TODO: Remove player from other screens if exit their view
         var range = getIJRange(player.i, player.j);
-        console.log(range);
-        console.log(players);
         for (var i = range.lefti; i <= range.righti; i++) {
             for (var j = range.topj; j <= range.bottomj; j++) {
                 if (worldPlayerMap[i][j].length > 0) {
                     for (othplayer of worldPlayerMap[i][j]) {
                         if (othplayer.id != player.id) {
-                            console.log(player.id)
-                            console.log("in", othplayer)
-                            io.sockets.emit('playerProject', players[socket.id]);
+                            io.to(othplayer.id).emit('playerJoin', players[socket.id]);
                         }
                     }
                 }
@@ -89,13 +89,13 @@ io.on('connection', function (socket) {
 
     socket.on('disconnect', function () {
         console.log("dc", socket.id)
+        //TODO: make local
         // Check if player exists
         if (players[socket.id]) {
             removePlayerLocation(players[socket.id]);
             io.sockets.emit('playerRemove', players[socket.id]);
             delete players[socket.id];
         }
-        console.log(players)
     });
 
     socket.on('movement', function (data) {
@@ -116,10 +116,38 @@ io.on('connection', function (socket) {
         // Remove the old player location
         removePlayerLocation(player);
         // TODO: check for impassible structures/ out of bounds
-        if (data.left) { player.i--; }
-        if (data.right) { player.i++; }
-        if (data.up) { player.j--; }
-        if (data.down) { player.j++; }
+        if (data.left) {
+            if (player.i - 1 >= 0 && structurePassable(worldStructureMap[player.i - 1][player.j])) {
+                player.i--;
+            } else {
+                data.left = false;
+                // Show user that movement is blocked
+            }
+        }
+        if (data.right) {
+            if (player.i + 1 < WORLDLIMIT && structurePassable(worldStructureMap[player.i + 1][player.j])) {
+                player.i++;
+            } else {
+                data.right = false;
+                // Show user that movement is blocked
+            }
+        }
+        if (data.up) {
+            if (player.j - 1 >= 0 && structurePassable(worldStructureMap[player.i][player.j - 1])) {
+                player.j--;
+            } else {
+                data.up = false;
+                // Show user that movement is blocked
+            }
+        }
+        if (data.down) {
+            if (player.j + 1 < WORLDLIMIT && structurePassable(worldStructureMap[player.i][player.j + 1])) {
+                player.j++;
+            } else {
+                data.down = false;
+                // Show user that movement is blocked
+            }
+        }
         addPlayerLocation(player);
 
         if (moveLog[socket.id].length >= MAXSPEED) {
@@ -129,8 +157,11 @@ io.on('connection', function (socket) {
             moveLog[socket.id].push((new Date).getTime())
         }
 
-        io.to(socket.id).emit('message', `x: ${player.i}   y: ${player.j}`); //remove
-
+        // If player did not move then do stop here
+        if (!data.up && !data.right && !data.down && !data.left) {
+            return;
+        
+        }
         // TODO: Only emit to players in the viewable radius of other players
         // TODO: Remove player from other screens if exit their view
         var range = getIJRange(player.i, player.j);
@@ -154,7 +185,6 @@ io.on('connection', function (socket) {
                 range.topj--;
             }
         }
-        console.log(range);
         for (var i = range.lefti; i <= range.righti; i++) {
             for (var j = range.topj; j <= range.bottomj; j++) {
                 if (worldPlayerMap[i][j].length > 0) {
@@ -168,7 +198,7 @@ io.on('connection', function (socket) {
         }
 
         // TODO: Send moving player new map info
-        io.to(socket.id).emit('moveCurrPlayer', player, getLocal2DPlayerList(player));
+        io.to(socket.id).emit('moveCurrPlayer', player, getLocal2DPlayerDict(player), getLocal2DGround(player), getLocal2DStructure(player));
 
 
     });
@@ -176,6 +206,8 @@ io.on('connection', function (socket) {
 
 /**
  * Returns an object with the left/right bound and top/bottom bound of i and j respectively
+ * If the player is near the border, the i's and j's will be either 0 or the WORLDLIMIT - 1
+ * However the true i and j's will ignore the constraints above and can give < 0 or > WORLDLIMIT - 1
  * @param {*} i player's world i coordinate
  * @param {*} j player's world j coordinate
  */
@@ -185,33 +217,70 @@ function getIJRange(i, j) {
     var topJ = 0;
     var bottomJ = WORLDLIMIT - VERTICALRADIUS;
     // Used to get how close user is to the border
-    var trueLeftI; var trueTopJ;
+    var trueLeftI; var trueTopJ; var trueRightI; var trueBottomJ;
+    trueLeftI = i - HORIZONTALRADIUS
+    trueRightI = i + HORIZONTALRADIUS
+    trueTopJ = j - VERTICALRADIUS
+    trueBottomJ = j + VERTICALRADIUS
     if (i >= HORIZONTALRADIUS) { leftI = i - HORIZONTALRADIUS }
-    else { trueLeftI = i - HORIZONTALRADIUS }
     if (i < WORLDLIMIT - HORIZONTALRADIUS) { rightI = i + HORIZONTALRADIUS };
     if (j >= VERTICALRADIUS) { topJ = j - VERTICALRADIUS }
-    else { trueTopJ = j - VERTICALRADIUS }
     if (j < WORLDLIMIT - VERTICALRADIUS) { bottomJ = j + VERTICALRADIUS };
-    return { lefti: leftI, righti: rightI, topj: topJ, bottomj: bottomJ, truelefti: trueLeftI, truetopj: trueTopJ };
+    return { lefti: leftI, righti: rightI, topj: topJ, bottomj: bottomJ, truelefti: trueLeftI, truetopj: trueTopJ, truerighti: trueRightI, truebottomj: trueBottomJ };
 }
 
 /**
- * Gets a 2D list of players in viewing distance of the given player
+ * Gets a 2D list of players in viewing distance of the given player and returns a dict of players
  * @param {*} player 
  */
-function getLocal2DPlayerList(player) {
-    var localPlayerList = [];
+function getLocal2DPlayerDict(player) {
+    var localPlayerDict = {};
     var range = getIJRange(player.i, player.j);
     for (var i = range.lefti; i <= range.righti; i++) {
         for (var j = range.topj; j <= range.bottomj; j++) {
             if (worldPlayerMap[i][j].length > 0) {
                 for (othplayer of worldPlayerMap[i][j]) {
-                    localPlayerList.push(othplayer);
+                    localPlayerDict[othplayer.id] = othplayer;
                 }
             }
         }
     }
-    return localPlayerList;
+    return localPlayerDict;
+}
+
+/**
+ * Returns a 2D list of ground ids near the player.
+ * If player is near the border, the id of the ground outside border will be null
+ * @param {} player 
+ */
+function getLocal2DGround(player) {
+    var ground2D = [...Array(NUMCOL)].map(e => Array(NUMROW));
+    var range = getIJRange(player.i, player.j);
+    for (var j = range.truetopj; j <= range.truebottomj; j++) {
+        for (var i = range.truelefti; i <= range.truerighti; i++) {
+            if (i >= 0 && i <= WORLDLIMIT - 1 && j >= 0 && j <= WORLDLIMIT - 1) {
+                ground2D[i - range.truelefti][j - range.truetopj] = worldGroundMap[i][j];
+            }
+        }
+    }
+    return ground2D;
+}
+
+/**
+ * Returns a 2D list of structureInfo objects near the player.
+ * @param {} player 
+ */
+function getLocal2DStructure(player) {
+    var structure2D = [...Array(NUMCOL)].map(e => Array(NUMROW));
+    var range = getIJRange(player.i, player.j);
+    for (var j = range.truetopj; j <= range.truebottomj; j++) {
+        for (var i = range.truelefti; i <= range.truerighti; i++) {
+            if (i >= 0 && i <= WORLDLIMIT - 1 && j >= 0 && j <= WORLDLIMIT - 1) {
+                structure2D[i - range.truelefti][j - range.truetopj] = worldStructureMap[i][j];
+            }
+        }
+    }
+    return structure2D;
 }
 
 // TODO: Save this into a database/file later
@@ -231,13 +300,28 @@ function removePlayerLocation(player) {
 
 function initializeTestMap() {
     worldStructureMap = [...Array(WORLDLIMIT)].map(e => Array(WORLDLIMIT));
+    worldStructureMap[2][2] = { id: 1, health: 10, owner: "game" };
     worldGroundMap = [...Array(WORLDLIMIT)].map(e => Array(WORLDLIMIT));
     worldPlayerMap = [...Array(WORLDLIMIT)].map(e => Array(WORLDLIMIT));
     for (i = 0; i < WORLDLIMIT; i++) {
         for (j = 0; j < WORLDLIMIT; j++) {
             worldPlayerMap[i][j] = []
+            worldGroundMap[i][j] = 0;
         }
     }
+}
+
+function structurePassable(structureInfo) {
+    var passable = true;
+    if (structureInfo) {
+        passable = structureJson.find(o => o.id == structureInfo.id).passable;
+    }
+    return passable;
+}
+
+function getStructureJson() {
+    let structureJson = JSON.parse(fs.readFileSync('./structure.json'))
+    return structureJson;
 }
 
 initializeTestMap()

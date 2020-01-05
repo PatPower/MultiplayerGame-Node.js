@@ -14,11 +14,14 @@ html
         div(id="viewport")
             h1(id="title") Pat Land
             p(id="subheader") By pat
-            canvas(id="background")
-            canvas(id="structure")
-            canvas(id="otherPlayers")
-            canvas(id="player")
-            canvas(id="overlay")
+            canvas(id="tileMarker")
+            div(id="screen1")
+                canvas(id="background")
+                canvas(id="structure")
+                canvas(id="otherPlayers")
+                canvas(id="player")
+                canvas(id="overlay")
         script(src="/static/game.js")
         script(src="/static/customContextMenu.js")
+        script(src="/static/coordinateInfo.js")
     

@@ -22,8 +22,8 @@ $(function () {
 });
 
 function findMenuObj(x, y) {
-    var i = Math.floor(x / boxSide);
-    var j = Math.floor(y / boxSide)
+    var i = Math.floor(x / BOXSIDE);
+    var j = Math.floor(y / BOXSIDE)
     console.log(i + "  " + j)
     return {
         items: {
@@ -39,7 +39,6 @@ function findMenuObj(x, y) {
                     for (index in locationMap[i][j].players) {
                         players[`${index}`] = { name: locationMap[i][j].players[index].name }
                     }
-                    console.log(players)
                     return players;
                 })()
             },
