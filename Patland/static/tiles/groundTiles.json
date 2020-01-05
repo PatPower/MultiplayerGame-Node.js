@@ -1,17 +1,17 @@
 [
     {
+        "id": -1,
+        "name": "void",
+        "backgroundColor": null
+    },
+    {
         "id": 0,
         "name": "grass",
-        "backgroundColor": "green"
+        "backgroundColor": "rgb(73, 196, 89)"
     },
     {
         "id": 1,
         "name": "stone",
         "backgroundColor": "grey"
-    },
-    {
-        "id": 2,
-        "name": "table",
-        "backgroundColor": null
     }
 ]

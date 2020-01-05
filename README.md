@@ -8,6 +8,7 @@ Features (maybe):
 - Finding and utilizing resource nodes
 - Crafting
 - Building
+- weird music o.O
 - Fast traveling
 - pvp????
 - no bugs (haha)
