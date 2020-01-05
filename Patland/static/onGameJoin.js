@@ -3,11 +3,9 @@ var name = "Pat";
 function show_prompt() {
     $.getJSON("/static/tiles/structures.json", function (json) {
         structureJson = json;
-        console.log(json);
     });
     $.getJSON("/static/tiles/groundTiles.json", function (json) {
         groundJson = json;
-        console.log(groundJson);
     });
     
     do {
@@ -21,9 +19,7 @@ function show_prompt() {
 function loadImages(callback) {
     var imgList = {};
     for (id in structureJson) {
-        console.log("win")
         if (structureJson[id].sprite) {
-            console.log("win")
             imgList[id] = new Image();
             imgList[id].onload = function() {
                 callback(imgList);

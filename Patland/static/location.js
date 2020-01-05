@@ -1,4 +1,5 @@
-var locationMap = [...Array(numCol)].map(e => Array(numRow));
+// The map relative to the player
+var locationMap = [...Array(NUMCOL)].map(e => Array(NUMROW));
 var structureJson = []; var groundJson = [];
 
 
@@ -31,9 +32,9 @@ function getGroundObj(id) {
             throw `id: ${id} does not exist in groundTile.json`
         }
     }
-    // If obj is grass or if obj not exist in groundTile.json
-    if (groundJson.find(o => o.id == 0)) {
-        return getGroundObj(0); // Grass
+    // If obj is void or if obj not exist in groundTile.json
+    if (groundJson.find(o => o.id == -1)) {
+        return getGroundObj(-1); // Void
     } else {
         throw "groundTile.json is invalid";
     }
@@ -44,18 +45,16 @@ function getGroundObj(id) {
  * @param {*} ground 2d array of ground ids
  * @param {*} structure 2d array of structure objectInfo's (id, health, owner)
  * @param {*} playersObj dict of players
- * @param {*} items 2d array of a list of items on the ground
  * @param {*} currPlayer the current player
  */
-function loadLocationMap(ground2D, structure2D, playersObj, items2D, currPlayer) {
+function loadLocationMap(ground2D, structure2D, playersObj, currPlayer) {
     var trueRange = getTrueRange(currPlayer);
-    for (var i = 0; i < numCol; i++) {
-        for (var j = 0; j < numRow; j++) {
+    for (var i = 0; i < NUMCOL; i++) {
+        for (var j = 0; j < NUMROW; j++) {
             locationMap[i][j] = {
                 ground: getGroundObj(ground2D[i][j]),
                 structure: getStructureObj(structure2D[i][j]),
                 players: [],
-                items: items2D[i][j] || []
             };
         }
     }

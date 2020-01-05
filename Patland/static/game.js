@@ -15,33 +15,32 @@ socket.emit('new player', name);
 // Server sends info needed to setup client
 // pList is a dict of playerObj with the id as key
 // currentPlayer is the currentplayerObj
-socket.on('setup', function (pList, currentPlayer) {
+socket.on('setup', function (pList, currentPlayer, ground2D, structure2D) {
     currPlayer = currentPlayer;
     playerList = pList;
-    loadLocationMap([...Array(numCol)].map(e => Array(numRow)), [...Array(numCol)].map(e => Array(numRow)), pList, [...Array(numCol)].map(e => Array(numRow)), currPlayer);
+    loadLocationMap(ground2D, structure2D, pList, currPlayer);
     bgcxt = setupBackground(document.getElementById('background'));
     strcxt = setupStructure(document.getElementById('structure'));
     pcxt = setupCurrentPlayer(document.getElementById('player'));
     opcxt = setupOtherPlayers(document.getElementById('otherPlayers'));
     ovlycxt = setupOverlay(document.getElementById('overlay'));
 
-
+    updateTileMarker(currPlayer);
     projectSquares(pList);
     projectSquare(currentPlayer, {});
 });
 
-socket.on('moveCurrPlayer', function (player, pList) {
+socket.on('moveCurrPlayer', function (player, pList, ground2D, structure2D) {
     currPlayer.i = player.i;
     currPlayer.j = player.j
     playerList = pList;
-    loadLocationMap([...Array(numCol)].map(e => Array(numRow)), [...Array(numCol)].map(e => Array(numRow)), pList, [...Array(numCol)].map(e => Array(numRow)), currPlayer);
-
+    loadLocationMap(ground2D, structure2D, pList, currPlayer);
+    updateBackgroundCanvas();
+    updateStructureCanvas()
     projectSquares(playerList);
-    // TODO update background and structures
+    updateTileMarker(currPlayer);
 })
 
-//TODO: Change to unit based movement
-// Turn (oldP, newP) to (othP, movement)
 socket.on('othPlayerMove', function (othP, movement) {
     if (othP.id == currPlayer.id) {
         console.log("Error: othPlayerMove sent current player")
@@ -55,9 +54,11 @@ socket.on('othPlayerMove', function (othP, movement) {
     // Other player moves in view
     if (!playerList[othP.id]) {
         addPlayer(getNewCoordsLocation(othP, movement));
+
         return;
     }
     var relCoords = getRelativeCoords(othP, currPlayer)
+    // Removes the old player projection
     removeProjectedPlayer(othP, relCoords)
     // Finds the moving player in the playerList array
     var playerObj = playerList[othP.id];
@@ -78,8 +79,7 @@ socket.on('othPlayerMove', function (othP, movement) {
     console.log("othMove") // remove
 });
 
-socket.on('playerProject', function (playerObj) {
-    console.log("player Join", playerObj, currPlayer) //remove
+socket.on('playerJoin', function (playerObj) {
     addPlayer(playerObj);
 });
 
@@ -130,14 +130,16 @@ setInterval(function () {
 
 function setupBackground(canvas) {
     // Background
-    canvas.width = cWidth;
-    canvas.height = cHeight;
+    canvas.width = CWIDTH;
+    canvas.height = CHEIGHT;
     var bgcxt = canvas.getContext('2d');
-    for (var i = 0; i < numCol; i++) {
-        for (var j = 0; j < numRow; j++) {
+    for (var i = 0; i < NUMCOL; i++) {
+        for (var j = 0; j < NUMROW; j++) {
             if (locationMap[i][j].ground.backgroundColor) {
                 bgcxt.fillStyle = locationMap[i][j].ground.backgroundColor;
-                bgcxt.fillRect(boxSide * i, boxSide * j, boxSide, boxSide);
+                bgcxt.fillRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
+            } else {
+                bgcxt.clearRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
             }
         }
     }
@@ -145,14 +147,14 @@ function setupBackground(canvas) {
 }
 
 function setupStructure(canvas) {
-    canvas.width = cWidth;
-    canvas.height = cHeight
+    canvas.width = CWIDTH;
+    canvas.height = CHEIGHT
     var strcxt = canvas.getContext('2d');
     loadImages(function (imgList) {
-        for (var i = 0; i < numCol; i++) {
-            for (var j = 0; j < numRow; j++) {
+        for (var i = 0; i < NUMCOL; i++) {
+            for (var j = 0; j < NUMROW; j++) {
                 if (locationMap[i][j].structure.sprite) {
-                    strcxt.drawImage(imgList[locationMap[i][j].structure.id], boxSide * i, boxSide * j)
+                    strcxt.drawImage(imgList[locationMap[i][j].structure.id], BOXSIDE * i, BOXSIDE * j)
                 }
             }
         }
@@ -161,12 +163,12 @@ function setupStructure(canvas) {
 }
 
 function setupOverlay(canvas) {
-    canvas.width = cWidth;
-    canvas.height = cHeight;
+    canvas.width = CWIDTH;
+    canvas.height = CHEIGHT;
     var ovlycxt = canvas.getContext('2d');
-    for (var i = 0; i < numCol; i++) {
-        for (var j = 0; j < numRow; j++) {
-            ovlycxt.strokeRect(boxSide * i, boxSide * j, boxSide, boxSide);
+    for (var i = 0; i < NUMCOL; i++) {
+        for (var j = 0; j < NUMROW; j++) {
+            ovlycxt.strokeRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
         }
     }
     return bgcxt;
@@ -174,38 +176,40 @@ function setupOverlay(canvas) {
 
 function setupCurrentPlayer(canvas) {
     // Current Player
-    canvas.width = cWidth;
-    canvas.height = cHeight;
+    canvas.width = CWIDTH;
+    canvas.height = CHEIGHT;
     return canvas.getContext('2d');
 }
 
 function setupOtherPlayers(canvas) {
     // Other Players
-    canvas.width = cWidth;
-    canvas.height = cHeight;
+    canvas.width = CWIDTH;
+    canvas.height = CHEIGHT;
     return canvas.getContext('2d');
 }
 
 function updateBackgroundCanvas() {
     // Background
     //bgcxt.clearRect(0, 0, canvas.width, canvas.height);
-    for (var i = 0; i < numCol; i++) {
-        for (var j = 0; j < numRow; j++) {
+    for (var i = 0; i < NUMCOL; i++) {
+        for (var j = 0; j < NUMROW; j++) {
             if (locationMap[i][j].ground.backgroundColor) {
                 bgcxt.fillStyle = locationMap[i][j].ground.backgroundColor;
-                bgcxt.fillRect(boxSide * i, boxSide * j, boxSide, boxSide);
+                bgcxt.fillRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
+            } else {
+                bgcxt.clearRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
             }
         }
     }
 }
 
 function updateStructureCanvas() {
-    //strcxt.clearRect(0, 0, canvas.width, canvas.height);
+    strcxt.clearRect(0, 0, CWIDTH, CHEIGHT);
     loadImages(function (imgList) {
-        for (var i = 0; i < numCol; i++) {
-            for (var j = 0; j < numRow; j++) {
+        for (var i = 0; i < NUMCOL; i++) {
+            for (var j = 0; j < NUMROW; j++) {
                 if (locationMap[i][j].structure.sprite) {
-                    strcxt.drawImage(imgList[locationMap[i][j].structure.id], boxSide * i, boxSide * j)
+                    strcxt.drawImage(imgList[locationMap[i][j].structure.id], BOXSIDE * i, BOXSIDE * j)
                 }
             }
         }
@@ -214,7 +218,7 @@ function updateStructureCanvas() {
 
 // Projects all the squares in the squaresObj object
 function projectSquares(squaresObj) {
-    opcxt.clearRect(0, 0, cWidth, cHeight);
+    opcxt.clearRect(0, 0, CWIDTH, CHEIGHT);
     for (var index in squaresObj) {
         projectSquare(squaresObj[index], getRelativeCoords(squaresObj[index], currPlayer));
     }
@@ -225,16 +229,16 @@ function projectSquare(playerObj, relCoords) {
     // Other players
     if (playerObj.id != currPlayer.id) {
         opcxt.fillStyle = playerObj.color;
-        opcxt.fillRect(boxSide * relCoords.i, boxSide * relCoords.j, boxSide, boxSide);
+        opcxt.fillRect(BOXSIDE * relCoords.i, BOXSIDE * relCoords.j, BOXSIDE, BOXSIDE);
         opcxt.fillStyle = 'blue';
         opcxt.font = "12px Arial";
-        opcxt.fillText(playerObj.name, boxSide * relCoords.i, boxSide * relCoords.j + 10);
+        opcxt.fillText(playerObj.name, BOXSIDE * relCoords.i, BOXSIDE * relCoords.j + 10);
     } else { // Current players
         pcxt.fillStyle = 'cyan';
-        pcxt.fillRect(boxSide * 10, boxSide * 7, boxSide, boxSide);
+        pcxt.fillRect(BOXSIDE * 10, BOXSIDE * 7, BOXSIDE, BOXSIDE);
         pcxt.fillStyle = 'blue'
         pcxt.font = "12px Arial";
-        pcxt.fillText(playerObj.name, boxSide * 10, boxSide * 7 + 10);
+        pcxt.fillText(playerObj.name, BOXSIDE * 10, BOXSIDE * 7 + 10);
     }
 }
 /**
@@ -247,18 +251,18 @@ function removeProjectedPlayer(playerObj, relCoords) {
     if (otherPlayer && playerList[playerObj.id]) {
         // If current player being removed
         if (playerObj.id == currPlayer.id) {
-            pcxt.clearRect(boxSide * relCoords.i, boxSide * relCoords.j, boxSide, boxSide);
+            pcxt.clearRect(BOXSIDE * relCoords.i, BOXSIDE * relCoords.j, BOXSIDE, BOXSIDE);
         }
-        opcxt.clearRect(boxSide * relCoords.i, boxSide * relCoords.j, boxSide, boxSide);
+        opcxt.clearRect(BOXSIDE * relCoords.i, BOXSIDE * relCoords.j, BOXSIDE, BOXSIDE);
         var relCoords = getRelativeCoords(otherPlayer, currPlayer)
         projectSquare(otherPlayer, relCoords);
         return;
     } else {
         // Other players
         if (playerObj.id != currPlayer.id) {
-            opcxt.clearRect(boxSide * relCoords.i, boxSide * relCoords.j, boxSide, boxSide);
+            opcxt.clearRect(BOXSIDE * relCoords.i, BOXSIDE * relCoords.j, BOXSIDE, BOXSIDE);
         } else { // Current players
-            pcxt.clearRect(boxSide * relCoords.i, boxSide * relCoords.j, boxSide, boxSide);
+            pcxt.clearRect(BOXSIDE * relCoords.i, BOXSIDE * relCoords.j, BOXSIDE, BOXSIDE);
         }
     }
 }
@@ -273,6 +277,7 @@ function removePlayer(playerObj) {
 function addPlayer(playerObj) {
     playerList[playerObj.id] = playerObj;
     var relCoords = getRelativeCoords(playerObj, currPlayer)
+    addOtherPlayerToLocationMap(getTrueRange(currPlayer), playerObj)
     projectSquare(playerObj, relCoords);
 }
 
@@ -301,11 +306,10 @@ function getNewCoordsLocation(oldObj, movement) {
 
 function checkIfNewCoordsOutBounds(player, movement) {
     var relCoords = getRelativeCoords(getNewCoordsLocation(player, movement), currPlayer);
-    console.log(relCoords.i, relCoords.j)
-    if (relCoords.i < 0 || relCoords.i >= numCol) {
+    if (relCoords.i < 0 || relCoords.i >= NUMCOL) {
         return true;
     }
-    if (relCoords.j < 0 || relCoords.j >= numRow) {
+    if (relCoords.j < 0 || relCoords.j >= NUMROW) {
         return true;
     }
     return false;
