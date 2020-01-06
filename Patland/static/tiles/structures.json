@@ -5,7 +5,12 @@
         "armor": -1,
         "health": 1,
         "owner": "game",
-        "sprite": null
+        "sprite": null,
+        "action": {
+            "a1": null,
+            "a2": null,
+            "a3": null
+        }
     },
     {
         "id": 1,
@@ -13,6 +18,11 @@
         "armor": 1,
         "health": 1,
         "owner": "game",
-        "sprite": "/static/img/rock.png"
+        "sprite": "/static/img/rock.png",
+        "action": {
+            "a1": "Mine",
+            "a2": null,
+            "a3": null
+        }
     }
 ]
