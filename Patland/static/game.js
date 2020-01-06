@@ -87,6 +87,8 @@ socket.on('playerRemove', function (playerObj) {
     removePlayer(playerObj);
 });
 
+// TODO: make a socket that gets responses for invalid movement or actions done
+
 socket.on('message', function (msg) {
     console.log(msg);
 });
@@ -268,10 +270,14 @@ function removeProjectedPlayer(playerObj, relCoords) {
 }
 
 function removePlayer(playerObj) {
-    var relCoords = getRelativeCoords(playerObj, currPlayer);
-    removePlayerFromMap(playerObj, relCoords);
-    removeProjectedPlayer(playerObj, relCoords);
-    delete playerList[playerObj.id]
+    if (playerList[playerObj.id]) {
+        var relCoords = getRelativeCoords(playerObj, currPlayer);
+        removePlayerFromMap(playerObj, relCoords);
+        removeProjectedPlayer(playerObj, relCoords);
+        delete playerList[playerObj.id]
+    } else {
+        console.log("Error: player not found when player being removed")
+    }
 }
 
 function addPlayer(playerObj) {
@@ -313,4 +319,13 @@ function checkIfNewCoordsOutBounds(player, movement) {
         return true;
     }
     return false;
+}
+
+/**
+ * Sends the server a request for an action to be performed
+ * @param {*} id id of the structure being interacted with
+ * @param {*} actionId 1, 2 or 3 depending if action1, action2 or action3
+ */
+function sendPlayerAction(id, actionId) {
+    socket.emit("pAction", id, actionId);
 }

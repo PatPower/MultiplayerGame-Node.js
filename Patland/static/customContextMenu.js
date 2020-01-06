@@ -4,8 +4,11 @@
 $(function () {
     $.contextMenu({
         selector: '#overlay',
-        callback: function (key, options) {
-            var m = "clicked: " + key;
+        callback: function (key, options, rootMenu, origEvent) {
+            var m = "1 clicked: " + key;
+            console.log(options, "HEY")
+            console.log(rootMenu)
+            console.log(options.$label)
             window.console && console.log(m) || alert(m);
         },
         autoHide: true,
@@ -17,7 +20,7 @@ $(function () {
     });
 
     $('.context-menu-one').on('click', function (e) {
-        console.log('clicked', this);
+        console.log('2 clicked', this);
     })
 });
 
@@ -27,8 +30,20 @@ function findMenuObj(x, y) {
     console.log(i + "  " + j)
     return {
         items: {
-            "ground": { name: `${locationMap[i][j].ground.name}` },
-            "strucutre": { name: `${locationMap[i][j].structure.name}` },
+            "ground": { name: `${locationMap[i][j].ground.name}`, icon: "far fa-list-alt" },
+            "structure": { name: `${locationMap[i][j].structure.name}`, icon: "far fa-list-alt"},
+            "a1": {
+                name: `Action: ${locationMap[i][j].structure.action.a1}`,
+                icon: 'fas fa-hammer',
+                visible: function (key, opt) {
+                    // TODO: Check if in interactible range
+                    if (locationMap[i][j].structure.action.a1) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                },
+            },
             "players": {
                 name: "Players:",
                 visible: function (key, opt) {

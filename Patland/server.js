@@ -5,10 +5,7 @@ var fs = require('fs');
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 
-//For testing
-var worldStructureMap = [];
-var wordGroundMap = [];
-var worldPlayerMap = [];
+
 
 const port = 8080;
 
@@ -28,19 +25,7 @@ server.listen(port, function () {
 var players = {};
 var moveLog = {};
 
-// TODO: calculate and move these variables to a different file
-const CWIDTH = 840;
-const CHEIGHT = 600;
-const BOXSIDE = 40;
-const NUMCOL = Math.floor(CWIDTH / BOXSIDE);
-const NUMROW = Math.floor(CHEIGHT / BOXSIDE);
 
-const MAXSPEED = 30;
-const WORLDLIMIT = 100;
-const HORIZONTALRADIUS = Math.floor(NUMCOL / 2);
-const VERTICALRADIUS = Math.floor(NUMROW / 2);
-const MILLISECONDMAX = 2000;
-const structureJson = getStructureJson();
 
 
 
@@ -63,20 +48,17 @@ io.on('connection', function (socket) {
                 name: pname,
                 color: 'red'
             }
-            players[socket.id] = player;
+            setPlayer(socket.id, player);
             addPlayerLocation(player);
         }
-        // TODO: Send the player a 2D list of players around them
-        // TODO: ALSO SEND THE BACKGROUND AND STRUCTURES
-        io.to(socket.id).emit('setup', players, players[socket.id], getLocal2DGround(player), getLocal2DStructure(player));
-        // TODO: Remove player from other screens if exit their view
+        io.to(socket.id).emit('setup', players, getPlayer(socket.id), getLocal2DGround(player), getLocal2DStructure(player));
         var range = getIJRange(player.i, player.j);
         for (var i = range.lefti; i <= range.righti; i++) {
             for (var j = range.topj; j <= range.bottomj; j++) {
                 if (worldPlayerMap[i][j].length > 0) {
                     for (othplayer of worldPlayerMap[i][j]) {
                         if (othplayer.id != player.id) {
-                            io.to(othplayer.id).emit('playerJoin', players[socket.id]);
+                            io.to(othplayer.id).emit('playerJoin', getPlayer(socket.id));
                         }
                     }
                 }
@@ -91,10 +73,10 @@ io.on('connection', function (socket) {
         console.log("dc", socket.id)
         //TODO: make local
         // Check if player exists
-        if (players[socket.id]) {
-            removePlayerLocation(players[socket.id]);
-            io.sockets.emit('playerRemove', players[socket.id]);
-            delete players[socket.id];
+        if (getPlayer(socket.id)) {
+            removePlayerLocation(getPlayer(socket.id));
+            io.sockets.emit('playerRemove', getPlayer(socket.id));
+            deletePlayer(socket.id);
         }
     });
 
@@ -109,7 +91,7 @@ io.on('connection', function (socket) {
         // Checks if the user has moved more than MAXSPEED tiles in 2 seconds
         if (currMoveLog[moveLog[socket.id].length - 1] - currMoveLog[0] <= MILLISECONDMAX && currMoveLog.length >= MAXSPEED) { console.log("TOO FAST!"); return; }
 
-        var player = players[socket.id] || {};
+        var player = getPlayer(socket.id) || {};
         var oldPlayer = JSON.parse(JSON.stringify(player)); // For the client to remove old player tile
 
         // This part will be dangerous if unexpected power off
@@ -160,7 +142,7 @@ io.on('connection', function (socket) {
         // If player did not move then do stop here
         if (!data.up && !data.right && !data.down && !data.left) {
             return;
-        
+
         }
         // TODO: Only emit to players in the viewable radius of other players
         // TODO: Remove player from other screens if exit their view
@@ -196,12 +178,23 @@ io.on('connection', function (socket) {
                 }
             }
         }
-
-        // TODO: Send moving player new map info
         io.to(socket.id).emit('moveCurrPlayer', player, getLocal2DPlayerDict(player), getLocal2DGround(player), getLocal2DStructure(player));
-
-
     });
+
+    /**
+     * id: id of structure
+     * actionId: 1, 2 or 3 depending if action 1, action 2 or action 3
+     * location: {i: int, j: int}
+     */
+    socket.on('pAction', function (id, actionId, location) {
+        if (worldStructureMap[location.i][location.j].id == id) {
+            var player = getPlayer(id);
+            if (checkIfInteractible(player, location)) {
+
+            }
+        }
+    });
+
 });
 
 /**
@@ -320,8 +313,36 @@ function structurePassable(structureInfo) {
 }
 
 function getStructureJson() {
-    let structureJson = JSON.parse(fs.readFileSync('./structure.json'))
+    let structureJson = JSON.parse(fs.readFileSync('./structureServer.json'))
     return structureJson;
+}
+
+function getPlayer(id) {
+    return players[id];
+}
+
+function setPlayer(id, player) {
+    players[id] = player;
+}
+
+function deletePlayer(id) {
+    delete players[id];
+}
+
+/**
+ * Checks if the structure is in a 3x3 vicinity of the player
+ * @param {*} player an object with an i and j
+ * @param {*} structure another object with an i and j
+ */
+function checkIfInteractible(player, structure) {
+    for (var i = -1; i <= 1; i++) {
+        for (var j = -1; j <= 1; j++) {
+            if (player.i + i == structure.i && player.j + j == structure.j) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 initializeTestMap()
