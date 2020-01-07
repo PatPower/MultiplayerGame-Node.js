@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Patland",
   "main": "server.js",
+  "scripts": {
+    "start": "nodemon"
+  },
   "author": {
     "name": ""
   },
