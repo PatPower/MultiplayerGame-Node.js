@@ -1,6 +1,6 @@
 var Settings = require('./settings.js');
 var fs = require('fs');
-var io = 
+
 function World() {
     var data = getDataFromDB();
     this.worldStructureMap = data.worldStructureMap;
@@ -109,7 +109,7 @@ World.prototype.checkIfInteractible = function (player, structure) {
     return false;
 }
 
-World.prototype.createPlayer = function (id, pname) {
+World.prototype.createPlayer = function (id, pname, io) {
     var player;
     // TODO: make a system to save a player and load it
     // If player exists load it
@@ -127,7 +127,7 @@ World.prototype.createPlayer = function (id, pname) {
         this.setPlayer(id, player);
         this.addPlayerLocation(player);
     }
-    io.to(id).emit('setup', players, this.getPlayer(id), this.getLocal2DGround(player), this.getLocal2DStructure(player));
+    io.to(id).emit('setup', this.players, this.getPlayer(id), this.getLocal2DGround(player), this.getLocal2DStructure(player));
     var range = getIJRange(player.i, player.j);
     for (var i = range.lefti; i <= range.righti; i++) {
         for (var j = range.topj; j <= range.bottomj; j++) {
@@ -141,13 +141,14 @@ World.prototype.createPlayer = function (id, pname) {
         }
     }
 
-    moveLog[id] = [];
-    moveLog[id].push((new Date).getTime());
+    this.moveLog[id] = [];
+    this.moveLog[id].push((new Date).getTime());
 }
 
-World.prototype.disconnectPlayer = function (id) {
+World.prototype.disconnectPlayer = function (id, io) {
     var dcPlayer = this.getPlayer(id);
     if (dcPlayer) {
+        var range = getIJRange(dcPlayer.i, dcPlayer.j);
         this.removePlayerLocation(dcPlayer);
         for (var i = range.lefti; i <= range.righti; i++) {
             for (var j = range.topj; j <= range.bottomj; j++) {
@@ -162,13 +163,13 @@ World.prototype.disconnectPlayer = function (id) {
     }
 }
 
-World.prototype.movePlayer = function (id, data) {
+World.prototype.movePlayer = function (id, data, io) {
     // Checks if user exists
     if (!this.moveLog[id]) {
         io.to(id).emit('message', "Not connected");
         return
     }
-    var currMoveLog = this.moveLog[socket.id];
+    var currMoveLog = this.moveLog[id];
 
     // Checks if the user has moved more than MAXSPEED tiles in 2 seconds
     if (currMoveLog[this.moveLog[id].length - 1] - currMoveLog[0] <= this.MILLISECONDMAX && currMoveLog.length >= this.MAXSPEED) { console.log("TOO FAST!"); return; }
@@ -181,7 +182,7 @@ World.prototype.movePlayer = function (id, data) {
     this.removePlayerLocation(player);
     // TODO: check for impassible structures/ out of bounds
     if (data.left) {
-        if (player.i - 1 >= 0 && this.structurePassable(worldStructureMap[player.i - 1][player.j])) {
+        if (player.i - 1 >= 0 && this.structurePassable(this.worldStructureMap[player.i - 1][player.j])) {
             player.i--;
         } else {
             data.left = false;
@@ -189,7 +190,7 @@ World.prototype.movePlayer = function (id, data) {
         }
     }
     if (data.right) {
-        if (player.i + 1 < Settings.WORLDLIMIT && this.structurePassable(worldStructureMap[player.i + 1][player.j])) {
+        if (player.i + 1 < Settings.WORLDLIMIT && this.structurePassable(this.worldStructureMap[player.i + 1][player.j])) {
             player.i++;
         } else {
             data.right = false;
@@ -197,7 +198,7 @@ World.prototype.movePlayer = function (id, data) {
         }
     }
     if (data.up) {
-        if (player.j - 1 >= 0 && this.structurePassable(worldStructureMap[player.i][player.j - 1])) {
+        if (player.j - 1 >= 0 && this.structurePassable(this.worldStructureMap[player.i][player.j - 1])) {
             player.j--;
         } else {
             data.up = false;
@@ -205,7 +206,7 @@ World.prototype.movePlayer = function (id, data) {
         }
     }
     if (data.down) {
-        if (player.j + 1 < Settings.WORLDLIMIT && this.structurePassable(worldStructureMap[player.i][player.j + 1])) {
+        if (player.j + 1 < Settings.WORLDLIMIT && this.structurePassable(this.worldStructureMap[player.i][player.j + 1])) {
             player.j++;
         } else {
             data.down = false;
@@ -259,7 +260,7 @@ World.prototype.movePlayer = function (id, data) {
             }
         }
     }
-    io.to(socket.id).emit('moveCurrPlayer', player, this.getLocal2DPlayerDict(player), this.getLocal2DGround(player), this.getLocal2DStructure(player));
+    io.to(id).emit('moveCurrPlayer', player, this.getLocal2DPlayerDict(player), this.getLocal2DGround(player), this.getLocal2DStructure(player));
 }
 
 function getStructureJson() {
@@ -267,7 +268,7 @@ function getStructureJson() {
     return structureJson;
 }
 
-World.prototype.structurePassable = function(structureInfo) {
+World.prototype.structurePassable = function (structureInfo) {
     var passable = true;
     if (structureInfo) {
         passable = this.structureJson.find(o => o.id == structureInfo.id).passable;
@@ -275,19 +276,19 @@ World.prototype.structurePassable = function(structureInfo) {
     return passable;
 }
 
-World.prototype.getPlayer = function(id) {
+World.prototype.getPlayer = function (id) {
     return this.players[id];
 }
 
-World.prototype.setPlayer = function(id, player) {
+World.prototype.setPlayer = function (id, player) {
     this.players[id] = player;
 }
 
-World.prototype.deletePlayer = function(id) {
+World.prototype.deletePlayer = function (id) {
     delete this.players[id];
 }
 
-World.prototype.initializeTestMap = function() {
+World.prototype.initializeTestMap = function () {
     this.worldStructureMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
     this.worldStructureMap[2][2] = { id: 1, health: 10, owner: "game" };
     this.worldGroundMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
@@ -298,6 +299,8 @@ World.prototype.initializeTestMap = function() {
             this.worldGroundMap[i][j] = 0;
         }
     }
+    console.log("TestMap Initalized!")
+
 }
 
 /**
@@ -326,7 +329,7 @@ function getIJRange(i, j) {
 }
 
 function getDataFromDB() {
-    // TODO: actually get it from DB
+    // TODO: actually get it from a DB
     return { worldStructureMap: [], worldGroundMap: [], worldPlayerMap: [] }
 }
 

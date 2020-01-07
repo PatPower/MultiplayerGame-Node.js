@@ -1,12 +1,19 @@
-module.exports = {
+var Settings = {
     CWIDTH: 840,
     CHEIGHT: 600,
     BOXSIDE: 40,
-    //NUMCOL: Math.floor(this.CWIDTH / this.BOXSIDE),
-    //NUMROW: Math.floor(this.CHEIGHT / this.BOXSIDE),
+    NUMCOL: 0,
+    NUMROW: 0,
     MAXSPEED: 30,
     WORLDLIMIT: 100,
-    //HORIZONTALRADIUS: Math.floor(this.NUMCOL / 2),
-    //VERTICALRADIUS: Math.floor(this.NUMROW / 2),
+    HORIZONTALRADIUS: 0,
+    VERTICALRADIUS: 0,
     MILLISECONDMAX: 000
 }
+
+Settings.NUMCOL = Math.floor(Settings.CWIDTH / Settings.BOXSIDE);
+Settings.NUMROW = Math.floor(Settings.CHEIGHT / Settings.BOXSIDE);
+Settings.HORIZONTALRADIUS = Math.floor(Settings.NUMCOL / 2);
+Settings.VERTICALRADIUS = Math.floor(Settings.NUMROW / 2);
+
+module.exports = Settings;
