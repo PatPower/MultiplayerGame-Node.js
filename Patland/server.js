@@ -28,17 +28,17 @@ let world = new World();
 io.on('connection', function (socket) {
 
     socket.on('new player', function (pname) {
-        world.createPlayer(socket.id, pname);
+        world.createPlayer(socket.id, pname, io);
     });
 
     socket.on('disconnect', function () {
         console.log("dc", socket.id)
-        world.disconnectPlayer(socket.id);
+        world.disconnectPlayer(socket.id, io);
 
     });
 
     socket.on('movement', function (data) {
-        world.movePlayer(socket.id, data);
+        world.movePlayer(socket.id, data, io);
     });
 
     /**
@@ -56,63 +56,6 @@ io.on('connection', function (socket) {
     });
 
 });
-
-
-
-/**
- * Gets a 2D list of players in viewing distance of the given player and returns a dict of players
- * @param {*} player 
- 
-function getLocal2DPlayerDict(player) {
-    var localPlayerDict = {};
-    var range = getIJRange(player.i, player.j);
-    for (var i = range.lefti; i <= range.righti; i++) {
-        for (var j = range.topj; j <= range.bottomj; j++) {
-            if (worldPlayerMap[i][j].length > 0) {
-                for (othplayer of worldPlayerMap[i][j]) {
-                    localPlayerDict[othplayer.id] = othplayer;
-                }
-            }
-        }
-    }
-    return localPlayerDict;
-}*/
-
-/**
- * Returns a 2D list of ground ids near the player.
- * If player is near the border, the id of the ground outside border will be null
- * @param {} player 
- 
-function getLocal2DGround(player) {
-    var ground2D = [...Array(NUMCOL)].map(e => Array(NUMROW));
-    var range = getIJRange(player.i, player.j);
-    for (var j = range.truetopj; j <= range.truebottomj; j++) {
-        for (var i = range.truelefti; i <= range.truerighti; i++) {
-            if (i >= 0 && i <= WORLDLIMIT - 1 && j >= 0 && j <= WORLDLIMIT - 1) {
-                ground2D[i - range.truelefti][j - range.truetopj] = worldGroundMap[i][j];
-            }
-        }
-    }
-    return ground2D;
-}*/
-
-/**
- * Returns a 2D list of structureInfo objects near the player.
- * @param {} player 
- 
-function getLocal2DStructure(player) {
-    var structure2D = [...Array(NUMCOL)].map(e => Array(NUMROW));
-    var range = getIJRange(player.i, player.j);
-    for (var j = range.truetopj; j <= range.truebottomj; j++) {
-        for (var i = range.truelefti; i <= range.truerighti; i++) {
-            if (i >= 0 && i <= WORLDLIMIT - 1 && j >= 0 && j <= WORLDLIMIT - 1) {
-                structure2D[i - range.truelefti][j - range.truetopj] = worldStructureMap[i][j];
-            }
-        }
-    }
-    return structure2D;
-}*/
-
 
 
 

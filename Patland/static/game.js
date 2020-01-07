@@ -18,6 +18,7 @@ socket.emit('new player', name);
 socket.on('setup', function (pList, currentPlayer, ground2D, structure2D) {
     currPlayer = currentPlayer;
     playerList = pList;
+    console.log(ground2D, structure2D, pList,currPlayer)
     loadLocationMap(ground2D, structure2D, pList, currPlayer);
     bgcxt = setupBackground(document.getElementById('background'));
     strcxt = setupStructure(document.getElementById('structure'));
