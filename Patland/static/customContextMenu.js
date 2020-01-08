@@ -22,6 +22,7 @@ function findMenuObj(x, y) {
     var i = Math.floor(x / BOXSIDE);
     var j = Math.floor(y / BOXSIDE);
     var locWhenClicked = { i: currPlayer.i, j: currPlayer.j }
+    var structIdWhenClicked = locationMap[i][j].structure.id
     console.log(i + "  " + j)
     return {
         items: {
@@ -41,8 +42,8 @@ function findMenuObj(x, y) {
                     return false;
                 },
                 callback: function (key, opt) {
-                    console.log(getGlobalCoords({ i: i, j: j }));
-                    sendPlayerAction(locationMap[i][j].structure.id, "a1", getGlobalCoords({ i: i, j: j }, locWhenClicked));
+                    console.log(getGlobalCoords({ i: i, j: j }, locWhenClicked));
+                    sendPlayerAction(structIdWhenClicked, "a1", getGlobalCoords({ i: i, j: j }, locWhenClicked));
                 }
             },
             "players": {
