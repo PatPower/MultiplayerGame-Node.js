@@ -1,4 +1,5 @@
 var world;
+var JsonController = require('./jsonController.js');
 
 function Action(worldArg) {
     world = worldArg;
@@ -14,14 +15,17 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
     if (world.verifyStructureLocation(location, structId)) {
         var player = world.getPlayer(playerId);
         if (player) {
-            console.log(location)
             if (world.checkIfInteractible(player, location)) {
-                var structureAction = world.structureJson.find(o => o.id == structId).action[actionId];
-
+                var structureAction = JsonController.getStructureAction(structId, actionId);
                 // CONDITIONS:
                 for (itemCond of structureAction.cond.item) {
                     // TODO: Check player inventory for item
-                    if (false) {
+                    var itemInfo = player.inventory.find(o => o.id == itemCond.id);
+                    // If player has the item and if the durability is higher than the required durability
+                    if (!itemInfo) {
+                        if (itemInfo.durability >= itemCond.reqDurability) {
+                            return { result: false, reason: "Not enough durability on: " + "{item name here}" };
+                        }
                         return { result: false, reason: "Missing Item: " + "{item name here}" };
                     }
                 }
@@ -42,10 +46,23 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
                 if (structureAction.result.destroy) {
                     world.removeStructure(location);
                 }
-
+                for (item of structureAction.result.degradeItems) {
+                    // TODO: Degrade items
+                }
+                for (pFlag of structureAction.result.updatePFlag) {
+                    // TODO: Update pflag
+                }
+                for (expGain of structureAction.result.expGain) {
+                    // TODO: Gain exp
+                }
+                for (item of structureAction.result.drop) {
+                    // TODO: Give user items
+                }
             }
         }
     }
 }
+
+
 
 module.exports = Action;

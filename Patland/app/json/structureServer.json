@@ -20,7 +20,7 @@
         "action": {
             "a1": {
                 "cond": {
-                    "item": [],
+                    "item": [{"id": 0, "reqDurability": 1}],
                     "skill": {},
                     "pFlag": []
                 },

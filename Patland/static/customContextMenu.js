@@ -28,11 +28,11 @@ function findMenuObj(x, y) {
         items: {
             "ground": { name: `${locationMap[i][j].ground.name}`, icon: "far fa-list-alt" },
             "structure": { name: `${locationMap[i][j].structure.name}`, icon: "far fa-list-alt" },
+            // TODO: create a function to build the menu for multiple actions
             "a1": {
                 name: `Action: ${locationMap[i][j].structure.action.a1}`,
                 icon: 'fas fa-hammer',
                 visible: function (key, opt) {
-                    console.log("H")
                     if (locationMap[i][j].structure.action.a1) {
                         var structureLoc = { i: i, j: j };
                         if (checkIfInteractible(getMiddleLocation(), structureLoc)) {
@@ -42,8 +42,7 @@ function findMenuObj(x, y) {
                     return false;
                 },
                 callback: function (key, opt) {
-                    console.log(getGlobalCoords({ i: i, j: j }, locWhenClicked));
-                    sendPlayerAction(structIdWhenClicked, "a1", getGlobalCoords({ i: i, j: j }, locWhenClicked));
+                    sendPlayerAction(structIdWhenClicked, key, getGlobalCoords({ i: i, j: j }, locWhenClicked));
                 }
             },
             "players": {

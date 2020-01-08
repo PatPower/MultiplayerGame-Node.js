@@ -1,10 +1,10 @@
 var name = "Pat";
 
 function show_prompt() {
-    $.getJSON("/static/tiles/structures.json", function (json) {
+    $.getJSON("/static/json/structures.json", function (json) {
         structureJson = json;
     });
-    $.getJSON("/static/tiles/groundTiles.json", function (json) {
+    $.getJSON("/static/json/groundTiles.json", function (json) {
         groundJson = json;
     });
     
