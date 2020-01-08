@@ -14,6 +14,7 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
     if (world.verifyStructureLocation(location, structId)) {
         var player = world.getPlayer(playerId);
         if (player) {
+            console.log(location)
             if (world.checkIfInteractible(player, location)) {
                 var structureAction = world.structureJson.find(o => o.id == structId).action[actionId];
 
