@@ -15,10 +15,9 @@ socket.emit('new player', name);
 // Server sends info needed to setup client
 // pList is a dict of playerObj with the id as key
 // currentPlayer is the currentplayerObj
-socket.on('setup', function (pList, currentPlayer, ground2D, structure2D) {
+socket.on('setup', function (currentPlayer, pList, ground2D, structure2D) {
     currPlayer = currentPlayer;
     playerList = pList;
-    console.log(ground2D, structure2D, pList,currPlayer)
     loadLocationMap(ground2D, structure2D, pList, currPlayer);
     bgcxt = setupBackground(document.getElementById('background'));
     strcxt = setupStructure(document.getElementById('structure'));
@@ -29,6 +28,7 @@ socket.on('setup', function (pList, currentPlayer, ground2D, structure2D) {
     updateTileMarker(currPlayer);
     projectSquares(pList);
     projectSquare(currentPlayer, {});
+
 });
 
 socket.on('moveCurrPlayer', function (player, pList, ground2D, structure2D) {
@@ -40,7 +40,12 @@ socket.on('moveCurrPlayer', function (player, pList, ground2D, structure2D) {
     updateStructureCanvas()
     projectSquares(playerList);
     updateTileMarker(currPlayer);
-})
+});
+
+socket.on('removeStructure', function (location) {
+    removeStructure(location);
+    updateStructureCanvas()
+});
 
 socket.on('othPlayerMove', function (othP, movement) {
     if (othP.id == currPlayer.id) {
@@ -58,7 +63,7 @@ socket.on('othPlayerMove', function (othP, movement) {
 
         return;
     }
-    var relCoords = getRelativeCoords(othP, currPlayer)
+    var relCoords = getRelativeCoords(othP)
     // Removes the old player projection
     removeProjectedPlayer(othP, relCoords)
     // Finds the moving player in the playerList array
@@ -76,7 +81,7 @@ socket.on('othPlayerMove', function (othP, movement) {
     // Shows the new location of the player
     projectSquare(newP, getNewCoordsLocation(relCoords, movement));
     // Move the player in the locationMap
-    movePlayer(othP, movement, currPlayer);
+    movePlayer(othP, movement);
     console.log("othMove") // remove
 });
 
@@ -223,7 +228,7 @@ function updateStructureCanvas() {
 function projectSquares(squaresObj) {
     opcxt.clearRect(0, 0, CWIDTH, CHEIGHT);
     for (var index in squaresObj) {
-        projectSquare(squaresObj[index], getRelativeCoords(squaresObj[index], currPlayer));
+        projectSquare(squaresObj[index], getRelativeCoords(squaresObj[index]));
     }
 }
 
@@ -257,7 +262,7 @@ function removeProjectedPlayer(playerObj, relCoords) {
             pcxt.clearRect(BOXSIDE * relCoords.i, BOXSIDE * relCoords.j, BOXSIDE, BOXSIDE);
         }
         opcxt.clearRect(BOXSIDE * relCoords.i, BOXSIDE * relCoords.j, BOXSIDE, BOXSIDE);
-        var relCoords = getRelativeCoords(otherPlayer, currPlayer)
+        var relCoords = getRelativeCoords(otherPlayer)
         projectSquare(otherPlayer, relCoords);
         return;
     } else {
@@ -272,7 +277,7 @@ function removeProjectedPlayer(playerObj, relCoords) {
 
 function removePlayer(playerObj) {
     if (playerList[playerObj.id]) {
-        var relCoords = getRelativeCoords(playerObj, currPlayer);
+        var relCoords = getRelativeCoords(playerObj);
         removePlayerFromMap(playerObj, relCoords);
         removeProjectedPlayer(playerObj, relCoords);
         delete playerList[playerObj.id]
@@ -283,7 +288,7 @@ function removePlayer(playerObj) {
 
 function addPlayer(playerObj) {
     playerList[playerObj.id] = playerObj;
-    var relCoords = getRelativeCoords(playerObj, currPlayer)
+    var relCoords = getRelativeCoords(playerObj)
     addOtherPlayerToLocationMap(getTrueRange(currPlayer), playerObj)
     projectSquare(playerObj, relCoords);
 }
@@ -312,7 +317,7 @@ function getNewCoordsLocation(oldObj, movement) {
 }
 
 function checkIfNewCoordsOutBounds(player, movement) {
-    var relCoords = getRelativeCoords(getNewCoordsLocation(player, movement), currPlayer);
+    var relCoords = getRelativeCoords(getNewCoordsLocation(player, movement));
     if (relCoords.i < 0 || relCoords.i >= NUMCOL) {
         return true;
     }
@@ -325,8 +330,9 @@ function checkIfNewCoordsOutBounds(player, movement) {
 /**
  * Sends the server a request for an action to be performed
  * @param {*} id id of the structure being interacted with
- * @param {*} actionId 1, 2 or 3 depending if action1, action2 or action3
+ * @param {*} actionId a1, a2 or a3 depending if action1, action2 or action3
+ * @param {*} location the location of the interacted structure
  */
-function sendPlayerAction(id, actionId) {
-    socket.emit("pAction", id, actionId);
+function sendPlayerAction(id, actionId, location) {
+    socket.emit("pAction", id, actionId, location);
 }
