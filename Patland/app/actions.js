@@ -23,10 +23,10 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
                     var itemInfo = player.inventory.find(o => o.id == itemCond.id);
                     // If player has the item and if the durability is higher than the required durability
                     if (!itemInfo) {
-                        if (itemInfo.durability >= itemCond.reqDurability) {
-                            return { result: false, reason: "Not enough durability on: " + "{item name here}" };
-                        }
-                        return { result: false, reason: "Missing Item: " + "{item name here}" };
+                        return { result: false, msg: "Missing Item: " + JsonController.getItemName(itemCond.id) };
+                    }
+                    if (itemInfo.durability < itemCond.reqDurability) {
+                        return { result: false, msg: "Not enough durability on: " + JsonController.getItemName(itemCond.id) };
                     }
                 }
                 for (skillCond in structureAction.cond.skill) {
@@ -61,6 +61,7 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
             }
         }
     }
+    return { result: true, msg: "" };
 }
 
 

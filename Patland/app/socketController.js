@@ -25,7 +25,11 @@ module.exports = function (socketIo, world) {
 
 
             socket.on('pAction', function (id, actionId, location) {
-                action.doAction(socket.id, id, actionId, location);
+                var response = action.doAction(socket.id, id, actionId, location);
+                // If a condition is not met
+                if (!response.result) {
+                    module.exports.message(socket.id, response.msg);
+                }
             });
 
         });
@@ -35,49 +39,49 @@ module.exports = function (socketIo, world) {
 
 module.exports.playerJoin = function (othPlayer, player) {
     if (!io) {
-        throw new Error("Error: Can't use print until io is properly initalized");
+        throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(othplayer.id).emit('playerJoin', player);
 }
 
 module.exports.playerRemove = function (othPlayer, dcPlayer) {
     if (!io) {
-        throw new Error("Error: Can't use print until io is properly initalized");
+        throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(othplayer.id).emit('playerRemove', dcPlayer);
 }
 
 module.exports.othPlayerMove = function (othPlayer, oldPlayer, data) {
     if (!io) {
-        throw new Error("Error: Can't use print until io is properly initalized");
+        throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(othplayer.id).emit('othPlayerMove', oldPlayer, data);
 }
 
 module.exports.moveCurrPlayer = function (player, localPlayerDict2D, localGround2D, localStructure2D) {
     if (!io) {
-        throw new Error("Error: Can't use print until io is properly initalized");
+        throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(player.id).emit('moveCurrPlayer', player, localPlayerDict2D, localGround2D, localStructure2D);
 }
 
 module.exports.setup = function (currPlayer, localPlayerDict2D, localGround2D, localStructure2D) {
     if (!io) {
-        throw new Error("Error: Can't use print until io is properly initalized");
+        throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(currPlayer.id).emit('setup', currPlayer, localPlayerDict2D, localGround2D, localStructure2D);
 
 }
 module.exports.message = function (id, msg) {
     if (!io) {
-        throw new Error("Error: Can't use print until io is properly initalized");
+        throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(id).emit('message', msg);
 }
 
 module.exports.removeStructure = function (player, location) {
     if (!io) {
-        throw new Error("Error: Can't use print until io is properly initalized");
+        throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(player.id).emit('removeStructure', location);
 }
