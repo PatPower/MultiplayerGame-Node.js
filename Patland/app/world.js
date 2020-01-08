@@ -1,7 +1,8 @@
 var Settings = require('./settings.js');
 var fs = require('fs');
+var socketController = require('./socketController.js');
 
-function World() {
+function World(socketIo) {
     var data = getDataFromDB();
     this.worldStructureMap = data.worldStructureMap;
     this.worldGroundMap = data.worldGroundMap;
@@ -13,6 +14,7 @@ function World() {
 }
 
 World.prototype.getStructureMap = function () {
+    socketController.print()
     return this.worldStructureMap;
 }
 
@@ -109,7 +111,7 @@ World.prototype.checkIfInteractible = function (player, structure) {
     return false;
 }
 
-World.prototype.createPlayer = function (id, pname, io) {
+World.prototype.createPlayer = function (id, pname) {
     var player;
     // TODO: make a system to save a player and load it
     // If player exists load it
@@ -127,14 +129,14 @@ World.prototype.createPlayer = function (id, pname, io) {
         this.setPlayer(id, player);
         this.addPlayerLocation(player);
     }
-    io.to(id).emit('setup', this.players, this.getPlayer(id), this.getLocal2DGround(player), this.getLocal2DStructure(player));
+    socketController.setup(this.getPlayer(id), this.getLocal2DPlayerDict(id), this.getLocal2DGround(player), this.getLocal2DStructure(player));
     var range = getIJRange(player.i, player.j);
     for (var i = range.lefti; i <= range.righti; i++) {
         for (var j = range.topj; j <= range.bottomj; j++) {
             if (this.worldPlayerMap[i][j].length > 0) {
                 for (othplayer of this.worldPlayerMap[i][j]) {
                     if (othplayer.id != player.id) {
-                        io.to(othplayer.id).emit('playerJoin', this.getPlayer(id));
+                        socketController.playerJoin(othplayer, this.getPlayer(id));
                     }
                 }
             }
@@ -145,16 +147,17 @@ World.prototype.createPlayer = function (id, pname, io) {
     this.moveLog[id].push((new Date).getTime());
 }
 
-World.prototype.disconnectPlayer = function (id, io) {
+World.prototype.disconnectPlayer = function (id) {
     var dcPlayer = this.getPlayer(id);
     if (dcPlayer) {
+        console.log("dc", id)
         var range = getIJRange(dcPlayer.i, dcPlayer.j);
         this.removePlayerLocation(dcPlayer);
         for (var i = range.lefti; i <= range.righti; i++) {
             for (var j = range.topj; j <= range.bottomj; j++) {
                 if (this.worldPlayerMap[i][j].length > 0) {
                     for (othplayer of this.worldPlayerMap[i][j]) {
-                        io.to(othplayer.id).emit('playerRemove', dcPlayer);
+                        socketController.playerRemove(othplayer, id);
                         this.deletePlayer(id);
                     }
                 }
@@ -163,10 +166,10 @@ World.prototype.disconnectPlayer = function (id, io) {
     }
 }
 
-World.prototype.movePlayer = function (id, data, io) {
+World.prototype.movePlayer = function (id, data) {
     // Checks if user exists
     if (!this.moveLog[id]) {
-        io.to(id).emit('message', "Not connected");
+        socketController.message(id, "You are not connected to the server.")
         return
     }
     var currMoveLog = this.moveLog[id];
@@ -254,18 +257,13 @@ World.prototype.movePlayer = function (id, data, io) {
             if (this.worldPlayerMap[i][j].length > 0) {
                 for (othplayer of this.worldPlayerMap[i][j]) {
                     if (othplayer.id != player.id) {
-                        io.to(othplayer.id).emit('othPlayerMove', oldPlayer, data);
+                        socketController.othPlayerMove(othplayer, oldPlayer, data);
                     }
                 }
             }
         }
     }
-    io.to(id).emit('moveCurrPlayer', player, this.getLocal2DPlayerDict(player), this.getLocal2DGround(player), this.getLocal2DStructure(player));
-}
-
-function getStructureJson() {
-    let structureJson = JSON.parse(fs.readFileSync('./structureServer.json'))
-    return structureJson;
+    socketController.moveCurrPlayer(player, this.getLocal2DPlayerDict(player), this.getLocal2DGround(player), this.getLocal2DStructure(player));
 }
 
 World.prototype.structurePassable = function (structureInfo) {
@@ -288,6 +286,20 @@ World.prototype.deletePlayer = function (id) {
     delete this.players[id];
 }
 
+World.prototype.removeStructure = function (location) {
+    this.worldStructureMap[location.i][location.j] = null;
+    var range = getIJRange(location.i, location.j);
+    for (var i = range.lefti; i <= range.righti; i++) {
+        for (var j = range.topj; j <= range.bottomj; j++) {
+            if (this.worldPlayerMap[i][j].length > 0) {
+                for (othPlayer of this.worldPlayerMap[i][j]) {
+                    socketController.removeStructure(othPlayer, location);
+                }
+            }
+        }
+    }
+}
+
 World.prototype.initializeTestMap = function () {
     this.worldStructureMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
     this.worldStructureMap[2][2] = { id: 1, health: 10, owner: "game" };
@@ -301,6 +313,21 @@ World.prototype.initializeTestMap = function () {
     }
     console.log("TestMap Initalized!")
 
+}
+
+/**
+ * Used to verify if the location contains the structure
+ */
+World.prototype.verifyStructureLocation = function (location, id) {
+    if (this.worldStructureMap[location.i][location.j]) {
+        return (this.worldStructureMap[location.i][location.j].id == id);
+    }
+    return false;
+};
+
+function getStructureJson() {
+    let structureJson = JSON.parse(fs.readFileSync('./structureServer.json'))
+    return structureJson;
 }
 
 /**

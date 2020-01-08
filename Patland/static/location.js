@@ -3,7 +3,11 @@ var locationMap = [...Array(NUMCOL)].map(e => Array(NUMROW));
 var structureJson = []; var groundJson = [];
 
 
-
+/**
+ * Given the structure id, gets the rest of the structures information and returns it
+ * If null is passed, then returns the air object
+ * @param {*} objInfo {id:int, health: int, owner:str}
+ */
 function getStructureObj(objInfo) {
     if (objInfo) {
         var obj = structureJson.find(o => o.id == objInfo.id)
@@ -66,9 +70,24 @@ function loadLocationMap(ground2D, structure2D, playersObj, currPlayer) {
     }
 }
 
+function removeStructure(location) {
+    var relCoords = getRelativeCoords(location)
+    // Sets it to air
+    locationMap[relCoords.i][relCoords.j].structure = getStructureObj();
+}
+/**
+function loadStructureMap(structure2D) {
+    var trueRange = getTrueRange(currPlayer);
+    for (var i = 0; i < NUMCOL; i++) {
+        for (var j = 0; j < NUMROW; j++) {
+            locationMap[i][j].structure = getStructureObj(structure2D[i][j]);
+        }
+    }
+}*/
+
 // TODO: Change to (othP, movement)
-function movePlayer(othP, movement, currPlayer) {
-    var relCoords = getRelativeCoords(othP, currPlayer)
+function movePlayer(othP, movement) {
+    var relCoords = getRelativeCoords(othP)
     removePlayerFromMap(othP, relCoords);
     var newRelCoords = getNewCoordsLocation(relCoords, movement);
     locationMap[newRelCoords.i][newRelCoords.j].players.push(othP);
@@ -100,9 +119,47 @@ function addOtherPlayerToLocationMap(trueRange, player) {
 }
 
 // Gets the relative coordinates of the other player from the player
-function getRelativeCoords(othPlayer, currPlayer) {
+function getRelativeCoords(othPlayer) {
     var trueRange = getTrueRange(currPlayer);
     var relI = othPlayer.i - trueRange.truelefti;
     var relJ = othPlayer.j - trueRange.truetopj;
-    return {i: relI, j: relJ};
+    return { i: relI, j: relJ };
+}
+
+/**
+ * Returns the real coordinates of an object given the relative coordinates and 
+ * location of a player.
+ * @param {*} othObj An object with coordiantes relative to the currPlayer
+ * @param {*} player Location of a player. Will be currPlayer if not specified
+ */
+function getGlobalCoords(othObj, player = currPlayer) {
+    var middleLoc = getMiddleLocation();
+    var iOffset = othObj.i - middleLoc.i;
+    var jOffset = othObj.j - middleLoc.j;
+    var newI = player.i + iOffset;
+    var newJ = player.j + jOffset;
+    return { i: newI, j: newJ };
+}
+
+/**
+ * Returns an object with the i, j being in the middle of the local map
+ */
+function getMiddleLocation() {
+    return { i: HORIZONTALRADIUS, j: VERTICALRADIUS }
+}
+
+/**
+* Checks if the structure is in a 3x3 vicinity of the player
+* @param {*} player an object with an i and j
+* @param {*} structure another object with an i and j
+*/
+function checkIfInteractible(player, structure) {
+    for (var i = -1; i <= 1; i++) {
+        for (var j = -1; j <= 1; j++) {
+            if (player.i + i == structure.i && player.j + j == structure.j) {
+                return true;
+            }
+        }
+    }
+    return false;
 }

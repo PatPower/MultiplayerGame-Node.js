@@ -19,7 +19,6 @@
         "passable": false,
         "action": {
             "a1": {
-                "type": "instant",
                 "cond": {
                     "item": [],
                     "skill": {},
@@ -29,6 +28,7 @@
                     "destroy": true,
                     "degradeItems": [],
                     "updatePFlag": [],
+                    "expGain": [],
                     "drop": []
                 }
             },
