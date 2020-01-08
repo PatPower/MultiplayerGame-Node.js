@@ -18,7 +18,7 @@
         "armor": 1,
         "health": 1,
         "owner": "game",
-        "sprite": "/static/img/rock.png",
+        "sprite": "/static/img/structures/rock.png",
         "action": {
             "a1": "Mine",
             "a2": null,

@@ -1,20 +1,19 @@
 var Settings = require('./settings.js');
-var fs = require('fs');
+var JsonController = require('./jsonController.js')(); 
 var socketController = require('./socketController.js');
 
-function World(socketIo) {
+function World() {
     var data = getDataFromDB();
     this.worldStructureMap = data.worldStructureMap;
     this.worldGroundMap = data.worldGroundMap;
     this.worldPlayerMap = data.worldPlayerMap;
+    this.pFlags = data.pFlags;
     this.players = {};
     this.moveLog = {};
-    this.structureJson = getStructureJson();
     this.initializeTestMap();
 }
 
 World.prototype.getStructureMap = function () {
-    socketController.print()
     return this.worldStructureMap;
 }
 
@@ -124,10 +123,16 @@ World.prototype.createPlayer = function (id, pname) {
             i: 10,
             j: 7,
             name: pname,
+            inventory: [{id: 0, durability: 50}],
+            skills: {
+                "mining": 1,
+                "woodcutting": 1
+            },
             color: 'red'
         }
         this.setPlayer(id, player);
         this.addPlayerLocation(player);
+        this.createPFlag(id);
     }
     socketController.setup(this.getPlayer(id), this.getLocal2DPlayerDict(id), this.getLocal2DGround(player), this.getLocal2DStructure(player));
     var range = getIJRange(player.i, player.j);
@@ -142,7 +147,6 @@ World.prototype.createPlayer = function (id, pname) {
             }
         }
     }
-
     this.moveLog[id] = [];
     this.moveLog[id].push((new Date).getTime());
 }
@@ -183,7 +187,6 @@ World.prototype.movePlayer = function (id, data) {
     // This part will be dangerous if unexpected power off
     // Remove the old player location
     this.removePlayerLocation(player);
-    // TODO: check for impassible structures/ out of bounds
     if (data.left) {
         if (player.i - 1 >= 0 && this.structurePassable(this.worldStructureMap[player.i - 1][player.j])) {
             player.i--;
@@ -269,7 +272,7 @@ World.prototype.movePlayer = function (id, data) {
 World.prototype.structurePassable = function (structureInfo) {
     var passable = true;
     if (structureInfo) {
-        passable = this.structureJson.find(o => o.id == structureInfo.id).passable;
+        passable = JsonController.isStructurePassable(structureInfo.id);
     }
     return passable;
 }
@@ -284,6 +287,10 @@ World.prototype.setPlayer = function (id, player) {
 
 World.prototype.deletePlayer = function (id) {
     delete this.players[id];
+}
+
+World.prototype.createPFlag = function (id) {
+    this.pFlags[id] = [];
 }
 
 World.prototype.removeStructure = function (location) {
@@ -325,11 +332,6 @@ World.prototype.verifyStructureLocation = function (location, id) {
     return false;
 };
 
-function getStructureJson() {
-    let structureJson = JSON.parse(fs.readFileSync('./structureServer.json'))
-    return structureJson;
-}
-
 /**
  * Returns an object with the left/right bound and top/bottom bound of i and j respectively
  * If the player is near the border, the i's and j's will be either 0 or the Settings.WORLDLIMIT - 1
@@ -357,7 +359,7 @@ function getIJRange(i, j) {
 
 function getDataFromDB() {
     // TODO: actually get it from a DB
-    return { worldStructureMap: [], worldGroundMap: [], worldPlayerMap: [] }
+    return { worldStructureMap: [], worldGroundMap: [], worldPlayerMap: [] , pFlags: {}}
 }
 
 module.exports = World;
