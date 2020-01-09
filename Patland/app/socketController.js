@@ -3,7 +3,6 @@ var Action = require('./actions.js');
 var action;
 
 module.exports = function (socketIo, world) {
-
     if (!io) {
         action = new Action(world);
         io = socketIo
@@ -16,7 +15,6 @@ module.exports = function (socketIo, world) {
 
             socket.on('disconnect', function () {
                 world.disconnectPlayer(socket.id, io);
-
             });
 
             socket.on('movement', function (data) {
