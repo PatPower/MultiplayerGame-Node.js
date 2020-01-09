@@ -1,7 +1,7 @@
 #viewport {
     position: relative;
-    width: 1080;
-    height: 600px;
+    width: 1080px;
+    height: 710px;
 }
 
 canvas {
@@ -72,18 +72,53 @@ canvas {
     margin-right: 30px;
 }
 
+#invDiv {
+    width: 168px;
+    height: 640px;
+    float: right;
+}
+
 #inv {
     width: 160px;
     height: 620px;
     border: 4px solid rgb(102, 51, 0);
-    float: right;
+    right: 0;
+    position: absolute;
 }
 
+#itemArea {
+    margin-top:25px;
+    margin-left:4px;
+    margin-right:4px;
+    width: 160px;
+    height: 600px;
+    right: 0;
+    position: absolute;
+}
+
+.item {
+    width: 40px;
+    height:40px;
+    position: relative;
+    z-index: 4;   
+}
+
+#emptyitem {
+    width: 40px;
+    height:40px;
+    position: relative;
+    z-index: 0;   
+}
 
 #title {
     text-align: center;
     padding: 0px;
     margin: 0px;
+}
+
+#draggableSpan {
+    width: 40px;
+
 }
 
 #subheader {
