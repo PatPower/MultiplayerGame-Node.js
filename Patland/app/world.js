@@ -311,6 +311,7 @@ World.prototype.removeStructure = function (location) {
 World.prototype.initializeTestMap = function () {
     this.worldStructureMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
     this.worldStructureMap[2][2] = { id: 1, health: 10, owner: "game" };
+    this.worldStructureMap[7][7] = { id: 2, health: 10, owner: "game" };
     this.worldGroundMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
     this.worldPlayerMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
     for (i = 0; i < Settings.WORLDLIMIT; i++) {
@@ -333,7 +334,11 @@ World.prototype.verifyStructureLocation = function (location, id) {
     return false;
 };
 
+/**
+ * Swaps the positions of two items in the player's inventory
+ */
 World.prototype.itemSwap = function (id, pos1, pos2) {
+    // TODO: check for invalid positions
     var player = this.getPlayer(id);
     if (!player) {
         return;
@@ -343,6 +348,25 @@ World.prototype.itemSwap = function (id, pos1, pos2) {
     player.inventory[pos1] = oldItem;
     var inventoryChanges = [{ item: oldItem, pos: pos1 }, { item: player.inventory[pos2], pos: pos2 }]
     socketController.playerInventoryUpdate(player, player.inventorySize, inventoryChanges)
+}
+
+World.prototype.changeInvSize = function (player, invAddAmount) {
+    // TODO: if remove inv slots, then drop items in inv
+    if (invAddAmount < 0) {
+
+    }
+    var newInvSize = player.inventorySize + invAddAmount;
+    if (newInvSize > 60) {
+        socketController.playerInventoryUpdate(player, Settings.MAXINVSIZE, []);
+        player.inventorySize = Settings.MAXINVSIZE;
+    } else if (newInvSize < 0) {
+        socketController.playerInventoryUpdate(player, 0, []);
+        player.inventorySize = 0;
+    } else if (invAddAmount != 0) {
+        socketController.playerInventoryUpdate(player, newInvSize, []);
+        player.inventorySize += invAddAmount;
+    }
+
 }
 
 /**

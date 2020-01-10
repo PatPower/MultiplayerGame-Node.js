@@ -85,5 +85,6 @@ module.exports.playerInventoryUpdate = function (player, inventorySize, inventor
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
+    console.log(player.id, inventorySize)
     io.to(player.id).emit('playerInventoryUpdate', inventorySize, inventoryChanges);
 }

@@ -8,7 +8,8 @@ var Settings = {
     WORLDLIMIT: 100,
     HORIZONTALRADIUS: 0,
     VERTICALRADIUS: 0,
-    MILLISECONDMAX: 000
+    MILLISECONDMAX: 000,
+    MAXINVSIZE: 60
 }
 
 Settings.NUMCOL = Math.floor(Settings.CWIDTH / Settings.BOXSIDE);
