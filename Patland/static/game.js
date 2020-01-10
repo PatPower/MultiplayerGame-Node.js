@@ -24,16 +24,14 @@ socket.on('setup', function (currentPlayer, pList, ground2D, structure2D) {
     pcxt = setupCurrentPlayer(document.getElementById('player'));
     opcxt = setupOtherPlayers(document.getElementById('otherPlayers'));
     ovlycxt = setupOverlay(document.getElementById('overlay'));
-
     updateTileMarker(currPlayer);
     projectSquares(pList);
     projectSquare(currentPlayer, {});
-
+    initalizeInvItems();
 });
 
 socket.on('moveCurrPlayer', function (player, pList, ground2D, structure2D) {
-    currPlayer.i = player.i;
-    currPlayer.j = player.j
+    currPlayer = player
     playerList = pList;
     loadLocationMap(ground2D, structure2D, pList, currPlayer);
     updateBackgroundCanvas();
@@ -93,11 +91,44 @@ socket.on('playerRemove', function (playerObj) {
     removePlayer(playerObj);
 });
 
+/**
+ * item: the new item
+ * pos: the position of the new item (starts at 1)
+ * inventoryChanges: [ { item: { id: int, durability: int }, pos: int } , ... ]
+ */
+socket.on('playerInventoryUpdate', function (inventorySize, inventoryChanges) {
+    updateInvSize(inventorySize);
+    updateInventory(inventoryChanges);
+})
+
 // TODO: make a socket that gets responses for invalid movement or actions done
 
 socket.on('message', function (msg) {
     console.log(msg);
 });
+
+/**
+ * Sends the server a request for an action to be performed
+ * @param {*} id id of the structure being interacted with
+ * @param {*} actionId a1, a2 or a3 depending if action1, action2 or action3
+ * @param {*} location the location of the interacted structure
+ */
+function sendPlayerAction(id, actionId, location) {
+    socket.emit("pAction", id, actionId, location);
+}
+
+function emitMovement(movement) {
+    socket.emit('movement', movement);
+}
+
+/**
+ * Sends the server two positions of items being swapped (starting from 0)
+ * @param {*} pos1 
+ * @param {*} pos2 
+ */
+function emitItemSwap(pos1, pos2) {
+    socket.emit('itemSwap', pos1, pos2);
+}
 
 // The object being sent to server to move the character
 var movement = {
@@ -131,7 +162,7 @@ setInterval(function () {
     if (timeoutCounter >= 1) { timeoutCounter--; return false; }
     if (movement.up || movement.right || movement.down || movement.left) {
         if (firstKeyHold) { timeoutCounter = 8; firstKeyHold = false } else { timeoutCounter = 3; }
-        socket.emit('movement', movement);
+        emitMovement(movement);
     }
 }, 40);
 
@@ -327,12 +358,3 @@ function checkIfNewCoordsOutBounds(player, movement) {
     return false;
 }
 
-/**
- * Sends the server a request for an action to be performed
- * @param {*} id id of the structure being interacted with
- * @param {*} actionId a1, a2 or a3 depending if action1, action2 or action3
- * @param {*} location the location of the interacted structure
- */
-function sendPlayerAction(id, actionId, location) {
-    socket.emit("pAction", id, actionId, location);
-}

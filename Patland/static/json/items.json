@@ -2,6 +2,26 @@
     {
         "id": 0,
         "name": "Pickaxe",
-        "icon": "/static/img/items/img_lamp.png"
-    } 
+        "icon": "/static/img/items/0.png"
+    },
+    {
+        "id": 1,
+        "name": "Light Bulb",
+        "icon": "/static/img/items/1.png"
+    },
+    {
+        "id": -1,
+        "name": "Nothing",
+        "icon": "/static/img/items/-1.png"
+    },
+    {
+        "id": -2,
+        "name": "Locked",
+        "icon": "/static/img/items/-2.png"
+    },
+    {
+        "id": -3,
+        "name": "Locked",
+        "icon": "/static/img/items/lock.png"
+    }
 ]

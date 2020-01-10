@@ -1,6 +1,5 @@
 // The map relative to the player
 var locationMap = [...Array(NUMCOL)].map(e => Array(NUMROW));
-var structureJson = []; var groundJson = [];
 
 
 /**

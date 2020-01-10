@@ -1,7 +1,8 @@
 
 var invElement = document.getElementById("inv");
-
+var itemArea = document.getElementById("itemArea");
 var invCxt = setupInventory(invElement);
+var itemJson = [];
 
 invTitle(invCxt)
 
@@ -32,43 +33,171 @@ function setupInventory(canvas) {
     return invcxt;
 }
 
-$(function () {
-    for (var i = 1; i <= 2; i++) {
-        $("#item"+i).draggable({
-            snap: true,
-            opacity: 0.35,
-            drop: function( event, ui ) {
-                console.log(event, ui)
-                console.log( ui.draggable.attr("id"));
-            }
-        });
+function updateInventory(inventoryChanges) {
+    for (invChange of inventoryChanges) {
+        var i = invChange.pos + 1;
+        var img = itemArea.childNodes[i];
+        if (invChange.item) {
+            img.src = getItemIcon(invChange.item.id);
+            makeDraggable(i);
+            enableDragging(i);
+        } else {
+            img.src = getItemIcon(-1);
+            preventDragging(i);
+        }
+        makeDroppable(i);
     }
-});
-
-function dragstart_handler(ev) {
-    ev = ev || window.event;
-    // Add the target element's id to the data transfer object
-    console.log("onDragStart")
-    ev.preventDefault();
-    document.onmouseup = closeDragElement;
-    ev.dataTransfer.setData("text/plain", ev.target.id);
 }
 
-function elementDrag(ev) {
-    ev = ev || window.event;
-    ev.preventDefault();
-    // calculate the new cursor position:
-    pos1 = pos3 - ev.clientX;
-    pos2 = pos4 - ev.clientY;
-    pos3 = ev.clientX;
-    pos4 = ev.clientY;
-    // set the element's new position:
-    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+function updateInvSize(newInventorySize) {
+    var oldInvSize = currPlayer.inventorySize;
+    var difference = newInventorySize - oldInvSize;
+    if (difference == 0) {
+        return;
+    } else if (difference > 0) {
+        // Unlock inv spots
+        for (var i = oldInvSize + 1; i < newInventorySize + 1; i++) {
+
+            var img = itemArea.childNodes[i];
+            img.setAttribute("class", "item");
+            img.setAttribute("id", "item" + i);
+            img.src = getItemIcon(-1);
+            preventDragging(i);
+            makeDroppable(i);
+        }
+    } else {
+        // Lock inv spots
+        for (var i = oldInvSize; i > newInventorySize; i--) {
+            var img = itemArea.childNodes[i];
+            img.setAttribute("class", "lockeditemslot");
+            img.setAttribute("id", "item" + i);
+            img.src = getItemIcon(-2);
+            preventDragging(i);
+            $('#item' + i).droppable('disable');
+        }
+    }
+    currPlayer.inventorySize = newInventorySize;
+    updateInvLockIcon()
 }
 
-function closeDragElement() {
-    // stop moving when mouse button is released:
-    document.onmouseup = null;
-    document.onmousemove = null;
+function initalizeInvItems() {
+    invLockIcon();
+    for (var i = 1; i <= currPlayer.inventorySize; i++) {
+        var item = currPlayer.inventory[i - 1];
+        var img = document.createElement('img');
+        img.setAttribute("class", "item");
+        img.setAttribute("id", "item" + i);
+        if (item) {
+            img.src = getItemIcon(item.id);
+            itemArea.append(img);
+            makeDraggable(i);
+        } else {
+            img.src = getItemIcon(-1);
+            itemArea.append(img);
+            preventDragging(i);
+        }
+        makeDroppable(i);
+    }
+    for (i = currPlayer.inventorySize + 1; i <= 60; i++) {
+        var img = document.createElement('img');
+        img.setAttribute("class", "lockeditemslot");
+        img.setAttribute("id", "item" + i);
+        img.src = getItemIcon(-2);
+        itemArea.append(img);
+        preventDragging(i);
+    }
 }
+
+function invLockIcon() {
+    var img = document.createElement('img');
+    img.setAttribute("id", "lockimg");
+    img.src = getItemIcon(-3);
+    var invSpaceLeft = MAXINVSPACE - currPlayer.inventorySize
+    var rowsLeft = Math.floor(invSpaceLeft / 4)
+    if (invSpaceLeft >= 4) {
+        var x = (4 * INVBOXSIDE) / 2 - INVBOXSIDE / 2
+    } else {
+        var x = INVWIDTH / 2 + (INVWIDTH - invSpaceLeft * INVBOXSIDE) / 2 - INVBOXSIDE / 2
+    }
+    if (rowsLeft >= 1) {
+        var y = 600 / 2 + (600 - (INVBOXSIDE * rowsLeft)) / 2 - INVBOXSIDE / 2
+    } else {
+        var y = 600 - BOXSIDE
+    }
+    img.style.marginLeft = x + 'px';
+    img.style.marginTop = y + 'px';
+    itemArea.append(img);
+    $("lockimg").on('dragstart', function (event) {
+        event.preventDefault();
+    });
+    if (currPlayer.inventorySize >= 60) {
+        img.style.visibility = 'hidden';
+    }
+}
+
+function updateInvLockIcon() {
+    var img = document.getElementById("lockimg");
+    if (currPlayer.inventorySize >= 60) {
+        img.style.visibility = 'hidden';
+        return
+    } else {
+        img.style.visibility = 'visible';
+    }
+    var invSpaceLeft = MAXINVSPACE - currPlayer.inventorySize
+    var rowsLeft = Math.floor(invSpaceLeft / 4)
+    if (invSpaceLeft >= 4) {
+        var x = (4 * INVBOXSIDE) / 2 - INVBOXSIDE / 2
+    } else {
+        var x = INVWIDTH / 2 + (INVWIDTH - invSpaceLeft * INVBOXSIDE) / 2 - INVBOXSIDE / 2
+    }
+    if (rowsLeft >= 1) {
+        var y = 600 / 2 + (600 - (INVBOXSIDE * rowsLeft)) / 2 - INVBOXSIDE / 2
+    } else {
+        var y = 600 - BOXSIDE
+    }
+    img.style.marginLeft = x + 'px';
+    img.style.marginTop = y + 'px';
+}
+
+
+function getItemIcon(id) {
+    var item = itemJson.find(o => o.id == id);
+    if (item) {
+        return item.icon;
+    } else {
+        return null;
+    }
+}
+
+function makeDraggable(i) {
+    $("#item" + i).draggable({
+        opacity: 0.8,
+        revert: true,
+        revertDuration: 0,
+    });
+}
+
+function makeDroppable(i) {
+    $("#item" + i).droppable({
+        disabled: false,
+        drop: function (event, ui) {
+            //Make item temp invisible
+            var draggedItemId = ui.draggable.attr('id');
+            document.getElementById(draggedItemId).src = getItemIcon(-1);
+
+            var pos1 = parseInt(draggedItemId[4]) - 1
+            var pos2 = parseInt($(this).attr('id')[4]) - 1
+            emitItemSwap(pos1, pos2);
+        }
+    });
+}
+
+function preventDragging(i) {
+    $("#item" + i).on('dragstart', function (event) {
+        event.preventDefault();
+    });
+}
+function enableDragging(i) {
+    $("#item" + i).off('dragstart');
+}
+
