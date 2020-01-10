@@ -1,28 +1,31 @@
 var Settings = require('./settings.js');
 var JsonController = require('./jsonController.js')();
 var socketController = require('./socketController.js');
+var worldStructureMap = [];
+var worldGroundMap = [];
+var worldPlayerMap = [];
 
 function World() {
     var data = getDataFromDB();
-    this.worldStructureMap = data.worldStructureMap;
-    this.worldGroundMap = data.worldGroundMap;
-    this.worldPlayerMap = data.worldPlayerMap;
+    worldStructureMap = data.worldStructureMap;
+    worldGroundMap = data.worldGroundMap;
+    worldPlayerMap = data.worldPlayerMap;
     this.pFlags = data.pFlags;
     this.players = {};
     this.moveLog = {};
-    this.initializeTestMap();
+    initializeTestMap();
 }
 
 World.prototype.getStructureMap = function () {
-    return this.worldStructureMap;
+    return worldStructureMap;
 }
 
 World.prototype.getGroundMap = function () {
-    return this.worldGroundMap;
+    return worldGroundMap;
 }
 
 World.prototype.getPlayerMap = function () {
-    return this.worldPlayerMap;
+    return worldPlayerMap;
 }
 
 /**
@@ -34,8 +37,8 @@ World.prototype.getLocal2DPlayerDict = function (player) {
     var range = getIJRange(player.i, player.j);
     for (var i = range.lefti; i <= range.righti; i++) {
         for (var j = range.topj; j <= range.bottomj; j++) {
-            if (this.worldPlayerMap[i][j].length > 0) {
-                for (othplayer of this.worldPlayerMap[i][j]) {
+            if (worldPlayerMap[i][j].length > 0) {
+                for (othplayer of worldPlayerMap[i][j]) {
                     localPlayerDict[othplayer.id] = othplayer;
                 }
             }
@@ -55,7 +58,7 @@ World.prototype.getLocal2DGround = function (player) {
     for (var j = range.truetopj; j <= range.truebottomj; j++) {
         for (var i = range.truelefti; i <= range.truerighti; i++) {
             if (i >= 0 && i <= Settings.WORLDLIMIT - 1 && j >= 0 && j <= Settings.WORLDLIMIT - 1) {
-                ground2D[i - range.truelefti][j - range.truetopj] = this.worldGroundMap[i][j];
+                ground2D[i - range.truelefti][j - range.truetopj] = worldGroundMap[i][j];
             }
         }
     }
@@ -72,7 +75,7 @@ World.prototype.getLocal2DStructure = function (player) {
     for (var j = range.truetopj; j <= range.truebottomj; j++) {
         for (var i = range.truelefti; i <= range.truerighti; i++) {
             if (i >= 0 && i <= Settings.WORLDLIMIT - 1 && j >= 0 && j <= Settings.WORLDLIMIT - 1) {
-                structure2D[i - range.truelefti][j - range.truetopj] = this.worldStructureMap[i][j];
+                structure2D[i - range.truelefti][j - range.truetopj] = worldStructureMap[i][j];
             }
         }
     }
@@ -81,9 +84,9 @@ World.prototype.getLocal2DStructure = function (player) {
 
 World.prototype.removePlayerLocation = function (player) {
     // Remove the old player location
-    var pIndex = this.worldPlayerMap[player.i][player.j].findIndex(o => o.id == player.id);
+    var pIndex = worldPlayerMap[player.i][player.j].findIndex(o => o.id == player.id);
     if (pIndex >= 0) {
-        this.worldPlayerMap[player.i][player.j].splice(pIndex, 1);
+        worldPlayerMap[player.i][player.j].splice(pIndex, 1);
     } else {
         console.log("ERROR: player not found when removing location");
     }
@@ -91,7 +94,7 @@ World.prototype.removePlayerLocation = function (player) {
 
 // TODO: Save this into a database/file later
 World.prototype.addPlayerLocation = function (player) {
-    this.worldPlayerMap[player.i][player.j].push(player);
+    worldPlayerMap[player.i][player.j].push(player);
 }
 
 /**
@@ -139,8 +142,8 @@ World.prototype.createPlayer = function (id, pname) {
     var range = getIJRange(player.i, player.j);
     for (var i = range.lefti; i <= range.righti; i++) {
         for (var j = range.topj; j <= range.bottomj; j++) {
-            if (this.worldPlayerMap[i][j].length > 0) {
-                for (othplayer of this.worldPlayerMap[i][j]) {
+            if (worldPlayerMap[i][j].length > 0) {
+                for (othplayer of worldPlayerMap[i][j]) {
                     if (othplayer.id != player.id) {
                         socketController.playerJoin(othplayer, this.getPlayer(id));
                     }
@@ -155,13 +158,12 @@ World.prototype.createPlayer = function (id, pname) {
 World.prototype.disconnectPlayer = function (id) {
     var dcPlayer = this.getPlayer(id);
     if (dcPlayer) {
-        console.log("dc", id)
         var range = getIJRange(dcPlayer.i, dcPlayer.j);
         this.removePlayerLocation(dcPlayer);
         for (var i = range.lefti; i <= range.righti; i++) {
             for (var j = range.topj; j <= range.bottomj; j++) {
-                if (this.worldPlayerMap[i][j].length > 0) {
-                    for (othplayer of this.worldPlayerMap[i][j]) {
+                if (worldPlayerMap[i][j].length > 0) {
+                    for (othplayer of worldPlayerMap[i][j]) {
                         socketController.playerRemove(othplayer, id);
                         this.deletePlayer(id);
                     }
@@ -189,7 +191,7 @@ World.prototype.movePlayer = function (id, data) {
     // Remove the old player location
     this.removePlayerLocation(player);
     if (data.left) {
-        if (player.i - 1 >= 0 && this.structurePassable(this.worldStructureMap[player.i - 1][player.j])) {
+        if (player.i - 1 >= 0 && this.structurePassable(worldStructureMap[player.i - 1][player.j])) {
             player.i--;
         } else {
             data.left = false;
@@ -197,7 +199,7 @@ World.prototype.movePlayer = function (id, data) {
         }
     }
     if (data.right) {
-        if (player.i + 1 < Settings.WORLDLIMIT && this.structurePassable(this.worldStructureMap[player.i + 1][player.j])) {
+        if (player.i + 1 < Settings.WORLDLIMIT && this.structurePassable(worldStructureMap[player.i + 1][player.j])) {
             player.i++;
         } else {
             data.right = false;
@@ -205,7 +207,7 @@ World.prototype.movePlayer = function (id, data) {
         }
     }
     if (data.up) {
-        if (player.j - 1 >= 0 && this.structurePassable(this.worldStructureMap[player.i][player.j - 1])) {
+        if (player.j - 1 >= 0 && this.structurePassable(worldStructureMap[player.i][player.j - 1])) {
             player.j--;
         } else {
             data.up = false;
@@ -213,7 +215,7 @@ World.prototype.movePlayer = function (id, data) {
         }
     }
     if (data.down) {
-        if (player.j + 1 < Settings.WORLDLIMIT && this.structurePassable(this.worldStructureMap[player.i][player.j + 1])) {
+        if (player.j + 1 < Settings.WORLDLIMIT && this.structurePassable(worldStructureMap[player.i][player.j + 1])) {
             player.j++;
         } else {
             data.down = false;
@@ -258,8 +260,8 @@ World.prototype.movePlayer = function (id, data) {
     }
     for (var i = range.lefti; i <= range.righti; i++) {
         for (var j = range.topj; j <= range.bottomj; j++) {
-            if (this.worldPlayerMap[i][j].length > 0) {
-                for (othplayer of this.worldPlayerMap[i][j]) {
+            if (worldPlayerMap[i][j].length > 0) {
+                for (othplayer of worldPlayerMap[i][j]) {
                     if (othplayer.id != player.id) {
                         socketController.othPlayerMove(othplayer, oldPlayer, data);
                     }
@@ -295,12 +297,12 @@ World.prototype.createPFlag = function (id) {
 }
 
 World.prototype.removeStructure = function (location) {
-    this.worldStructureMap[location.i][location.j] = null;
+    worldStructureMap[location.i][location.j] = null;
     var range = getIJRange(location.i, location.j);
     for (var i = range.lefti; i <= range.righti; i++) {
         for (var j = range.topj; j <= range.bottomj; j++) {
-            if (this.worldPlayerMap[i][j].length > 0) {
-                for (othPlayer of this.worldPlayerMap[i][j]) {
+            if (worldPlayerMap[i][j].length > 0) {
+                for (othPlayer of worldPlayerMap[i][j]) {
                     socketController.removeStructure(othPlayer, location);
                 }
             }
@@ -308,28 +310,28 @@ World.prototype.removeStructure = function (location) {
     }
 }
 
-World.prototype.initializeTestMap = function () {
-    this.worldStructureMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
-    this.worldStructureMap[2][2] = { id: 1, health: 10, owner: "game" };
-    this.worldStructureMap[7][7] = { id: 2, health: 10, owner: "game" };
-    this.worldGroundMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
-    this.worldPlayerMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
+function initializeTestMap() {
+    worldStructureMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
+    worldStructureMap[2][2] = { id: 1, health: 10, owner: "game" };
+    worldStructureMap[7][7] = { id: 2, health: 10, owner: "game" };
+    worldStructureMap[10][6] = { id: 3, health: 10, owner: "game" };
+    worldGroundMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
+    worldPlayerMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
     for (i = 0; i < Settings.WORLDLIMIT; i++) {
         for (j = 0; j < Settings.WORLDLIMIT; j++) {
-            this.worldPlayerMap[i][j] = []
-            this.worldGroundMap[i][j] = 0;
+            worldPlayerMap[i][j] = []
+            worldGroundMap[i][j] = 0;
         }
     }
     console.log("TestMap Initalized!")
-
 }
 
 /**
  * Used to verify if the location contains the structure
  */
 World.prototype.verifyStructureLocation = function (location, id) {
-    if (this.worldStructureMap[location.i][location.j]) {
-        return (this.worldStructureMap[location.i][location.j].id == id);
+    if (worldStructureMap[location.i][location.j]) {
+        return (worldStructureMap[location.i][location.j].id == id);
     }
     return false;
 };
@@ -351,11 +353,13 @@ World.prototype.itemSwap = function (id, pos1, pos2) {
 }
 
 World.prototype.changeInvSize = function (player, invAddAmount) {
+    var newInvSize = player.inventorySize + invAddAmount;
     // TODO: if remove inv slots, then drop items in inv
     if (invAddAmount < 0) {
-
+        for (var i = player.inventorySize - 1; i > newInvSize - 1; i--) {
+            player.inventory.pop(i);
+        }
     }
-    var newInvSize = player.inventorySize + invAddAmount;
     if (newInvSize > 60) {
         socketController.playerInventoryUpdate(player, Settings.MAXINVSIZE, []);
         player.inventorySize = Settings.MAXINVSIZE;
@@ -367,6 +371,20 @@ World.prototype.changeInvSize = function (player, invAddAmount) {
         player.inventorySize += invAddAmount;
     }
 
+}
+
+/**
+ * Removes items at the positions specified
+ * @param {*} player 
+ * @param {*} slot a list of inv pos (starting at 0)
+ */
+World.prototype.removePlayerItems = function (player, slots) {
+    for (slot of slots) {
+        // Check if slot is removable
+        if (0 <= slot && slot < player.inventorySize) {
+            player.inventory[slot] = null;
+        }
+    }
 }
 
 /**
@@ -398,5 +416,7 @@ function getDataFromDB() {
     // TODO: actually get it from a DB
     return { worldStructureMap: [], worldGroundMap: [], worldPlayerMap: [], pFlags: {} }
 }
+
+
 
 module.exports = World;

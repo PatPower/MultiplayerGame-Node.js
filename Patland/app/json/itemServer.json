@@ -3,5 +3,10 @@
         "id": 0,
         "name": "Pickaxe",
         "Durability": 50
-    } 
+    },
+    {
+        "id": 1,
+        "name": "Light Bulb",
+        "Durability": 50
+    }
 ]

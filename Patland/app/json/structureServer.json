@@ -67,5 +67,31 @@
             "a2": null,
             "a3": null
         }
+    },
+    {
+        "id": 3,
+        "name": "badbag",
+        "armor": 1,
+        "health": 1,
+        "passable": false,
+        "action": {
+            "a1": {
+                "cond": {
+                    "item": [],
+                    "skill": {},
+                    "pFlag": []
+                },
+                "result": {
+                    "destroy": false,
+                    "degradeItems": [],
+                    "updatePFlag": [],
+                    "expGain": [],
+                    "drop": [],
+                    "addToInvSize": -5
+                }
+            },
+            "a2": null,
+            "a3": null
+        }
     }
 ]
