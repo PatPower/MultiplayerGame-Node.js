@@ -24,5 +24,18 @@
             "a2": null,
             "a3": null
         }
+    },
+    {
+        "id": 2,
+        "name": "bag",
+        "armor": 1,
+        "health": 1,
+        "owner": "game",
+        "sprite": "/static/img/structures/bag.png",
+        "action": {
+            "a1": "Pick Up",
+            "a2": null,
+            "a3": null
+        }
     }
 ]

@@ -58,6 +58,9 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
                 for (item of structureAction.result.drop) {
                     // TODO: Give user items
                 }
+                if (structureAction.result.addToInvSize) {
+                    world.changeInvSize(player, structureAction.result.addToInvSize)
+                }
             }
         }
     }
