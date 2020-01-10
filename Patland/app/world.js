@@ -335,6 +335,9 @@ World.prototype.verifyStructureLocation = function (location, id) {
 
 World.prototype.itemSwap = function (id, pos1, pos2) {
     var player = this.getPlayer(id);
+    if (!player) {
+        return;
+    }
     var oldItem = player.inventory[pos2];
     player.inventory[pos2] = player.inventory[pos1];
     player.inventory[pos1] = oldItem;
