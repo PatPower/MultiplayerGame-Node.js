@@ -1,5 +1,5 @@
 var Settings = require('./settings.js');
-var JsonController = require('./jsonController.js')(); 
+var JsonController = require('./jsonController.js')();
 var socketController = require('./socketController.js');
 
 function World() {
@@ -123,10 +123,11 @@ World.prototype.createPlayer = function (id, pname) {
             i: 10,
             j: 7,
             name: pname,
-            inventory: [{id: 0, durability: 50}],
+            inventory: [{ id: 0, durability: 50 }, null, { id: 1, durability: 50 }, null],
+            inventorySize: 5,
             skills: {
-                "mining": {level: 1, experience: 0},
-                "woodcutting": {level: 1, experience: 0}
+                "mining": { level: 1, experience: 0 },
+                "woodcutting": { level: 1, experience: 0 }
             },
             color: 'red'
         }
@@ -332,6 +333,15 @@ World.prototype.verifyStructureLocation = function (location, id) {
     return false;
 };
 
+World.prototype.itemSwap = function (id, pos1, pos2) {
+    var player = this.getPlayer(id);
+    var oldItem = player.inventory[pos2];
+    player.inventory[pos2] = player.inventory[pos1];
+    player.inventory[pos1] = oldItem;
+    var inventoryChanges = [{ item: oldItem, pos: pos1 }, { item: player.inventory[pos2], pos: pos2 }]
+    socketController.playerInventoryUpdate(player, player.inventorySize, inventoryChanges)
+}
+
 /**
  * Returns an object with the left/right bound and top/bottom bound of i and j respectively
  * If the player is near the border, the i's and j's will be either 0 or the Settings.WORLDLIMIT - 1
@@ -359,7 +369,7 @@ function getIJRange(i, j) {
 
 function getDataFromDB() {
     // TODO: actually get it from a DB
-    return { worldStructureMap: [], worldGroundMap: [], worldPlayerMap: [] , pFlags: {}}
+    return { worldStructureMap: [], worldGroundMap: [], worldPlayerMap: [], pFlags: {} }
 }
 
 module.exports = World;

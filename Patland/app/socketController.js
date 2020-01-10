@@ -8,20 +8,15 @@ module.exports = function (socketIo, world) {
         io = socketIo
         // Add the WebSocket handlers
         io.on('connection', function (socket) {
-
             socket.on('new player', function (pname) {
                 world.createPlayer(socket.id, pname, io);
             });
-
             socket.on('disconnect', function () {
                 world.disconnectPlayer(socket.id, io);
             });
-
             socket.on('movement', function (data) {
                 world.movePlayer(socket.id, data, io);
             });
-
-
             socket.on('pAction', function (id, actionId, location) {
                 var response = action.doAction(socket.id, id, actionId, location);
                 // If a condition is not met
@@ -29,7 +24,9 @@ module.exports = function (socketIo, world) {
                     module.exports.message(socket.id, response.msg);
                 }
             });
-
+            socket.on('itemSwap', function (pos1, pos2) {
+                world.itemSwap(socket.id, pos1, pos2);
+            });
         });
     }
     return module.exports;
@@ -82,4 +79,11 @@ module.exports.removeStructure = function (player, location) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(player.id).emit('removeStructure', location);
+}
+
+module.exports.playerInventoryUpdate = function (player, inventorySize, inventoryChanges) {
+    if (!io) {
+        throw new Error("Error: Can't use this function until io is properly initalized");
+    }
+    io.to(player.id).emit('playerInventoryUpdate', inventorySize, inventoryChanges);
 }
