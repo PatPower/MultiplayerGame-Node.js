@@ -81,10 +81,20 @@ module.exports.removeStructure = function (player, location) {
     io.to(player.id).emit('removeStructure', location);
 }
 
-module.exports.playerInventoryUpdate = function (player, inventorySize, inventoryChanges) {
+/**
+ * If inventoryChanges is not null then inventorySize and newInventory should be null
+ * If inventorySize and newInventory is not null, then inventoryChanges should be null
+ */
+module.exports.playerInventoryUpdate = function (player, inventoryChanges) {
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
-    console.log(player.id, inventorySize)
-    io.to(player.id).emit('playerInventoryUpdate', inventorySize, inventoryChanges);
+    io.to(player.id).emit('playerInventoryUpdate', inventoryChanges);
+}
+
+module.exports.playerInventorySizeUpdate = function (player, inventorySize, newInventory) {
+    if (!io) {
+        throw new Error("Error: Can't use this function until io is properly initalized");
+    }
+    io.to(player.id).emit('playerInventorySizeUpdate', inventorySize, newInventory);
 }
