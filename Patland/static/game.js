@@ -58,7 +58,6 @@ socket.on('othPlayerMove', function (othP, movement) {
     // Other player moves in view
     if (!playerList[othP.id]) {
         addPlayer(getNewCoordsLocation(othP, movement));
-
         return;
     }
     var relCoords = getRelativeCoords(othP)
@@ -93,13 +92,23 @@ socket.on('playerRemove', function (playerObj) {
 
 /**
  * item: the new item
- * pos: the position of the new item (starts at 1)
+ * pos: the position of the new item (starts at 0)
  * inventoryChanges: [ { item: { id: int, durability: int }, pos: int } , ... ]
  */
-socket.on('playerInventoryUpdate', function (inventorySize, inventoryChanges) {
-    updateInvSize(inventorySize);
+socket.on('playerInventoryUpdate', function (inventoryChanges) {
     updateInventory(inventoryChanges);
 })
+
+/**
+ * item: the new item
+ * pos: the position of the new item (starts at 0)
+ * inventoryChanges: [ { item: { id: int, durability: int }, pos: int } , ... ]
+ */
+socket.on('playerInventorySizeUpdate', function (inventorySize, newInventory) {
+    updateInvSize(inventorySize);
+    currPlayer.inventory = newInventory;
+})
+
 
 // TODO: make a socket that gets responses for invalid movement or actions done
 

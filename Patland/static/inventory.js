@@ -33,10 +33,16 @@ function setupInventory(canvas) {
     return invcxt;
 }
 
+/**
+ * item: the new item
+ * pos: the position of the new item (starts at 0)
+ * inventoryChanges: [ { item: { id: int, durability: int }, pos: int } , ... ]
+ */
 function updateInventory(inventoryChanges) {
     for (invChange of inventoryChanges) {
         var i = invChange.pos + 1;
         var img = itemArea.childNodes[i];
+        currPlayer.inventory[invChange.pos] = invChange.item;
         if (invChange.item) {
             img.src = getItemIcon(invChange.item.id);
             makeDraggable(i);
@@ -185,8 +191,8 @@ function makeDroppable(i) {
             var draggedItemId = ui.draggable.attr('id');
             document.getElementById(draggedItemId).src = getItemIcon(-1);
 
-            var pos1 = parseInt(draggedItemId[4]) - 1
-            var pos2 = parseInt($(this).attr('id')[4]) - 1
+            var pos1 = parseInt(draggedItemId.slice(4)) - 1
+            var pos2 = parseInt($(this).attr('id').slice(4)) - 1
             emitItemSwap(pos1, pos2);
         }
     });

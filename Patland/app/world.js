@@ -127,7 +127,7 @@ World.prototype.createPlayer = function (id, pname) {
             j: 7,
             name: pname,
             inventory: [{ id: 0, durability: 50 }, null, { id: 1, durability: 50 }, null],
-            inventorySize: 5,
+            inventorySize: 4,
             skills: {
                 "mining": { level: 1, experience: 0 },
                 "woodcutting": { level: 1, experience: 0 }
@@ -349,26 +349,31 @@ World.prototype.itemSwap = function (id, pos1, pos2) {
     player.inventory[pos2] = player.inventory[pos1];
     player.inventory[pos1] = oldItem;
     var inventoryChanges = [{ item: oldItem, pos: pos1 }, { item: player.inventory[pos2], pos: pos2 }]
-    socketController.playerInventoryUpdate(player, player.inventorySize, inventoryChanges)
+    socketController.playerInventoryUpdate(player, inventoryChanges)
 }
 
 World.prototype.changeInvSize = function (player, invAddAmount) {
     var newInvSize = player.inventorySize + invAddAmount;
-    // TODO: if remove inv slots, then drop items in inv
+    // Removes the inventory slots on the player object
     if (invAddAmount < 0) {
         for (var i = player.inventorySize - 1; i > newInvSize - 1; i--) {
             player.inventory.pop(i);
         }
+    } else {
+        // Adds null objects in the player object
+        for (var i = player.inventorySize; i < newInvSize ; i++) {
+            player.inventory.push(null);
+        }
     }
     if (newInvSize > 60) {
-        socketController.playerInventoryUpdate(player, Settings.MAXINVSIZE, []);
+        socketController.playerInventorySizeUpdate(player, Settings.MAXINVSIZE, player.inventory);
         player.inventorySize = Settings.MAXINVSIZE;
     } else if (newInvSize < 0) {
-        socketController.playerInventoryUpdate(player, 0, []);
+        socketController.playerInventorySizeUpdate(player, 0, player.inventory);
         player.inventorySize = 0;
     } else if (invAddAmount != 0) {
-        socketController.playerInventoryUpdate(player, newInvSize, []);
-        player.inventorySize += invAddAmount;
+        socketController.playerInventorySizeUpdate(player, newInvSize, player.inventory);
+        player.inventorySize = newInvSize;
     }
 
 }
