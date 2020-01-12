@@ -1,6 +1,7 @@
 var socket = io();
-var currPlayer = {} // Current Player Object
-var playerList = {}
+var currPlayer = {}; // Current Player Object
+var playerList = {};
+var defaultActions = {};
 
 // Setup the canvases
 var bgcxt;
@@ -12,12 +13,19 @@ var ovlycxt;
 // Send to server that a player joined
 socket.emit('new player', name);
 
-// Server sends info needed to setup client
-// pList is a dict of playerObj with the id as key
-// currentPlayer is the currentplayerObj
-socket.on('setup', function (currentPlayer, pList, ground2D, structure2D) {
+/** 
+ * Server sends info needed to setup client
+ * currentPlayer is the currentplayerObj
+ * pList is a dict of playerObj with the id as key
+ * ground2D is a 2D array of the local ground map
+ * structure2D is a 2D array of the local structure map
+ * defaultActions is a dict with all the default actions binded to each structure for the player
+ * {structureId: actionId}
+*/
+socket.on('setup', function (currentPlayer, pList, ground2D, structure2D, defaultActs) {
     currPlayer = currentPlayer;
     playerList = pList;
+    defaultActions = defaultActs;
     loadLocationMap(ground2D, structure2D, pList, currPlayer);
     bgcxt = setupBackground(document.getElementById('background'));
     strcxt = setupStructure(document.getElementById('structure'));
@@ -109,7 +117,6 @@ socket.on('playerInventorySizeUpdate', function (inventorySize, newInventory) {
     currPlayer.inventory = newInventory;
 })
 
-
 // TODO: make a socket that gets responses for invalid movement or actions done
 
 socket.on('message', function (msg) {
@@ -138,43 +145,6 @@ function emitMovement(movement) {
 function emitItemSwap(pos1, pos2) {
     socket.emit('itemSwap', pos1, pos2);
 }
-
-// The object being sent to server to move the character
-var movement = {
-    up: false,
-    down: false,
-    left: false,
-    right: false
-}
-
-var firstKeyHold = true;
-document.addEventListener('keydown', function (event) {
-    if (event.keyCode == 87) { movement.up = true; } //W 
-    if (event.keyCode == 68) { movement.right = true; } //D
-    if (event.keyCode == 83) { movement.down = true; } //S
-    if (event.keyCode == 65) { movement.left = true; } //A
-});
-
-document.addEventListener('keyup', function (event) {
-    if (event.keyCode == 87) { movement.up = false; } //W 
-    if (event.keyCode == 68) { movement.right = false; } //D
-    if (event.keyCode == 83) { movement.down = false; } //S
-    if (event.keyCode == 65) { movement.left = false; } //A
-    timeoutCounter = 0;
-    firstKeyHold = true
-});
-
-// TimeoutCounter limits how fast the user can move from the client side
-// FirstKeyHold makes the first press take a bit longer to move the player to allow easier tap movement 
-var timeoutCounter = 0;
-setInterval(function () {
-    if (timeoutCounter >= 1) { timeoutCounter--; return false; }
-    if (movement.up || movement.right || movement.down || movement.left) {
-        if (firstKeyHold) { timeoutCounter = 8; firstKeyHold = false } else { timeoutCounter = 3; }
-        emitMovement(movement);
-    }
-}, 40);
-
 
 function setupBackground(canvas) {
     // Background
@@ -367,3 +337,17 @@ function checkIfNewCoordsOutBounds(player, movement) {
     return false;
 }
 
+function defaultAction(structId, location) {
+    var structObj = getStructureObj({ id: structId, health: 0, owner: "game" });
+    if (structObj) {
+        if (structId in defaultActions) {
+            var defaultAction = "a" + defaultAction[structId];
+            if (structObj.action[defaultAction]) {
+                sendPlayerAction(structId, defaultAction[structId], location);
+            }
+        }
+        if (structObj.action["a1"]) {
+            sendPlayerAction(structId, "a1", location);
+        }
+    }
+}

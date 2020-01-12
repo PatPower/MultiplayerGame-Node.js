@@ -3,12 +3,14 @@
 
 $(function () {
     $.contextMenu({
-        selector: '#overlay',
+        selector: '#overlay, #click',
         autoHide: true,
         hideOnSecondTrigger: true,
         build: function ($triggerElement, e) {
-            console.log(e.offsetX, e.offsetY, "HEY")
-            return findMenuObj(e.offsetX, e.offsetY)
+            var x = mousePos.x - $('#overlay').offset().left - 4;
+            var y = mousePos.y - $('#overlay').offset().top - 4;
+            console.log(x, y, "HEY")
+            return findMenuObj(x, y)
         },
         zIndex: 4
     });
@@ -35,7 +37,7 @@ function findMenuObj(x, y) {
                 visible: function (key, opt) {
                     if (locationMap[i][j].structure.action.a1) {
                         var structureLoc = { i: i, j: j };
-                        if (checkIfInteractible(getMiddleLocation(), structureLoc)) {
+                        if (checkIfInteractible(structureLoc)) {
                             return true;
                         }
                     }

@@ -7,7 +7,7 @@ function Action(worldArg) {
 
 /**
  * id: id of structure
- * actionId: 1, 2 or 3 depending if action 1, action 2 or action 3
+ * actionId: a1, a2 or a3 depending if action 1, action 2 or action 3
  * location: {i: int, j: int} of the interacted structure
  */
 Action.prototype.doAction = function (playerId, structId, actionId, location) {
@@ -16,11 +16,12 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
         var player = world.getPlayer(playerId);
         if (player) {
             if (world.checkIfInteractible(player, location)) {
+                console.log(structId, actionId)
                 var structureAction = JsonController.getStructureAction(structId, actionId);
                 // CONDITIONS:
                 for (itemCond of structureAction.cond.item) {
                     // TODO: Check player inventory for item
-                    var itemInfo = player.inventory.find(o => o.id == itemCond.id);
+                    var itemInfo = player.inventory.find(o => o && o.id == itemCond.id);
                     // If player has the item and if the durability is higher than the required durability
                     if (!itemInfo) {
                         return { result: false, msg: "Missing Item: " + JsonController.getItemName(itemCond.id) };
