@@ -152,7 +152,8 @@ function getMiddleLocation() {
 * @param {*} player an object with an i and j
 * @param {*} structure another object with an i and j
 */
-function checkIfInteractible(player, structure) {
+function checkIfInteractible(structure) {
+    var player = getMiddleLocation();
     for (var i = -1; i <= 1; i++) {
         for (var j = -1; j <= 1; j++) {
             if (player.i + i == structure.i && player.j + j == structure.j) {

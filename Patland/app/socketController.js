@@ -60,11 +60,11 @@ module.exports.moveCurrPlayer = function (player, localPlayerDict2D, localGround
     io.to(player.id).emit('moveCurrPlayer', player, localPlayerDict2D, localGround2D, localStructure2D);
 }
 
-module.exports.setup = function (currPlayer, localPlayerDict2D, localGround2D, localStructure2D) {
+module.exports.setup = function (currPlayer, localPlayerDict2D, localGround2D, localStructure2D, defaultActions) {
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
-    io.to(currPlayer.id).emit('setup', currPlayer, localPlayerDict2D, localGround2D, localStructure2D);
+    io.to(currPlayer.id).emit('setup', currPlayer, localPlayerDict2D, localGround2D, localStructure2D, defaultActions);
 
 }
 module.exports.message = function (id, msg) {

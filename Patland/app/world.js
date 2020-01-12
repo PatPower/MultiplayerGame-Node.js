@@ -138,7 +138,7 @@ World.prototype.createPlayer = function (id, pname) {
         this.addPlayerLocation(player);
         this.createPFlag(id);
     }
-    socketController.setup(this.getPlayer(id), this.getLocal2DPlayerDict(id), this.getLocal2DGround(player), this.getLocal2DStructure(player));
+    socketController.setup(this.getPlayer(id), this.getLocal2DPlayerDict(id), this.getLocal2DGround(player), this.getLocal2DStructure(player), {});
     var range = getIJRange(player.i, player.j);
     for (var i = range.lefti; i <= range.righti; i++) {
         for (var j = range.topj; j <= range.bottomj; j++) {
@@ -361,7 +361,7 @@ World.prototype.changeInvSize = function (player, invAddAmount) {
         }
     } else {
         // Adds null objects in the player object
-        for (var i = player.inventorySize; i < newInvSize ; i++) {
+        for (var i = player.inventorySize; i < newInvSize; i++) {
             player.inventory.push(null);
         }
     }
