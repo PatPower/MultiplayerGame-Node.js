@@ -126,7 +126,7 @@ World.prototype.createPlayer = function (id, pname) {
             i: 10,
             j: 7,
             name: pname,
-            inventory: [{ id: 0, durability: 50 }, null, { id: 1, durability: 50 }, null],
+            inventory: [{ id: 0, durability: 50 }, null, { id: 1, durability: 50 }, { id: 2, durability: 50 }],
             inventorySize: 4,
             skills: {
                 "mining": { level: 1, experience: 0 },

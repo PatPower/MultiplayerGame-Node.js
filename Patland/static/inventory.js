@@ -207,3 +207,7 @@ function enableDragging(i) {
     $("#item" + i).off('dragstart');
 }
 
+function getItemObj(id) {
+    var item = itemJson.find(o => o.id == id);
+    return item;
+}
