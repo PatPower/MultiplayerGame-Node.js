@@ -5,11 +5,7 @@
         "armor": -1,
         "health": 1,
         "passable": true,
-        "action": {
-            "a1": null,
-            "a2": null,
-            "a3": null
-        }
+        "action": {}
     },
     {
         "id": 1,
@@ -37,9 +33,7 @@
                     "drop": [],
                     "addToInvSize": 5
                 }
-            },
-            "a2": null,
-            "a3": null
+            }
         }
     },
     {
@@ -63,9 +57,7 @@
                     "drop": [],
                     "addToInvSize": 5
                 }
-            },
-            "a2": null,
-            "a3": null
+            }
         }
     },
     {
@@ -90,8 +82,21 @@
                     "addToInvSize": -5
                 }
             },
-            "a2": null,
-            "a3": null
+            "a2": {
+                "cond": {
+                    "item": [],
+                    "skill": {},
+                    "pFlag": []
+                },
+                "result": {
+                    "destroy": false,
+                    "degradeItems": [],
+                    "updatePFlag": [],
+                    "expGain": [],
+                    "drop": [],
+                    "addToInvSize": 5
+                }
+            }
         }
     }
 ]

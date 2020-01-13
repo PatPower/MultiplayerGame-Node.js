@@ -1,7 +1,5 @@
-
-//var canvasRectPos = document.getElementById("overlay").getBoundingClientRect();
-
 $(function () {
+    // Map
     $.contextMenu({
         selector: '#overlay, #click',
         autoHide: true,
@@ -9,15 +7,25 @@ $(function () {
         build: function ($triggerElement, e) {
             var x = mousePos.x - $('#overlay').offset().left - 4;
             var y = mousePos.y - $('#overlay').offset().top - 4;
-            console.log(x, y, "HEY")
             return findMenuObj(x, y)
         },
         zIndex: 4
     });
 
-    $('.context-menu-one').on('click', function (e) {
-        console.log('2 clicked', this);
-    })
+    // Inventory
+    $.contextMenu({
+        selector: '.item',
+        autoHide: true,
+        hideOnSecondTrigger: true,
+        build: function ($triggerElement, e) {
+            var x = mousePos.x - $('#overlay').offset().left - 4;
+            var y = mousePos.y - $('#overlay').offset().top - 4;
+            return findMenuObjInv(x, y, parseInt($triggerElement.attr("id").slice(4)) - 1);
+        },
+        zIndex: 4
+    });
+
+
 });
 
 function findMenuObj(x, y) {
@@ -25,55 +33,105 @@ function findMenuObj(x, y) {
     var j = Math.floor(y / BOXSIDE);
     var locWhenClicked = { i: currPlayer.i, j: currPlayer.j }
     var structIdWhenClicked = locationMap[i][j].structure.id
-    console.log(i + "  " + j)
-    return {
-        items: {
-            "ground": { name: `${locationMap[i][j].ground.name}`, icon: "far fa-list-alt" },
-            "structure": { name: `${locationMap[i][j].structure.name}`, icon: "far fa-list-alt" },
-            // TODO: create a function to build the menu for multiple actions
-            "a1": {
-                name: `Action: ${locationMap[i][j].structure.action.a1}`,
-                icon: 'fas fa-hammer',
-                visible: function (key, opt) {
-                    if (locationMap[i][j].structure.action.a1) {
-                        var structureLoc = { i: i, j: j };
-                        if (checkIfInteractible(structureLoc)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                },
-                callback: function (key, opt) {
-                    sendPlayerAction(structIdWhenClicked, key, getGlobalCoords({ i: i, j: j }, locWhenClicked));
-                }
-            },
-            "players": {
-                name: "Players:",
-                visible: function (key, opt) {
-                    return (locationMap[i][j].players.length > 0);
-                },
-                items: (function () {
-                    var players = {}
-                    for (index in locationMap[i][j].players) {
-                        players[`${index}`] = { name: locationMap[i][j].players[index].name }
-                    }
-                    return players;
-                })()
-            },
-            "sep1": "---------",
-            "quit": {
-                name: "Hello", icon: function () {
-                    return 'context-menu-icon context-menu-icon-quit';
-                }
+    var itemsDict = {};
+    var menuDict = {};
+    var locationObj = locationMap[i][j];
+    itemsDict["ground"] = {
+        name: `${locationObj.ground.name}`,
+        icon: "far fa-list-alt"
+    }
+    itemsDict["structure"] = {
+        name: `${locationObj.structure.name}`,
+        icon: "far fa-list-alt"
+    }
+    for (action in locationObj.structure.actions) {
+        itemsDict[action] = {
+            name: `Action: ${locationObj.structure.actions[action]}`,
+            icon: 'fas fa-hammer',
+            callback: function (key, opt) {
+                console.log(action);
+                sendPlayerAction(structIdWhenClicked, key, getGlobalCoords({ i: i, j: j }, locWhenClicked));
             }
         }
-    };
+    }
+    itemsDict["players"] = {
+        name: "Players:",
+        visible: function (key, opt) {
+            return (locationMap[i][j].players.length > 0);
+        },
+        items: (function () {
+            var players = {}
+            for (index in locationMap[i][j].players) {
+                players[`${index}`] = { name: locationMap[i][j].players[index].name }
+            }
+            return players;
+        })()
+    }
+    itemsDict["sep1"] = "---------";
+    itemsDict["quit"] = {
+        name: "quit", icon: function () {
+            return 'context-menu-icon context-menu-icon-quit';
+        }
+    }
+    menuDict["items"] = itemsDict;
+
+    console.log(i + "  " + j)
+    return menuDict
+
+
 }
+
+/**
+ * 
+ * @param {*} x 
+ * @param {*} y 
+ * @param {*} invSlot slot of the inventory (starting from 0) 
+ */
+function findMenuObjInv(x, y, invSlot) {
+    var i = Math.floor(x / BOXSIDE);
+    var j = Math.floor(y / BOXSIDE);
+    var itemsDict = {};
+    var menuDict = {};
+    var itemObj;
+    var itemName = "";
+    //var locWhenClicked = { i: currPlayer.i, j: currPlayer.j }
+    console.log(currPlayer.inventory[invSlot], invSlot)
+    if (currPlayer.inventory[invSlot]) {
+        itemObj = getItemObj(currPlayer.inventory[invSlot].id);
+        itemName = itemObj.name;
+    }
+    console.log(i + "  " + j)
+    itemsDict["itemName"] = {
+        name: `${itemName}`,
+        visible: function (key, opt) {
+            // If item has a name
+            return Boolean(itemObj.name)
+        },
+        icon: "far fa-list-alt"
+    }
+    for (action in itemObj.actions) {
+        itemsDict[action] = {
+            name: `Action: ${itemObj.actions[action]}`,
+            icon: 'fas fa-hammer',
+            callback: function (key, opt) {
+                console.log(action);
+                //sendPlayerAction(structIdWhenClicked, key, getGlobalCoords({ i: i, j: j }, locWhenClicked));
+            }
+        }
+    }
+    itemsDict["sep1"] = "---------";
+    itemsDict["quit"] = {
+        name: "quit", icon: function () {
+            return 'context-menu-icon context-menu-icon-quit';
+        }
+    }
+    menuDict["items"] = itemsDict;
+    return menuDict
+};
 
 function updateMenu() {
     $(function () {
         //$.contextMenu('update');
-        console.log("tue")
         $("#overlay").contextMenu('update');
         $("#overlay").contextMenu('hide');
     });

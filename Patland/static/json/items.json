@@ -2,26 +2,45 @@
     {
         "id": 0,
         "name": "Pickaxe",
-        "icon": "/static/img/items/0.png"
+        "icon": "/static/img/items/0.png",
+        "placeable": false,
+        "actions": {}
     },
     {
         "id": 1,
         "name": "Light Bulb",
-        "icon": "/static/img/items/1.png"
+        "icon": "/static/img/items/1.png",
+        "placeable": false,
+        "actions": {}
+    },
+    {
+        "id": 2,
+        "name": "Rock",
+        "icon": "/static/img/items/2.png",
+        "placeable": true,
+        "actions": {
+            "a1": "Select ",
+            "a2": "Drop"
+        }
     },
     {
         "id": -1,
         "name": "Nothing",
-        "icon": "/static/img/items/-1.png"
+        "icon": "/static/img/items/-1.png",
+        "placeable": false
     },
     {
         "id": -2,
         "name": "Locked",
-        "icon": "/static/img/items/-2.png"
+        "icon": "/static/img/items/-2.png",
+        "placeable": false,
+        "actions": {}
     },
     {
         "id": -3,
         "name": "Locked",
-        "icon": "/static/img/items/lock.png"
+        "icon": "/static/img/items/lock.png",
+        "placeable": false,
+        "actions": {}
     }
 ]

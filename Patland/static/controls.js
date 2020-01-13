@@ -63,6 +63,7 @@ document.addEventListener('keyup', function (e) {
 
 $("#click").hide();
 
+// Keeps track of the mouse position at all times
 $(document).bind('mousemove', function (e) {
     mousePos.x = e.pageX;
     mousePos.y = e.pageY;
