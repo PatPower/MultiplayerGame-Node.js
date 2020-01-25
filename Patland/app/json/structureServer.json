@@ -57,6 +57,26 @@
                     "drop": [],
                     "addToInvSize": 5
                 }
+            },
+            "a2": {
+                "cond": {
+                    "item": [],
+                    "skill": {},
+                    "pFlag": []
+                },
+                "result": {
+                    "destroy": false,
+                    "degradeItems": [],
+                    "updatePFlag": [],
+                    "expGain": [],
+                    "drop": [
+                        {
+                            "id": 2,
+                            "reqDurability": -1
+                        }
+                    ],
+                    "addToInvSize": 0
+                }
             }
         }
     },

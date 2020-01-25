@@ -2,11 +2,47 @@
     {
         "id": 0,
         "name": "Pickaxe",
-        "Durability": 50
+        "Durability": 50,
+        "action": {
+            "a1": {
+                "name": "DefaultDrop"
+            }
+        }
     },
     {
         "id": 1,
         "name": "Light Bulb",
-        "Durability": 50
+        "Durability": 50,
+        "action": {
+            "a1": {
+                "name": "DefaultDrop"
+            }
+        }
+    },
+    {
+        "id": 2,
+        "name": "Rock",
+        "Durability": 50,
+        "action": {
+            "a1": {
+                "name": "Select",
+                "cond": {
+                    "item": [],
+                    "skill": {},
+                    "pFlag": []
+                },
+                "result": {
+                    "destroy": false,
+                    "degradeItems": [],
+                    "updatePFlag": [],
+                    "expGain": [],
+                    "drop": [],
+                    "addToInvSize": 1
+                }
+            },
+            "a2": {
+                "name": "DefaultDrop"
+            }
+        }
     }
 ]

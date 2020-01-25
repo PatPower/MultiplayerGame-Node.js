@@ -133,6 +133,16 @@ function sendPlayerAction(id, actionId, location) {
     socket.emit("pAction", id, actionId, location);
 }
 
+/**
+ * Sends the server a request for an action to be performed
+ * @param {*} id id of the item being interacted with
+ * @param {*} actionId a1, a2 or a3 depending if action1, action2 or action3
+ * @param {*} invSlot the slot of the item being used
+ */
+function sendPlayerInvAction(id, actionId, invSlot) {
+    socket.emit("invAction", id, actionId, invSlot);
+}
+
 function emitMovement(movement) {
     socket.emit('movement', movement);
 }

@@ -10,7 +10,7 @@ module.exports = function JsonController() {
     return module.exports;
 };
 
-module.exports.isStructurePassable = function(structId) {
+module.exports.isStructurePassable = function (structId) {
     if (!structureJson) {
         throw new Error("Error: Can't this function until properly initalized");
     }
@@ -24,7 +24,14 @@ module.exports.getStructureAction = function (structId, actionId) {
     return structureJson.find(o => o.id == structId).action[actionId];
 }
 
-module.exports.getItemName = function(itemId) {
+module.exports.getItemAction = function (itemId, actionId) {
+    if (!structureJson) {
+        throw new Error("Error: Can't this function until properly initalized");
+    }
+    return itemJson.find(o => o.id == itemId).action[actionId];
+}
+
+module.exports.getItemName = function (itemId) {
     if (!structureJson) {
         throw new Error("Error: Can't this function until properly initalized");
     }
