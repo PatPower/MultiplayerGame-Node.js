@@ -48,8 +48,9 @@ function findMenuObj(x, y) {
         itemsDict[action] = {
             name: `Action: ${locationObj.structure.actions[action]}`,
             icon: 'fas fa-hammer',
+            // TODO: check if player close enough to interact
             callback: function (key, opt) {
-                console.log(action);
+                console.log(key);
                 sendPlayerAction(structIdWhenClicked, key, getGlobalCoords({ i: i, j: j }, locWhenClicked));
             }
         }
@@ -94,7 +95,6 @@ function findMenuObjInv(x, y, invSlot) {
     var menuDict = {};
     var itemObj;
     var itemName = "";
-    //var locWhenClicked = { i: currPlayer.i, j: currPlayer.j }
     console.log(currPlayer.inventory[invSlot], invSlot)
     if (currPlayer.inventory[invSlot]) {
         itemObj = getItemObj(currPlayer.inventory[invSlot].id);
@@ -105,17 +105,19 @@ function findMenuObjInv(x, y, invSlot) {
         name: `${itemName}`,
         visible: function (key, opt) {
             // If item has a name
-            return Boolean(itemObj.name)
+            return Boolean(itemObj)
         },
         icon: "far fa-list-alt"
     }
-    for (action in itemObj.actions) {
-        itemsDict[action] = {
-            name: `Action: ${itemObj.actions[action]}`,
-            icon: 'fas fa-hammer',
-            callback: function (key, opt) {
-                console.log(action);
-                //sendPlayerAction(structIdWhenClicked, key, getGlobalCoords({ i: i, j: j }, locWhenClicked));
+    if (itemObj) {
+        for (action in itemObj.actions) {
+            itemsDict[action] = {
+                name: `Action: ${itemObj.actions[action]}`,
+                icon: 'fas fa-hammer',
+                callback: function (key, opt) {
+                    console.log(key, itemObj.id, invSlot);
+                    sendPlayerInvAction(itemObj.id, key, invSlot);
+                }
             }
         }
     }

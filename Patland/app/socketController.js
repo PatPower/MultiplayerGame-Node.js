@@ -24,6 +24,13 @@ module.exports = function (socketIo, world) {
                     module.exports.message(socket.id, response.msg);
                 }
             });
+            socket.on('invAction', function (id, actionId, invSlot) {
+                var response = action.doInvAction(socket.id, id, actionId, invSlot);
+                // If a condition is not met
+                if (!response.result) {
+                    module.exports.message(socket.id, response.msg);
+                }
+            });
             socket.on('itemSwap', function (pos1, pos2) {
                 world.itemSwap(socket.id, pos1, pos2);
             });

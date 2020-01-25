@@ -4,14 +4,18 @@
         "name": "Pickaxe",
         "icon": "/static/img/items/0.png",
         "placeable": false,
-        "actions": {}
+        "actions": {
+            "a1": "Drop"
+        }
     },
     {
         "id": 1,
         "name": "Light Bulb",
         "icon": "/static/img/items/1.png",
         "placeable": false,
-        "actions": {}
+        "actions": {
+            "a1": "Drop"
+        }
     },
     {
         "id": 2,

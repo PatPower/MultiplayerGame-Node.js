@@ -27,7 +27,8 @@
         "owner": "game",
         "sprite": "/static/img/structures/bag.png",
         "actions": {
-            "a1": "Pick Up"
+            "a1": "Pick Up",
+            "a2": "Get Rocks"
         }
     },
     {

@@ -377,17 +377,58 @@ World.prototype.changeInvSize = function (player, invAddAmount) {
     }
 
 }
+/**
+ * Removes items at the positions specified
+ * @param {*} player 
+ * @param {*} itemObj itemObj
+ */
+World.prototype.addPlayerItem = function (player, itemObj) {
+    for (index in player.inventory) {
+        if (!player.inventory[index]) {
+            player.inventory[index] = itemObj;
+            return parseInt(index);
+        }
+    }
+    return -1;
+}
 
 /**
  * Removes items at the positions specified
  * @param {*} player 
  * @param {*} slot a list of inv pos (starting at 0)
  */
-World.prototype.removePlayerItems = function (player, slots) {
-    for (slot of slots) {
-        // Check if slot is removable
-        if (0 <= slot && slot < player.inventorySize) {
-            player.inventory[slot] = null;
+World.prototype.removePlayerItem = function (player, slot) {
+    console.log(slot, player.inventorySize)
+    if (0 <= slot && slot < player.inventorySize) {
+        player.inventory[slot] = null;
+    } else {
+        console.log("Error: removePlayerItem inv list out of range")
+    }
+}
+
+/**
+ * Check if player item exists and returns the item object
+ * @param {*} playerId
+ * @param {*} itemId an item id
+ */
+World.prototype.verifyPlayerItem = function (player, itemId, invSlot) {
+    if (player) {
+        var item = player.inventory[invSlot];
+        if (item.id == itemId) {
+            return item;
+        }
+    }
+}
+
+/**
+ * Check if player item exists and returns the item object
+ * @param {*} playerId
+ * @param {*} itemId an item id
+ */
+World.prototype.playerInventoryUpdate = function (player, invChanges) {
+    if (player) {
+        if (invChanges.length) {
+            socketController.playerInventoryUpdate(player, invChanges);
         }
     }
 }
