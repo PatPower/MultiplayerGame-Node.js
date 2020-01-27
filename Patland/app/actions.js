@@ -20,8 +20,7 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
                 var structureAction = JsonController.getStructureAction(structId, actionId);
                 // CONDITIONS:
                 for (itemCond of structureAction.cond.item) {
-                    // TODO: Check player inventory for item
-                    var itemInfo = world.verifyPlayerItem(player, itemCond);
+                    var itemInfo = world.verifyPlayerItem(player, itemCond.id);
                     // If player has the item and if the durability is higher than the required durability
                     if (!itemInfo) {
                         return { result: false, msg: "Missing Item: " + JsonController.getItemName(itemCond.id) };
@@ -43,16 +42,15 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
                     }
                 }
 
-                // EVENT:
                 var inventoryChanges = [];
-                for (item of structureAction.result.drop) {
-                    var slot = world.addPlayerItem(player, item);
-                    if (slot == -1) {
-                        return { result: false, msg: "Inventory is too full!" };
-                    }
-                    console.log(slot)
-                    inventoryChanges.push({ item: item, pos: slot })
+
+                // Check if there is enough space in inventory for items
+                var freeInvSpace = player.inventory.filter(o => o == null).length
+                if (structureAction.result.drop.length > freeInvSpace) {
+                    return { result: false, msg: "Not enough inventory space!" };
                 }
+
+                // EVENT:
                 if (structureAction.result.destroy) {
                     world.removeStructure(location);
                 }
@@ -65,7 +63,20 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
                 for (expGain of structureAction.result.expGain) {
                     // TODO: Gain exp
                 }
-
+                // REMINDER TO MAKE SURE THIS ITEM IS ALSO CHECKED IN THE CONDITIONS
+                for (itemId of structureAction.result.removeItem) {
+                    var itemInfo = world.verifyPlayerItem(player, itemId);
+                    world.removePlayerItem(player, itemInfo.slot);
+                    inventoryChanges.push({ item: null, pos: itemInfo.slot })
+                }
+                for (item of structureAction.result.drop) {
+                    var slot = world.addPlayerItem(player, item);
+                    if (slot == -1) {
+                        console.log("Error: ", player.id, " inventory overflowed")
+                    }
+                    console.log(slot)
+                    inventoryChanges.push({ item: item, pos: slot })
+                }
                 if (structureAction.result.addToInvSize) {
                     world.changeInvSize(player, structureAction.result.addToInvSize)
                 }
@@ -92,14 +103,14 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
             var inventoryChanges = [];
             // Check if action is "DefaultDrop"
             if (itemAction.name == "DefaultDrop") {
-                console.log("in dd")
                 world.removePlayerItem(player, invSlot);
                 inventoryChanges.push({ item: null, pos: invSlot })
+            } else if (itemAction.name == "Select") {
+                console.log(itemId, " selected!")
             } else {
-                console.log("not infaefa")
                 // CONDITIONS:
                 for (itemCond of itemAction.cond.item) {
-                    var itemInfo = world.verifyPlayerItem(player, itemCond);
+                    var itemInfo = world.verifyPlayerItem(player, itemCond.id);
                     // If player has the item and if the durability is higher than the required durability
                     if (!itemInfo) {
                         return { result: false, msg: "Missing Item: " + JsonController.getItemName(itemCond.id) };
@@ -120,6 +131,16 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
                         return { result: false, reason: "You can't do this yet" };
                     }
                 }
+                // Check if there is enough space in inventory for items
+                var freeInvSpace = player.inventory.filter(o => o == null).length
+                var freedUpSpace = itemAction.result.removeItem.length;
+                // If used item is being destroyed, then make one free space
+                freedUpSpace += itemAction.result.destroy ? 1 : 0;
+                console.log("FREE", itemAction.result.drop.length, freeInvSpace + freedUpSpace)
+                if (itemAction.result.drop.length > freeInvSpace + freedUpSpace) {
+                    return { result: false, msg: "Not enough inventory space!" };
+                }
+
                 // EVENT:
                 if (itemAction.result.destroy) {
                     world.removePlayerItem(player, invSlot);
@@ -134,9 +155,19 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
                 for (expGain of itemAction.result.expGain) {
                     // TODO: Gain exp
                 }
+                // REMINDER TO MAKE SURE THIS ITEM IS ALSO CHECKED IN THE CONDITIONS
+                for (itemId of itemAction.result.removeItem) {
+                    var itemInfo = world.verifyPlayerItem(player, itemId);
+                    world.removePlayerItem(player, itemInfo.slot);
+                    inventoryChanges.push({ item: null, pos: itemInfo.slot })
+                }
                 for (item of itemAction.result.drop) {
-                    // TODO: Give user items
-                    //inventoryChanges.push({ item: { id: item durability: 50}, pos: invSlot })
+                    var slot = world.addPlayerItem(player, item);
+                    if (slot == -1) {
+                        console.log("Error: ", player.id, " inventory overflowed")
+                    }
+                    console.log(slot)
+                    inventoryChanges.push({ item: item, pos: slot })
                 }
                 if (itemAction.result.addToInvSize) {
                     world.changeInvSize(player, itemAction.result.addToInvSize)
@@ -149,5 +180,20 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
     return { result: true, msg: "" };
 }
 
+
+/**
+ * id: id of item
+ * actionId: a1, a2 or a3 depending if action 1, action 2 or action 3
+ * location: {i: int, j: int} of the interacted structure
+ */
+Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc) {
+    console.log("Build Action ", playerId, itemId, actionId, invSlot, buildLoc);
+    var player = world.getPlayer(playerId);
+    if (player) {
+        // Make sure player has the item at the slot specified
+        if (world.verifyPlayerItem(player, itemId, invSlot)) {
+        }
+    }
+}
 
 module.exports = Action;

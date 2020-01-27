@@ -412,12 +412,24 @@ World.prototype.removePlayerItem = function (player, slot) {
  * @param {*} itemId an item id
  */
 World.prototype.verifyPlayerItem = function (player, itemId, invSlot) {
+    var itemObj;
     if (player) {
-        var item = player.inventory[invSlot];
-        if (item.id == itemId) {
-            return item;
+        if (invSlot || invSlot == 0) {
+            var item = player.inventory[invSlot];
+            if (item && item.id == itemId) {
+                item["slot"] = invSlot;
+                itemObj = item;
+            }
+        } else {
+            var itemIndex = player.inventory.findIndex(o => o && o.id == itemId);
+            var item = player.inventory[itemIndex];
+            if (item && item.id == itemId) {
+                item["slot"] = itemIndex;
+                itemObj = item;
+            }
         }
     }
+    return itemObj;
 }
 
 /**

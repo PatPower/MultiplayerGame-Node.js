@@ -15,6 +15,43 @@
         "Durability": 50,
         "action": {
             "a1": {
+                "name": "Open",
+                "cond": {
+                    "item": [
+                        {
+                            "id": 0,
+                            "durability": 1
+                        }
+                    ],
+                    "skill": {},
+                    "pFlag": []
+                },
+                "result": {
+                    "destroy": true,
+                    "degradeItems": [],
+                    "updatePFlag": [],
+                    "expGain": [],
+                    "removeItem": [
+                        0
+                    ],
+                    "drop": [
+                        {
+                            "id": 2,
+                            "reqDurability": -1
+                        },
+                        {
+                            "id": 2,
+                            "reqDurability": -1
+                        },
+                        {
+                            "id": 1,
+                            "reqDurability": -1
+                        }
+                    ],
+                    "addToInvSize": 0
+                }
+            },
+            "a2": {
                 "name": "DefaultDrop"
             }
         }
@@ -25,20 +62,7 @@
         "Durability": 50,
         "action": {
             "a1": {
-                "name": "Select",
-                "cond": {
-                    "item": [],
-                    "skill": {},
-                    "pFlag": []
-                },
-                "result": {
-                    "destroy": false,
-                    "degradeItems": [],
-                    "updatePFlag": [],
-                    "expGain": [],
-                    "drop": [],
-                    "addToInvSize": 1
-                }
+                "name": "Select"
             },
             "a2": {
                 "name": "DefaultDrop"
