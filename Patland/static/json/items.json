@@ -14,7 +14,8 @@
         "icon": "/static/img/items/1.png",
         "placeable": false,
         "actions": {
-            "a1": "Drop"
+            "a1": "Open",
+            "a2": "Drop"
         }
     },
     {
