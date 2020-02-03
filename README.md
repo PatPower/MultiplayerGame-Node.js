@@ -7,13 +7,15 @@ Current Features:
 - Multiplayer
 
 Features (In progress):
+- Building
+
+Features (Planned): 
 - Randomly generated large world
 - Caves
 - Dungeons
 - Gathering resources
 - A way to lose
 - Finding and utilizing resource nodes
-- Building
 - weird music o.O
 - Fast traveling
 - pvp????
