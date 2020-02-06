@@ -50,7 +50,7 @@ function findMenuObj(x, y) {
             icon: 'fas fa-hammer',
             // TODO: check if player close enough to interact
             callback: function (key, opt) {
-                console.log(key);
+                console.log(key, opt);
                 sendPlayerAction(structIdWhenClicked, key, getGlobalCoords({ i: i, j: j }, locWhenClicked));
             }
         }
@@ -115,7 +115,12 @@ function findMenuObjInv(x, y, invSlot) {
                 name: `Action: ${itemObj.actions[action]}`,
                 icon: 'fas fa-hammer',
                 callback: function (key, opt) {
-                    console.log(key, itemObj.id, invSlot);
+                    if (itemObj.actions[key] == "Select") {
+                        selectInvItem(invSlot)
+                    } else {
+                        deselectInvItem();
+                    }
+
                     sendPlayerInvAction(itemObj.id, key, invSlot);
                 }
             }

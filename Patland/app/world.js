@@ -98,14 +98,14 @@ World.prototype.addPlayerLocation = function (player) {
 }
 
 /**
-* Checks if the structure is in a 3x3 vicinity of the player
+* Checks if the location is in a 3x3 vicinity of the player
 * @param {*} player an object with an i and j
-* @param {*} structure another object with an i and j
+* @param {*} location another object with an i and j
 */
-World.prototype.checkIfInteractible = function (player, structure) {
+World.prototype.checkIfInteractible = function (player, location) {
     for (var i = -1; i <= 1; i++) {
         for (var j = -1; j <= 1; j++) {
-            if (player.i + i == structure.i && player.j + j == structure.j) {
+            if (player.i + i == location.i && player.j + j == location.j) {
                 return true;
             }
         }
@@ -310,6 +310,39 @@ World.prototype.removeStructure = function (location) {
     }
 }
 
+/**
+ * location: location of the placed structure
+ * structId: id of the structure
+ * health: starting health of the structure
+ * playerId of the user that placed the structure
+ */
+World.prototype.placeStructure = function (location, structId, health, playerId) {
+    // TODO: do some checks
+    var structObj = { id: structId, health: health, owner: playerId };
+    worldStructureMap[location.i][location.j] = structObj;
+    var range = getIJRange(location.i, location.j);
+    for (var i = range.lefti; i <= range.righti; i++) {
+        for (var j = range.topj; j <= range.bottomj; j++) {
+            if (worldPlayerMap[i][j].length > 0) {
+                for (othPlayer of worldPlayerMap[i][j]) {
+                    socketController.placeStructure(othPlayer, location, structObj);
+                }
+            }
+        }
+    }
+};
+
+
+/**
+ * Used to verify if the location contains the structure
+ */
+World.prototype.verifyStructureLocation = function (location, id) {
+    if (worldStructureMap[location.i][location.j]) {
+        return (worldStructureMap[location.i][location.j].id == id);
+    }
+    return false;
+};
+
 function initializeTestMap() {
     worldStructureMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
     worldStructureMap[2][2] = { id: 1, health: 10, owner: "game" };
@@ -327,16 +360,6 @@ function initializeTestMap() {
 }
 
 /**
- * Used to verify if the location contains the structure
- */
-World.prototype.verifyStructureLocation = function (location, id) {
-    if (worldStructureMap[location.i][location.j]) {
-        return (worldStructureMap[location.i][location.j].id == id);
-    }
-    return false;
-};
-
-/**
  * Swaps the positions of two items in the player's inventory
  */
 World.prototype.itemSwap = function (id, pos1, pos2) {
@@ -345,10 +368,14 @@ World.prototype.itemSwap = function (id, pos1, pos2) {
     if (!player) {
         return;
     }
+    console.log(player.inventory)
+
     var oldItem = player.inventory[pos2];
     player.inventory[pos2] = player.inventory[pos1];
     player.inventory[pos1] = oldItem;
+
     var inventoryChanges = [{ item: oldItem, pos: pos1 }, { item: player.inventory[pos2], pos: pos2 }]
+
     socketController.playerInventoryUpdate(player, inventoryChanges)
 }
 
@@ -417,15 +444,15 @@ World.prototype.verifyPlayerItem = function (player, itemId, invSlot) {
         if (invSlot || invSlot == 0) {
             var item = player.inventory[invSlot];
             if (item && item.id == itemId) {
-                item["slot"] = invSlot;
-                itemObj = item;
+                itemObj = JSON.parse(JSON.stringify(player));
+                itemObj["slot"] = invSlot;
             }
         } else {
             var itemIndex = player.inventory.findIndex(o => o && o.id == itemId);
             var item = player.inventory[itemIndex];
             if (item && item.id == itemId) {
-                item["slot"] = itemIndex;
-                itemObj = item;
+                itemObj = JSON.parse(JSON.stringify(player));
+                itemObj["slot"] = itemIndex;
             }
         }
     }

@@ -24,7 +24,7 @@
         "icon": "/static/img/items/2.png",
         "placeable": true,
         "actions": {
-            "a1": "Select ",
+            "a1": "Select",
             "a2": "Drop"
         }
     },
