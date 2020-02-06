@@ -4,6 +4,7 @@ var itemArea = document.getElementById("itemArea");
 var invCxt = setupInventory(invElement);
 var itemJson = [];
 var currentSelectedSlot = -1;
+var buildAnimationId = -1;
 
 invTitle(invCxt)
 
@@ -198,14 +199,13 @@ function makeDroppable(i) {
             document.getElementById(draggedItemId).src = getItemIcon(-1);
             var pos1 = parseInt(draggedItemId.slice(4)) - 1
             var pos2 = parseInt($(this).attr('id').slice(4)) - 1
+            emitItemSwap(pos1, pos2);
             if (currentSelectedSlot == pos1) {
                 selectInvItem(pos2);
             } else if (currentSelectedSlot == pos2) {
                 selectInvItem(pos1);
             }
 
-            emitItemSwap(pos1, pos2);
-            //console.log(currPlayer.inventory)
         }
     });
 }
@@ -227,23 +227,74 @@ function getItemObj(id) {
 function selectInvItem(slot) {
     var rect = itemArea.getBoundingClientRect();
     var invX = slot % 4;
-    var invY = Math.floor(slot/4);
-    console.log("A", rect.x + invX*INVBOXSIDE, rect.y + invY*INVBOXSIDE)
+    var invY = Math.floor(slot / 4);
+    console.log("A", rect.x + invX * INVBOXSIDE, rect.y + invY * INVBOXSIDE)
     $("#select").css({
-        visibility: "visible", 
-        top: rect.y + invY*INVBOXSIDE, 
-        left: rect.x + invX*INVBOXSIDE,
+        visibility: "visible",
+        top: rect.y + invY * INVBOXSIDE,
+        left: rect.x + invX * INVBOXSIDE,
     });
+    animateBuildingArea();
     currentSelectedSlot = slot;
 }
 
 function deselectInvItem() {
     currentSelectedSlot = -1;
     $("#select").css({
-        visibility: "hidden" 
+        visibility: "hidden"
     });
+    if (buildAnimationId != -1) {
+        clearInterval(buildAnimationId);
+        buildAnimationId = -1;
+
+        // Restore the effected overlay canvas
+        ovlycxt.clearRect(BOXSIDE * (HORIZONTALRADIUS - 1), BOXSIDE * (VERTICALRADIUS - 1), BOXSIDE * 3, BOXSIDE * 3);
+        for (var i = HORIZONTALRADIUS - 1; i <= HORIZONTALRADIUS + 1; i++) {
+            for (var j = VERTICALRADIUS - 1; j <= VERTICALRADIUS + 1; j++) {
+                ovlycxt.strokeRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
+            }
+        }
+    }
 }
 
 function getSelectedItemId() {
-    currPlayer.inven
+
+}
+
+function isSlotPlaceable(slot) {
+    return getItemObj(currPlayer.inventory[slot].id).placeable;
+}
+
+function animateBuildingArea() {
+    // Stop building animation if one is one already
+    if (buildAnimationId != -1) {
+        clearInterval(buildAnimationId);
+        buildAnimationId = -1;
+    }
+
+    buildAnimationId = setInterval(frame, 20);
+    var alpha = 0.03;
+    var alphaChange = 0.002;
+
+    function frame() {
+        if (alpha <= 0.08) {
+            alphaChange = 0.002;
+        } else if (alpha >= 0.18) {
+            alphaChange = -alphaChange;
+        }
+
+        ovlycxt.globalAlpha = alpha;
+        ovlycxt.fillStyle = "red";
+        ovlycxt.clearRect(BOXSIDE * (HORIZONTALRADIUS - 1), BOXSIDE * (VERTICALRADIUS - 1), BOXSIDE * 3, BOXSIDE * 3);
+        ovlycxt.fillRect(BOXSIDE * (HORIZONTALRADIUS - 1), BOXSIDE * (VERTICALRADIUS - 1), BOXSIDE * 3, BOXSIDE * 3);
+        ovlycxt.globalAlpha = 1;
+        ovlycxt.clearRect(BOXSIDE * (HORIZONTALRADIUS), BOXSIDE * (VERTICALRADIUS), BOXSIDE, BOXSIDE);
+        for (var i = HORIZONTALRADIUS - 1; i <= HORIZONTALRADIUS + 1; i++) {
+            for (var j = VERTICALRADIUS - 1; j <= VERTICALRADIUS + 1; j++) {
+                ovlycxt.strokeRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
+            }
+        }
+
+        alpha += alphaChange;
+    }
 }
