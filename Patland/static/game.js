@@ -53,6 +53,11 @@ socket.on('removeStructure', function (location) {
     updateStructureCanvas()
 });
 
+socket.on('placeStructure', function (location, structObj) {
+    placeStructure(location, structObj);
+    updateStructureCanvas()
+});
+
 socket.on('othPlayerMove', function (othP, movement) {
     if (othP.id == currPlayer.id) {
         console.log("Error: othPlayerMove sent current player")
@@ -154,6 +159,17 @@ function emitMovement(movement) {
  */
 function emitItemSwap(pos1, pos2) {
     socket.emit('itemSwap', pos1, pos2);
+}
+
+/**
+ * Sends the server of a request to build a structure at the given location
+ * @param {*} itemId 
+ * @param {*} actionId 
+ * @param {*} invSlot 
+ * @param {*} buildLoc 
+ */
+function emitBuild(itemId, actionId, invSlot, buildLoc) {
+    socket.emit('build', itemId, actionId, invSlot, buildLoc);
 }
 
 function setupBackground(canvas) {
@@ -356,7 +372,8 @@ function defaultAction(structId, location) {
                 sendPlayerAction(structId, defaultAction[structId], location);
             }
         }
-        if (structObj.action["a1"]) {
+        console.log(structObj)
+        if (structObj.actions["a1"]) {
             sendPlayerAction(structId, "a1", location);
         }
     }

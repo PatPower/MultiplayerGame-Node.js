@@ -3,6 +3,7 @@ var invElement = document.getElementById("inv");
 var itemArea = document.getElementById("itemArea");
 var invCxt = setupInventory(invElement);
 var itemJson = [];
+var currentSelectedSlot = -1;
 
 invTitle(invCxt)
 
@@ -39,6 +40,8 @@ function setupInventory(canvas) {
  * inventoryChanges: [ { item: { id: int, durability: int }, pos: int } , ... ]
  */
 function updateInventory(inventoryChanges) {
+    console.log(inventoryChanges)
+
     for (invChange of inventoryChanges) {
         var i = invChange.pos + 1;
         var img = itemArea.childNodes[i];
@@ -49,6 +52,7 @@ function updateInventory(inventoryChanges) {
             enableDragging(i);
         } else {
             img.src = getItemIcon(-1);
+
             preventDragging(i);
         }
         makeDroppable(i);
@@ -187,13 +191,21 @@ function makeDroppable(i) {
     $("#item" + i).droppable({
         disabled: false,
         drop: function (event, ui) {
+            console.log(currPlayer.inventory)
+
             //Make item temp invisible
             var draggedItemId = ui.draggable.attr('id');
             document.getElementById(draggedItemId).src = getItemIcon(-1);
-
             var pos1 = parseInt(draggedItemId.slice(4)) - 1
             var pos2 = parseInt($(this).attr('id').slice(4)) - 1
+            if (currentSelectedSlot == pos1) {
+                selectInvItem(pos2);
+            } else if (currentSelectedSlot == pos2) {
+                selectInvItem(pos1);
+            }
+
             emitItemSwap(pos1, pos2);
+            //console.log(currPlayer.inventory)
         }
     });
 }
@@ -210,4 +222,28 @@ function enableDragging(i) {
 function getItemObj(id) {
     var item = itemJson.find(o => o.id == id);
     return item;
+}
+
+function selectInvItem(slot) {
+    var rect = itemArea.getBoundingClientRect();
+    var invX = slot % 4;
+    var invY = Math.floor(slot/4);
+    console.log("A", rect.x + invX*INVBOXSIDE, rect.y + invY*INVBOXSIDE)
+    $("#select").css({
+        visibility: "visible", 
+        top: rect.y + invY*INVBOXSIDE, 
+        left: rect.x + invX*INVBOXSIDE,
+    });
+    currentSelectedSlot = slot;
+}
+
+function deselectInvItem() {
+    currentSelectedSlot = -1;
+    $("#select").css({
+        visibility: "hidden" 
+    });
+}
+
+function getSelectedItemId() {
+    currPlayer.inven
 }

@@ -31,6 +31,13 @@ module.exports = function (socketIo, world) {
                     module.exports.message(socket.id, response.msg);
                 }
             });
+            socket.on('build', function (itemId, actionId, invSlot, buildLoc) {
+                var response = action.build(socket.id, itemId, actionId, invSlot, buildLoc);
+                // If a condition is not met
+                if (!response.result) {
+                    module.exports.message(socket.id, response.msg);
+                }
+            });
             socket.on('itemSwap', function (pos1, pos2) {
                 world.itemSwap(socket.id, pos1, pos2);
             });
@@ -86,6 +93,13 @@ module.exports.removeStructure = function (player, location) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(player.id).emit('removeStructure', location);
+}
+
+module.exports.placeStructure = function (player, location, structObj) {
+    if (!io) {
+        throw new Error("Error: Can't use this function until io is properly initalized");
+    }
+    io.to(player.id).emit('placeStructure', location, structObj);
 }
 
 /**

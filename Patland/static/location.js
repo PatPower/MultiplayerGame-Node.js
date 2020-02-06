@@ -74,6 +74,11 @@ function removeStructure(location) {
     // Sets it to air
     locationMap[relCoords.i][relCoords.j].structure = getStructureObj();
 }
+function placeStructure(location, structObj){
+    var relCoords = getRelativeCoords(location)
+    // Sets it to air
+    locationMap[relCoords.i][relCoords.j].structure = getStructureObj(structObj);
+}
 /**
 function loadStructureMap(structure2D) {
     var trueRange = getTrueRange(currPlayer);

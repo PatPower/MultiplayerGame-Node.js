@@ -34,6 +34,7 @@ document.addEventListener('keyup', function (e) {
         if (structId && checkIfInteractible({ i: i, j: j })) {
             console.log({ i: i, j: j });
             defaultAction(structId, getGlobalCoords({ i: i, j: j }));
+            // Shows interaction effect
             $("#click").stop().show(function () {
                 console.log($(this))
                 $(this).css({

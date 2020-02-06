@@ -24,6 +24,13 @@ module.exports.getStructureAction = function (structId, actionId) {
     return structureJson.find(o => o.id == structId).action[actionId];
 }
 
+module.exports.getStructureHealth = function (structId) {
+    if (!structureJson) {
+        throw new Error("Error: Can't this function until properly initalized");
+    }
+    return structureJson.find(o => o.id == structId).health;
+}
+
 module.exports.getItemAction = function (itemId, actionId) {
     if (!structureJson) {
         throw new Error("Error: Can't this function until properly initalized");
