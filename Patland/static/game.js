@@ -29,9 +29,9 @@ socket.on('setup', function (currentPlayer, pList, ground2D, structure2D, defaul
     loadLocationMap(ground2D, structure2D, pList, currPlayer);
     bgcxt = setupBackground(document.getElementById('background'));
     strcxt = setupStructure(document.getElementById('structure'));
-    pcxt = setupCurrentPlayer(document.getElementById('player'));
     opcxt = setupOtherPlayers(document.getElementById('otherPlayers'));
     ovlycxt = setupOverlay(document.getElementById('overlay'));
+    pcxt = setupCurrentPlayer(document.getElementById('player'));
     updateTileMarker(currPlayer);
     projectSquares(pList);
     projectSquare(currentPlayer, {});
@@ -215,7 +215,7 @@ function setupOverlay(canvas) {
             ovlycxt.strokeRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
         }
     }
-    return bgcxt;
+    return ovlycxt;
 }
 
 function setupCurrentPlayer(canvas) {

@@ -141,7 +141,6 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
                 var freedUpSpace = itemAction.result.removeItem.length;
                 // If used item is being destroyed, then make one free space
                 freedUpSpace += itemAction.result.destroy ? 1 : 0;
-                console.log("FREE", itemAction.result.drop.length, freeInvSpace + freedUpSpace)
                 if (itemAction.result.drop.length > freeInvSpace + freedUpSpace) {
                     return { result: false, msg: "Not enough inventory space!" };
                 }
@@ -169,9 +168,8 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
                 for (item of itemAction.result.drop) {
                     var slot = world.addPlayerItem(player, item);
                     if (slot == -1) {
-                        console.log("Error: ", player.id, " inventory overflowed")
+                        console.log("CRITICAL ERROR!!!: ", player.id, " inventory overflowed")
                     }
-                    console.log(item)
                     inventoryChanges.push({ item: item, pos: slot })
                 }
                 if (itemAction.result.addToInvSize) {

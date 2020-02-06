@@ -31,9 +31,7 @@
                     "degradeItems": [],
                     "updatePFlag": [],
                     "expGain": [],
-                    "removeItem": [
-                        0
-                    ],
+                    "removeItem": [],
                     "drop": [
                         {
                             "id": 2,
