@@ -239,14 +239,15 @@ function getItemObj(id) {
 function selectInvItem(slot) {
     console.log("ION")
 
-    var rect = itemArea.getBoundingClientRect();
+    var rect = $(itemArea).offset();
     var invX = slot % 4;
     var invY = Math.floor(slot / 4);
-    console.log("A", rect.x + invX * INVBOXSIDE, rect.y + invY * INVBOXSIDE)
+    console.log("SELECT INV ITEM RECT", rect)
+    console.log("A", rect.left + invX * INVBOXSIDE, rect.top + invY * INVBOXSIDE)
     $("#select").css({
         visibility: "visible",
-        top: rect.y + invY * INVBOXSIDE,
-        left: rect.x + invX * INVBOXSIDE,
+        top: rect.top + invY * INVBOXSIDE,
+        left: rect.left + invX * INVBOXSIDE,
     });
     animateBuildingArea();
     currentSelectedSlot = slot;
