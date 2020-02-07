@@ -6,11 +6,7 @@
         "health": 1,
         "owner": "game",
         "sprite": null,
-        "action": {
-            "a1": null,
-            "a2": null,
-            "a3": null
-        }
+        "actions": {}
     },
     {
         "id": 1,
@@ -19,10 +15,8 @@
         "health": 1,
         "owner": "game",
         "sprite": "/static/img/structures/rock.png",
-        "action": {
-            "a1": "Mine",
-            "a2": null,
-            "a3": null
+        "actions": {
+            "a1": "Mine"
         }
     },
     {
@@ -32,10 +26,10 @@
         "health": 1,
         "owner": "game",
         "sprite": "/static/img/structures/bag.png",
-        "action": {
+        "actions": {
             "a1": "Pick Up",
-            "a2": null,
-            "a3": null
+            "a2": "Get Rocks",
+            "a3": "Get Brick Wall"
         }
     },
     {
@@ -45,10 +39,20 @@
         "health": 1,
         "owner": "game",
         "sprite": "/static/img/structures/badbag.png",
-        "action": {
+        "actions": {
             "a1": "Pick Up?",
-            "a2": null,
-            "a3": null
+            "a2": "Pick Up (good)"
+        }
+    },
+    {
+        "id": 4,
+        "name": "brickwall",
+        "armor": 5,
+        "health": 50,
+        "owner": "game",
+        "sprite": "/static/img/structures/brickWall.png",
+        "actions": {
+            "a1": "Mine"
         }
     }
 ]

@@ -2,11 +2,80 @@
     {
         "id": 0,
         "name": "Pickaxe",
-        "Durability": 50
+        "Durability": 50,
+        "action": {
+            "a1": {
+                "name": "DefaultDrop"
+            }
+        }
     },
     {
         "id": 1,
         "name": "Light Bulb",
-        "Durability": 50
+        "Durability": 50,
+        "action": {
+            "a1": {
+                "name": "Open",
+                "cond": {
+                    "item": [
+                        {
+                            "id": 0,
+                            "durability": 1
+                        }
+                    ],
+                    "skill": {},
+                    "pFlag": []
+                },
+                "result": {
+                    "destroy": false,
+                    "degradeItems": [],
+                    "updatePFlag": [],
+                    "expGain": [],
+                    "removeItem": [],
+                    "drop": [
+                        {
+                            "id": 2,
+                            "reqDurability": -1
+                        },
+                        {
+                            "id": 2,
+                            "reqDurability": -1
+                        }
+                    ],
+                    "addToInvSize": 0
+                }
+            },
+            "a2": {
+                "name": "DefaultDrop"
+            }
+        }
+    },
+    {
+        "id": 2,
+        "name": "Rock",
+        "Durability": 50,
+        "action": {
+            "a1": {
+                "name": "Select",
+                "structId": 1
+            },
+            "a2": {
+                "name": "DefaultDrop"
+            }
+        }
+    },
+    {
+        "id": 3,
+        "name": "Brick Wall",
+        "Durability": 50,
+        "action": {
+            "a1": {
+                "name": "Select",
+                "structId": 4
+            },
+            "a2": {
+                "name": "DefaultDrop"
+            }
+        }
     }
 ]

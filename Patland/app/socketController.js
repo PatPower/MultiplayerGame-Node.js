@@ -24,6 +24,20 @@ module.exports = function (socketIo, world) {
                     module.exports.message(socket.id, response.msg);
                 }
             });
+            socket.on('invAction', function (id, actionId, invSlot) {
+                var response = action.doInvAction(socket.id, id, actionId, invSlot);
+                // If a condition is not met
+                if (!response.result) {
+                    module.exports.message(socket.id, response.msg);
+                }
+            });
+            socket.on('build', function (itemId, actionId, invSlot, buildLoc) {
+                var response = action.build(socket.id, itemId, actionId, invSlot, buildLoc);
+                // If a condition is not met
+                if (!response.result) {
+                    module.exports.message(socket.id, response.msg);
+                }
+            });
             socket.on('itemSwap', function (pos1, pos2) {
                 world.itemSwap(socket.id, pos1, pos2);
             });
@@ -39,11 +53,11 @@ module.exports.playerJoin = function (othPlayer, player) {
     io.to(othplayer.id).emit('playerJoin', player);
 }
 
-module.exports.playerRemove = function (othPlayer, dcPlayer) {
+module.exports.playerRemove = function (othPlayer, dcPlayerObj) {
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
-    io.to(othplayer.id).emit('playerRemove', dcPlayer);
+    io.to(othplayer.id).emit('playerRemove', dcPlayerObj);
 }
 
 module.exports.othPlayerMove = function (othPlayer, oldPlayer, data) {
@@ -79,6 +93,13 @@ module.exports.removeStructure = function (player, location) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(player.id).emit('removeStructure', location);
+}
+
+module.exports.placeStructure = function (player, location, structObj) {
+    if (!io) {
+        throw new Error("Error: Can't use this function until io is properly initalized");
+    }
+    io.to(player.id).emit('placeStructure', location, structObj);
 }
 
 /**

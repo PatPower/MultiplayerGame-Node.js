@@ -3,6 +3,8 @@ var invElement = document.getElementById("inv");
 var itemArea = document.getElementById("itemArea");
 var invCxt = setupInventory(invElement);
 var itemJson = [];
+var currentSelectedSlot = -1;
+var buildAnimationId = -1;
 
 invTitle(invCxt)
 
@@ -20,7 +22,6 @@ function setupInventory(canvas) {
     // Background
     canvas.width = INVWIDTH;
     canvas.height = INVHEIGHT;
-
     var invcxt = canvas.getContext('2d');
     for (var i = 0; i < INVNUMCOL; i++) {
         for (var j = 0; j < INVNUMROW; j++) {
@@ -42,6 +43,7 @@ function updateInventory(inventoryChanges) {
     for (invChange of inventoryChanges) {
         var i = invChange.pos + 1;
         var img = itemArea.childNodes[i];
+        var oldItemObj = currPlayer.inventory[invChange.pos];
         currPlayer.inventory[invChange.pos] = invChange.item;
         if (invChange.item) {
             img.src = getItemIcon(invChange.item.id);
@@ -49,9 +51,24 @@ function updateInventory(inventoryChanges) {
             enableDragging(i);
         } else {
             img.src = getItemIcon(-1);
+
             preventDragging(i);
         }
         makeDroppable(i);
+        // If item is being removed from inv and is currently selected, select the same item in inv or deselect
+        if (invChange.pos == currentSelectedSlot) {
+            if (invChange.item == null) {
+                var nextItemSlot = currPlayer.inventory.findIndex(o => o && o.id == oldItemObj.id);
+                if (nextItemSlot >= 0) {
+                    console.log(nextItemSlot)
+                    selectInvItem(nextItemSlot);
+                } else {
+                    deselectInvItem();
+                }
+            } else {
+                deselectInvItem();
+            }
+        }
     }
 }
 
@@ -187,13 +204,20 @@ function makeDroppable(i) {
     $("#item" + i).droppable({
         disabled: false,
         drop: function (event, ui) {
+            console.log(currPlayer.inventory)
+
             //Make item temp invisible
             var draggedItemId = ui.draggable.attr('id');
             document.getElementById(draggedItemId).src = getItemIcon(-1);
-
             var pos1 = parseInt(draggedItemId.slice(4)) - 1
             var pos2 = parseInt($(this).attr('id').slice(4)) - 1
             emitItemSwap(pos1, pos2);
+            if (currentSelectedSlot == pos1) {
+                selectInvItem(pos2);
+            } else if (currentSelectedSlot == pos2) {
+                selectInvItem(pos1);
+            }
+
         }
     });
 }
@@ -207,3 +231,115 @@ function enableDragging(i) {
     $("#item" + i).off('dragstart');
 }
 
+function getItemObj(id) {
+    var item = itemJson.find(o => o.id == id);
+    return item;
+}
+
+function selectInvItem(slot) {
+    console.log("ION")
+
+    var rect = $(itemArea).offset();
+    var invX = slot % 4;
+    var invY = Math.floor(slot / 4);
+    console.log("SELECT INV ITEM RECT", rect)
+    console.log("A", rect.left + invX * INVBOXSIDE, rect.top + invY * INVBOXSIDE)
+    $("#select").css({
+        visibility: "visible",
+        top: rect.top + invY * INVBOXSIDE,
+        left: rect.left + invX * INVBOXSIDE,
+    });
+    animateBuildingArea();
+    currentSelectedSlot = slot;
+}
+
+function deselectInvItem() {
+    currentSelectedSlot = -1;
+    $("#select").css({
+        visibility: "hidden"
+    });
+    var selectedBuild = $("#selectedBuild");
+    selectedBuild.attr("src", null);
+    selectedBuild.css({
+        visibility: "hidden"
+    });
+    if (buildAnimationId != -1) {
+        clearInterval(buildAnimationId);
+        buildAnimationId = -1;
+
+        // Restore the effected overlay canvas
+        ovlycxt.clearRect(BOXSIDE * (HORIZONTALRADIUS - 1), BOXSIDE * (VERTICALRADIUS - 1), BOXSIDE * 3, BOXSIDE * 3);
+        for (var i = HORIZONTALRADIUS - 1; i <= HORIZONTALRADIUS + 1; i++) {
+            for (var j = VERTICALRADIUS - 1; j <= VERTICALRADIUS + 1; j++) {
+                ovlycxt.strokeRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
+            }
+        }
+    }
+}
+
+function getSelectedItemId() {
+    if (currentSelectedSlot == -1) {
+        console.log("Error: No item selected!")
+        return;
+    }
+    return currPlayer.inventory[currentSelectedSlot].id
+}
+
+function isSlotPlaceable(slot) {
+    // Checks if the id of the placeable struct is null
+    if (getItemObj(currPlayer.inventory[slot].id).placeableStructId || getItemObj(currPlayer.inventory[slot].id).placeableStructId == 0) {
+        return true;
+    }
+    return false;
+}
+
+function animateBuildingArea() {
+    // Stop building animation if one is one already
+    if (buildAnimationId != -1) {
+        clearInterval(buildAnimationId);
+        buildAnimationId = -1;
+    }
+
+    buildAnimationId = setInterval(frame, 20);
+    var alpha = 0.1;
+    var alphaChange = 0.002;
+
+    function frame() {
+        if (alpha <= 0.12) {
+            alphaChange = 0.0025;
+        } else if (alpha >= 0.21) {
+            alphaChange = -alphaChange;
+        }
+
+        ovlycxt.globalAlpha = alpha;
+        ovlycxt.fillStyle = "red";
+        ovlycxt.clearRect(BOXSIDE * (HORIZONTALRADIUS - 1), BOXSIDE * (VERTICALRADIUS - 1), BOXSIDE * 3, BOXSIDE * 3);
+        ovlycxt.fillRect(BOXSIDE * (HORIZONTALRADIUS - 1), BOXSIDE * (VERTICALRADIUS - 1), BOXSIDE * 3, BOXSIDE * 3);
+        ovlycxt.globalAlpha = 1;
+        ovlycxt.clearRect(BOXSIDE * (HORIZONTALRADIUS), BOXSIDE * (VERTICALRADIUS), BOXSIDE, BOXSIDE);
+        for (var i = HORIZONTALRADIUS - 1; i <= HORIZONTALRADIUS + 1; i++) {
+            for (var j = VERTICALRADIUS - 1; j <= VERTICALRADIUS + 1; j++) {
+                ovlycxt.strokeRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
+            }
+        }
+
+        alpha += alphaChange;
+    }
+}
+
+/**
+ * Checks if the slot has an item that can be selected
+ * @param {*} slot inv slot starting at 0
+ */
+function getActionId(slot) {
+    var itemId = currPlayer.inventory[slot]
+    if (itemId) {
+        var itemObj = getItemObj(itemId.id);
+        for (actionId in itemObj.actions) {
+            if (itemObj.actions[actionId] == "Select") {
+                return actionId;
+            }
+        }
+    }
+    return;
+}
