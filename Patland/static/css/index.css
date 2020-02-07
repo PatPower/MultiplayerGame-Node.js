@@ -179,3 +179,24 @@ canvas {
     z-index: 5;
     pointer-events: none;
 }
+
+#selectedBuild {
+    visibility: visible;
+    position: absolute;
+    width: 40;
+    height: 40;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+
+::-moz-selection {
+    background-color: transparent;
+    color: #000;
+}
+
+::selection {
+    background-color: transparent;
+    color: #000;
+}

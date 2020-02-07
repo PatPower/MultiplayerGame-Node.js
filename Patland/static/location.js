@@ -1,4 +1,9 @@
-// The map relative to the player
+/**
+ * The map relative to the player
+ * ground: ground object. void if null,
+ * structure: structure object. air if null,
+ * players: [],
+ */
 var locationMap = [...Array(NUMCOL)].map(e => Array(NUMROW));
 
 
@@ -70,12 +75,13 @@ function loadLocationMap(ground2D, structure2D, playersObj, currPlayer) {
 }
 
 function removeStructure(location) {
-    var relCoords = getRelativeCoords(location)
+    var relCoords = getRelativeCoords(location);
     // Sets it to air
     locationMap[relCoords.i][relCoords.j].structure = getStructureObj();
 }
-function placeStructure(location, structObj){
-    var relCoords = getRelativeCoords(location)
+
+function placeStructure(location, structObj) {
+    var relCoords = getRelativeCoords(location);
     // Sets it to air
     locationMap[relCoords.i][relCoords.j].structure = getStructureObj(structObj);
 }
@@ -162,7 +168,10 @@ function checkIfInteractible(structure) {
     for (var i = -1; i <= 1; i++) {
         for (var j = -1; j <= 1; j++) {
             if (player.i + i == structure.i && player.j + j == structure.j) {
-                return true;
+                // If not on the player
+                if (!(i == 0 && j == 0)) {
+                    return true;
+                }
             }
         }
     }

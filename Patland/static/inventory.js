@@ -22,7 +22,6 @@ function setupInventory(canvas) {
     // Background
     canvas.width = INVWIDTH;
     canvas.height = INVHEIGHT;
-
     var invcxt = canvas.getContext('2d');
     for (var i = 0; i < INVNUMCOL; i++) {
         for (var j = 0; j < INVNUMROW; j++) {
@@ -41,11 +40,10 @@ function setupInventory(canvas) {
  * inventoryChanges: [ { item: { id: int, durability: int }, pos: int } , ... ]
  */
 function updateInventory(inventoryChanges) {
-    console.log(inventoryChanges)
-
     for (invChange of inventoryChanges) {
         var i = invChange.pos + 1;
         var img = itemArea.childNodes[i];
+        var oldItemObj = currPlayer.inventory[invChange.pos];
         currPlayer.inventory[invChange.pos] = invChange.item;
         if (invChange.item) {
             img.src = getItemIcon(invChange.item.id);
@@ -57,6 +55,20 @@ function updateInventory(inventoryChanges) {
             preventDragging(i);
         }
         makeDroppable(i);
+        // If item is being removed from inv and is currently selected, select the same item in inv or deselect
+        if (invChange.pos == currentSelectedSlot) {
+            if (invChange.item == null) {
+                var nextItemSlot = currPlayer.inventory.findIndex(o => o && o.id == oldItemObj.id);
+                if (nextItemSlot >= 0) {
+                    console.log(nextItemSlot)
+                    selectInvItem(nextItemSlot);
+                } else {
+                    deselectInvItem();
+                }
+            } else {
+                deselectInvItem();
+            }
+        }
     }
 }
 
@@ -225,6 +237,8 @@ function getItemObj(id) {
 }
 
 function selectInvItem(slot) {
+    console.log("ION")
+
     var rect = itemArea.getBoundingClientRect();
     var invX = slot % 4;
     var invY = Math.floor(slot / 4);
@@ -243,6 +257,11 @@ function deselectInvItem() {
     $("#select").css({
         visibility: "hidden"
     });
+    var selectedBuild = $("#selectedBuild");
+    selectedBuild.attr("src", null);
+    selectedBuild.css({
+        visibility: "hidden"
+    });
     if (buildAnimationId != -1) {
         clearInterval(buildAnimationId);
         buildAnimationId = -1;
@@ -258,11 +277,19 @@ function deselectInvItem() {
 }
 
 function getSelectedItemId() {
-
+    if (currentSelectedSlot == -1) {
+        console.log("Error: No item selected!")
+        return;
+    }
+    return currPlayer.inventory[currentSelectedSlot].id
 }
 
 function isSlotPlaceable(slot) {
-    return getItemObj(currPlayer.inventory[slot].id).placeable;
+    // Checks if the id of the placeable struct is null
+    if (getItemObj(currPlayer.inventory[slot].id).placeableStructId || getItemObj(currPlayer.inventory[slot].id).placeableStructId == 0) {
+        return true;
+    }
+    return false;
 }
 
 function animateBuildingArea() {
@@ -273,13 +300,13 @@ function animateBuildingArea() {
     }
 
     buildAnimationId = setInterval(frame, 20);
-    var alpha = 0.03;
+    var alpha = 0.1;
     var alphaChange = 0.002;
 
     function frame() {
-        if (alpha <= 0.08) {
-            alphaChange = 0.002;
-        } else if (alpha >= 0.18) {
+        if (alpha <= 0.12) {
+            alphaChange = 0.0025;
+        } else if (alpha >= 0.21) {
             alphaChange = -alphaChange;
         }
 
@@ -297,4 +324,21 @@ function animateBuildingArea() {
 
         alpha += alphaChange;
     }
+}
+
+/**
+ * Checks if the slot has an item that can be selected
+ * @param {*} slot inv slot starting at 0
+ */
+function getActionId(slot) {
+    var itemId = currPlayer.inventory[slot]
+    if (itemId) {
+        var itemObj = getItemObj(itemId.id);
+        for (actionId in itemObj.actions) {
+            if (itemObj.actions[actionId] == "Select") {
+                return actionId;
+            }
+        }
+    }
+    return;
 }
