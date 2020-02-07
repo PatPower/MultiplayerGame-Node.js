@@ -60,7 +60,7 @@ socket.on('removeStructure', function (location) {
 
 /**
  * location: global coordinates
- * structObj: structure object
+ * structObj: structure object 
  */
 socket.on('placeStructure', function (location, structObj) {
     placeStructure(location, structObj);
