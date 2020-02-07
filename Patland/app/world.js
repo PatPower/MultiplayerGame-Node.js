@@ -98,14 +98,14 @@ World.prototype.addPlayerLocation = function (player) {
 }
 
 /**
-* Checks if the structure is in a 3x3 vicinity of the player
+* Checks if the location is in a 3x3 vicinity of the player
 * @param {*} player an object with an i and j
-* @param {*} structure another object with an i and j
+* @param {*} location another object with an i and j
 */
-World.prototype.checkIfInteractible = function (player, structure) {
+World.prototype.checkIfInteractible = function (player, location) {
     for (var i = -1; i <= 1; i++) {
         for (var j = -1; j <= 1; j++) {
-            if (player.i + i == structure.i && player.j + j == structure.j) {
+            if (player.i + i == location.i && player.j + j == location.j) {
                 return true;
             }
         }
@@ -126,8 +126,8 @@ World.prototype.createPlayer = function (id, pname) {
             i: 10,
             j: 7,
             name: pname,
-            inventory: [{ id: 0, durability: 50 }, null, { id: 1, durability: 50 }, null],
-            inventorySize: 4,
+            inventory: [{ id: 0, durability: 50 }, null, { id: 3, durability: 50 }, { id: 1, durability: 50 }, { id: 2, durability: 50 }],
+            inventorySize: 5,
             skills: {
                 "mining": { level: 1, experience: 0 },
                 "woodcutting": { level: 1, experience: 0 }
@@ -156,15 +156,15 @@ World.prototype.createPlayer = function (id, pname) {
 }
 
 World.prototype.disconnectPlayer = function (id) {
-    var dcPlayer = this.getPlayer(id);
-    if (dcPlayer) {
-        var range = getIJRange(dcPlayer.i, dcPlayer.j);
-        this.removePlayerLocation(dcPlayer);
+    var dcPlayerObj = this.getPlayer(id);
+    if (dcPlayerObj) {
+        var range = getIJRange(dcPlayerObj.i, dcPlayerObj.j);
+        this.removePlayerLocation(dcPlayerObj);
         for (var i = range.lefti; i <= range.righti; i++) {
             for (var j = range.topj; j <= range.bottomj; j++) {
                 if (worldPlayerMap[i][j].length > 0) {
                     for (othplayer of worldPlayerMap[i][j]) {
-                        socketController.playerRemove(othplayer, id);
+                        socketController.playerRemove(othplayer, dcPlayerObj);
                         this.deletePlayer(id);
                     }
                 }
@@ -310,6 +310,51 @@ World.prototype.removeStructure = function (location) {
     }
 }
 
+/**
+ * location: location of the placed structure
+ * structId: id of the structure
+ * health: starting health of the structure
+ * playerId of the user that placed the structure
+ */
+World.prototype.placeStructure = function (location, structId, health, playerId) {
+    // TODO: do some checks
+    var structObj = { id: structId, health: health, owner: playerId };
+    worldStructureMap[location.i][location.j] = structObj;
+    var range = getIJRange(location.i, location.j);
+    for (var i = range.lefti; i <= range.righti; i++) {
+        for (var j = range.topj; j <= range.bottomj; j++) {
+            if (worldPlayerMap[i][j].length > 0) {
+                for (othPlayer of worldPlayerMap[i][j]) {
+                    socketController.placeStructure(othPlayer, location, structObj);
+                }
+            }
+        }
+    }
+};
+
+
+/**
+ * Used to verify if the location contains the structure
+ */
+World.prototype.verifyStructureLocation = function (location, id) {
+    if (worldStructureMap[location.i][location.j]) {
+        return (this.getStructureAtLocation(location) == id);
+    }
+    return false;
+};
+
+World.prototype.getStructureAtLocation = function (location) {
+    var structId;
+    if (worldStructureMap[location.i][location.j]) {
+        structId = worldStructureMap[location.i][location.j].id;
+    }
+    return structId;
+}
+
+World.prototype.getPlayersAtLocation = function (location) {
+    return worldPlayerMap[location.i][location.j];
+}
+
 function initializeTestMap() {
     worldStructureMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
     worldStructureMap[2][2] = { id: 1, health: 10, owner: "game" };
@@ -327,16 +372,6 @@ function initializeTestMap() {
 }
 
 /**
- * Used to verify if the location contains the structure
- */
-World.prototype.verifyStructureLocation = function (location, id) {
-    if (worldStructureMap[location.i][location.j]) {
-        return (worldStructureMap[location.i][location.j].id == id);
-    }
-    return false;
-};
-
-/**
  * Swaps the positions of two items in the player's inventory
  */
 World.prototype.itemSwap = function (id, pos1, pos2) {
@@ -345,10 +380,14 @@ World.prototype.itemSwap = function (id, pos1, pos2) {
     if (!player) {
         return;
     }
+    console.log(player.inventory)
+
     var oldItem = player.inventory[pos2];
     player.inventory[pos2] = player.inventory[pos1];
     player.inventory[pos1] = oldItem;
+
     var inventoryChanges = [{ item: oldItem, pos: pos1 }, { item: player.inventory[pos2], pos: pos2 }]
+
     socketController.playerInventoryUpdate(player, inventoryChanges)
 }
 
@@ -377,17 +416,74 @@ World.prototype.changeInvSize = function (player, invAddAmount) {
     }
 
 }
-
 /**
  * Removes items at the positions specified
  * @param {*} player 
- * @param {*} slot a list of inv pos (starting at 0)
+ * @param {*} itemObj itemObj
  */
-World.prototype.removePlayerItems = function (player, slots) {
-    for (slot of slots) {
-        // Check if slot is removable
-        if (0 <= slot && slot < player.inventorySize) {
-            player.inventory[slot] = null;
+World.prototype.addPlayerItem = function (player, itemObj) {
+    for (index in player.inventory) {
+        if (!player.inventory[index]) {
+            player.inventory[index] = itemObj;
+            return parseInt(index);
+        }
+    }
+    return -1;
+}
+
+/**
+ * Removes items at the positions specified
+ * @param {*} player player obj
+ * @param {*} slot a list of inv pos (starting at 0)
+ * @param {*} updateInv true to update player inv after removing
+ */
+World.prototype.removePlayerItem = function (player, slot, updateInv) {
+    console.log(slot, player.inventorySize)
+    if (0 <= slot && slot < player.inventorySize) {
+        player.inventory[slot] = null;
+    } else {
+        console.log("Error: removePlayerItem inv list out of range")
+    }
+    if (updateInv) {
+        this.playerInventoryUpdate(player, [{ item: null, pos: slot }]);
+    }
+}
+
+/**
+ * Check if player item exists and returns the item object
+ * @param {*} playerId
+ * @param {*} itemId an item id
+ */
+World.prototype.verifyPlayerItem = function (player, itemId, invSlot) {
+    var itemObj;
+    if (player) {
+        if (invSlot || invSlot == 0) {
+            var item = player.inventory[invSlot];
+            if (item && item.id == itemId) {
+                itemObj = JSON.parse(JSON.stringify(player));
+                itemObj["slot"] = invSlot;
+            }
+        } else {
+            var itemIndex = player.inventory.findIndex(o => o && o.id == itemId);
+            var item = player.inventory[itemIndex];
+            if (item && item.id == itemId) {
+                itemObj = JSON.parse(JSON.stringify(player));
+                itemObj["slot"] = itemIndex;
+            }
+        }
+    }
+    return itemObj;
+}
+
+/**
+ * Check if player item exists and returns the item object
+ * @param {*} playerId
+ * @param {*} itemId an item id
+ */
+World.prototype.playerInventoryUpdate = function (player, invChanges) {
+    if (player) {
+        if (invChanges.length) {
+            socketController.playerInventoryUpdate(player, invChanges);
         }
     }
 }

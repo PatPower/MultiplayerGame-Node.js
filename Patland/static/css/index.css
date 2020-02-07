@@ -99,7 +99,7 @@ canvas {
     margin-right:4px;
     width: 160px;
     height: 600px;
-
+    z-index: 5;
     position: absolute;
 }
 
@@ -131,6 +131,14 @@ canvas {
     z-index: 1;   
 }
 
+#selectimg {
+    top: 0;
+    width: 40px;
+    height:40px;
+    position: absolute;
+    z-index: 1;   
+}
+
 #emptyitem {
     width: 40px;
     height:40px;
@@ -146,7 +154,6 @@ canvas {
 
 #draggableSpan {
     width: 40px;
-
 }
 
 #subheader {
@@ -160,4 +167,36 @@ canvas {
     width: 0;
     height: 0;
     z-index: 5;
+}
+
+#select {
+    visibility: hidden;
+    position: absolute;
+    width: 40;
+    height: 40;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+
+#selectedBuild {
+    visibility: visible;
+    position: absolute;
+    width: 40;
+    height: 40;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+
+::-moz-selection {
+    background-color: transparent;
+    color: #000;
+}
+
+::selection {
+    background-color: transparent;
+    color: #000;
 }

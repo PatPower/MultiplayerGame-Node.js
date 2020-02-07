@@ -2,26 +2,60 @@
     {
         "id": 0,
         "name": "Pickaxe",
-        "icon": "/static/img/items/0.png"
+        "icon": "/static/img/items/0.png",
+        "placeableStructId": null,
+        "actions": {
+            "a1": "Drop"
+        }
     },
     {
         "id": 1,
         "name": "Light Bulb",
-        "icon": "/static/img/items/1.png"
+        "icon": "/static/img/items/1.png",
+        "placeableStructId": null,
+        "actions": {
+            "a1": "Open",
+            "a2": "Drop"
+        }
+    },
+    {
+        "id": 2,
+        "name": "Rock",
+        "icon": "/static/img/items/2.png",
+        "placeableStructId": 1,
+        "actions": {
+            "a1": "Select",
+            "a2": "Drop"
+        }
+    },
+    {
+        "id": 3,
+        "name": "Brick Wall",
+        "icon": "/static/img/items/3.png",
+        "placeableStructId": 4,
+        "actions": {
+            "a1": "Select",
+            "a2": "Drop"
+        }
     },
     {
         "id": -1,
         "name": "Nothing",
-        "icon": "/static/img/items/-1.png"
+        "icon": "/static/img/items/-1.png",
+        "placeableStructId": null
     },
     {
         "id": -2,
         "name": "Locked",
-        "icon": "/static/img/items/-2.png"
+        "icon": "/static/img/items/-2.png",
+        "placeableStructId": null,
+        "actions": {}
     },
     {
         "id": -3,
         "name": "Locked",
-        "icon": "/static/img/items/lock.png"
+        "icon": "/static/img/items/lock.png",
+        "placeableStructId": null,
+        "actions": {}
     }
 ]
