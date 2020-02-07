@@ -31,8 +31,13 @@
                     "updatePFlag": [],
                     "expGain": [],
                     "removeItem": [],
-                    "drop": [],
-                    "addToInvSize": 5
+                    "drop": [
+                        {
+                            "id": 2,
+                            "reqDurability": -1
+                        }
+                    ],
+                    "addToInvSize": 0
                 }
             }
         }
@@ -84,6 +89,31 @@
                     ],
                     "addToInvSize": 0
                 }
+            },
+            "a3": {
+                "cond": {
+                    "item": [],
+                    "skill": {},
+                    "pFlag": []
+                },
+                "result": {
+                    "destroy": false,
+                    "degradeItems": [],
+                    "updatePFlag": [],
+                    "expGain": [],
+                    "removeItem": [],
+                    "drop": [
+                        {
+                            "id": 3,
+                            "reqDurability": -1
+                        },
+                        {
+                            "id": 3,
+                            "reqDurability": -1
+                        }
+                    ],
+                    "addToInvSize": 0
+                }
             }
         }
     },
@@ -124,6 +154,41 @@
                     "removeItem": [],
                     "drop": [],
                     "addToInvSize": 5
+                }
+            }
+        }
+    },
+    {
+        "id": 4,
+        "name": "brickwall",
+        "armor": 5,
+        "health": 50,
+        "passable": false,
+        "action": {
+            "a1": {
+                "cond": {
+                    "item": [
+                        {
+                            "id": 0,
+                            "reqDurability": 1
+                        }
+                    ],
+                    "skill": {},
+                    "pFlag": []
+                },
+                "result": {
+                    "destroy": true,
+                    "degradeItems": [],
+                    "updatePFlag": [],
+                    "expGain": [],
+                    "removeItem": [],
+                    "drop": [
+                        {
+                            "id": 3,
+                            "reqDurability": -1
+                        }
+                    ],
+                    "addToInvSize": 0
                 }
             }
         }

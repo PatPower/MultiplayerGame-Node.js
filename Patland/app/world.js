@@ -126,8 +126,8 @@ World.prototype.createPlayer = function (id, pname) {
             i: 10,
             j: 7,
             name: pname,
-            inventory: [{ id: 0, durability: 50 }, null, { id: 1, durability: 50 }, { id: 2, durability: 50 }],
-            inventorySize: 4,
+            inventory: [{ id: 0, durability: 50 }, null, { id: 3, durability: 50 }, { id: 1, durability: 50 }, { id: 2, durability: 50 }],
+            inventorySize: 5,
             skills: {
                 "mining": { level: 1, experience: 0 },
                 "woodcutting": { level: 1, experience: 0 }
@@ -156,15 +156,15 @@ World.prototype.createPlayer = function (id, pname) {
 }
 
 World.prototype.disconnectPlayer = function (id) {
-    var dcPlayer = this.getPlayer(id);
-    if (dcPlayer) {
-        var range = getIJRange(dcPlayer.i, dcPlayer.j);
-        this.removePlayerLocation(dcPlayer);
+    var dcPlayerObj = this.getPlayer(id);
+    if (dcPlayerObj) {
+        var range = getIJRange(dcPlayerObj.i, dcPlayerObj.j);
+        this.removePlayerLocation(dcPlayerObj);
         for (var i = range.lefti; i <= range.righti; i++) {
             for (var j = range.topj; j <= range.bottomj; j++) {
                 if (worldPlayerMap[i][j].length > 0) {
                     for (othplayer of worldPlayerMap[i][j]) {
-                        socketController.playerRemove(othplayer, id);
+                        socketController.playerRemove(othplayer, dcPlayerObj);
                         this.deletePlayer(id);
                     }
                 }
@@ -338,10 +338,22 @@ World.prototype.placeStructure = function (location, structId, health, playerId)
  */
 World.prototype.verifyStructureLocation = function (location, id) {
     if (worldStructureMap[location.i][location.j]) {
-        return (worldStructureMap[location.i][location.j].id == id);
+        return (this.getStructureAtLocation(location) == id);
     }
     return false;
 };
+
+World.prototype.getStructureAtLocation = function (location) {
+    var structId;
+    if (worldStructureMap[location.i][location.j]) {
+        structId = worldStructureMap[location.i][location.j].id;
+    }
+    return structId;
+}
+
+World.prototype.getPlayersAtLocation = function (location) {
+    return worldPlayerMap[location.i][location.j];
+}
 
 function initializeTestMap() {
     worldStructureMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
@@ -421,15 +433,19 @@ World.prototype.addPlayerItem = function (player, itemObj) {
 
 /**
  * Removes items at the positions specified
- * @param {*} player 
+ * @param {*} player player obj
  * @param {*} slot a list of inv pos (starting at 0)
+ * @param {*} updateInv true to update player inv after removing
  */
-World.prototype.removePlayerItem = function (player, slot) {
+World.prototype.removePlayerItem = function (player, slot, updateInv) {
     console.log(slot, player.inventorySize)
     if (0 <= slot && slot < player.inventorySize) {
         player.inventory[slot] = null;
     } else {
         console.log("Error: removePlayerItem inv list out of range")
+    }
+    if (updateInv) {
+        this.playerInventoryUpdate(player, [{ item: null, pos: slot }]);
     }
 }
 

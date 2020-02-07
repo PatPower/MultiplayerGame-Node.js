@@ -28,7 +28,8 @@
         "sprite": "/static/img/structures/bag.png",
         "actions": {
             "a1": "Pick Up",
-            "a2": "Get Rocks"
+            "a2": "Get Rocks",
+            "a3": "Get Brick Wall"
         }
     },
     {
@@ -41,6 +42,17 @@
         "actions": {
             "a1": "Pick Up?",
             "a2": "Pick Up (good)"
+        }
+    },
+    {
+        "id": 4,
+        "name": "brickwall",
+        "armor": 5,
+        "health": 50,
+        "owner": "game",
+        "sprite": "/static/img/structures/brickWall.png",
+        "actions": {
+            "a1": "Mine"
         }
     }
 ]

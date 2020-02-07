@@ -1,9 +1,14 @@
+var currentSelectedActionId = -1;
+
 $(function () {
     // Map
     $.contextMenu({
         selector: '#overlay, #click',
         autoHide: true,
         hideOnSecondTrigger: true,
+        position: function (opt, x, y) {
+            opt.$menu.css({ top: y, left: x - 30 });
+        },
         build: function ($triggerElement, e) {
             var x = mousePos.x - $('#overlay').offset().left - 4;
             var y = mousePos.y - $('#overlay').offset().top - 4;
@@ -17,10 +22,11 @@ $(function () {
         selector: '.item',
         autoHide: true,
         hideOnSecondTrigger: true,
+        position: function (opt, x, y) {
+            opt.$menu.css({ top: y, left: x - 30 });
+        },
         build: function ($triggerElement, e) {
-            var x = mousePos.x - $('#overlay').offset().left - 4;
-            var y = mousePos.y - $('#overlay').offset().top - 4;
-            return findMenuObjInv(x, y, parseInt($triggerElement.attr("id").slice(4)) - 1);
+            return findMenuObjInv(parseInt($triggerElement.attr("id").slice(4)) - 1);
         },
         zIndex: 4
     });
@@ -50,7 +56,6 @@ function findMenuObj(x, y) {
             icon: 'fas fa-hammer',
             // TODO: check if player close enough to interact
             callback: function (key, opt) {
-                console.log(key, opt);
                 sendPlayerAction(structIdWhenClicked, key, getGlobalCoords({ i: i, j: j }, locWhenClicked));
             }
         }
@@ -75,32 +80,22 @@ function findMenuObj(x, y) {
         }
     }
     menuDict["items"] = itemsDict;
-
-    console.log(i + "  " + j)
     return menuDict
-
-
 }
 
 /**
  * 
- * @param {*} x 
- * @param {*} y 
  * @param {*} invSlot slot of the inventory (starting from 0) 
  */
-function findMenuObjInv(x, y, invSlot) {
-    var i = Math.floor(x / BOXSIDE);
-    var j = Math.floor(y / BOXSIDE);
+function findMenuObjInv(invSlot) {
     var itemsDict = {};
     var menuDict = {};
     var itemObj;
     var itemName = "";
-    console.log(currPlayer.inventory[invSlot], invSlot)
     if (currPlayer.inventory[invSlot]) {
         itemObj = getItemObj(currPlayer.inventory[invSlot].id);
         itemName = itemObj.name;
     }
-    console.log(i + "  " + j)
     itemsDict["itemName"] = {
         name: `${itemName}`,
         visible: function (key, opt) {
@@ -112,11 +107,28 @@ function findMenuObjInv(x, y, invSlot) {
     if (itemObj) {
         for (action in itemObj.actions) {
             itemsDict[action] = {
-                name: `Action: ${itemObj.actions[action]}`,
+                name: function () {
+                    if (itemObj.actions[action] == "Select") {
+                        if (currentSelectedSlot == -1 || invSlot != currentSelectedSlot) {
+                            return "Action: Select"
+                        } else {
+                            return "Action: Deselect"
+                        }
+                    } else {
+                        return `Action: ${itemObj.actions[action]}`
+                    }
+
+                }(),
                 icon: 'fas fa-hammer',
                 callback: function (key, opt) {
                     if (itemObj.actions[key] == "Select") {
-                        selectInvItem(invSlot)
+                        if (currentSelectedSlot == -1 || invSlot != currentSelectedSlot) {
+                            selectInvItem(invSlot);
+                            currentSelectedActionId = key;
+                        } else {
+                            deselectInvItem();
+                            currentSelectedActionId = -1;
+                        }
                     } else {
                         deselectInvItem();
                     }
@@ -143,3 +155,26 @@ function updateMenu() {
         $("#overlay").contextMenu('hide');
     });
 }
+
+function structHasActionAtMousePos(mousePos) {
+    // If the loation in locationMap hasn't been initalized yet
+    if (!locationMap || !locationMap[mousePos.i][mousePos.j]) {
+        return;
+    }
+    // Check if the player is in interactable range
+    if (!checkIfInteractible(mousePos)) {
+        return;
+    }
+    var structObj = locationMap[mousePos.i][mousePos.j].structure;
+    if (structObj) {
+        var obj = structureJson.find(o => o.id == structObj.id)
+        if (obj) {
+            // If there are actions for this structure
+            if (Object.keys(obj["actions"]).length > 0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+

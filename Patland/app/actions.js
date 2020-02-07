@@ -148,7 +148,7 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
                 // EVENT:
                 if (itemAction.result.destroy) {
                     world.removePlayerItem(player, invSlot);
-                    inventoryChanges.push({ item: null, pos: invSlot })
+                    inventoryChanges.push({ item: null, pos: invSlot });
                 }
                 for (item of itemAction.result.degradeItems) {
                     // TODO: Degrade items
@@ -210,9 +210,12 @@ Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc
                         var structHealth = JsonController.getStructureHealth(structId);
                         if (structId) {
                             world.placeStructure(buildLoc, structId, structHealth, player.id);
+                            world.removePlayerItem(player, invSlot, true);
                         } else {
-                            return { result: false, msg: "Not buildable here" };
+                            return { result: false, msg: "Item not placeable (actions)" };
                         }
+                    } else {
+                        return { result: false, msg: "Not buildable here" };
                     }
                 }
             }
@@ -222,7 +225,14 @@ Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc
 }
 
 function checkLocationBuildable(buildLoc) {
-    return true;
+    // If there is no structure there already
+    if (!world.getStructureAtLocation(buildLoc)) {
+        // If there is no player at that current location.
+        if (world.getPlayersAtLocation(buildLoc).length == 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 module.exports = Action;

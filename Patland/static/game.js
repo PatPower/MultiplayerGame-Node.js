@@ -43,19 +43,29 @@ socket.on('moveCurrPlayer', function (player, pList, ground2D, structure2D) {
     playerList = pList;
     loadLocationMap(ground2D, structure2D, pList, currPlayer);
     updateBackgroundCanvas();
-    updateStructureCanvas()
+    refreshStructureCanvas()
     projectSquares(playerList);
     updateTileMarker(currPlayer);
+    updateCursorType(mousePos);
 });
 
+/**
+ * location: global coordinates
+ */
 socket.on('removeStructure', function (location) {
     removeStructure(location);
-    updateStructureCanvas()
+    removeProjectedStructure(location);
+    updateCursorType(mousePos);
 });
 
+/**
+ * location: global coordinates
+ * structObj: structure object
+ */
 socket.on('placeStructure', function (location, structObj) {
     placeStructure(location, structObj);
-    updateStructureCanvas()
+    projectStructure(location, structObj);
+    updateCursorType(mousePos);
 });
 
 socket.on('othPlayerMove', function (othP, movement) {
@@ -92,7 +102,6 @@ socket.on('othPlayerMove', function (othP, movement) {
     projectSquare(newP, getNewCoordsLocation(relCoords, movement));
     // Move the player in the locationMap
     movePlayer(othP, movement);
-    console.log("othMove") // remove
 });
 
 socket.on('playerJoin', function (playerObj) {
@@ -194,6 +203,7 @@ function setupStructure(canvas) {
     canvas.width = CWIDTH;
     canvas.height = CHEIGHT
     var strcxt = canvas.getContext('2d');
+    // Waits for the list of struct images to finish loading
     loadImages(function (imgList) {
         for (var i = 0; i < NUMCOL; i++) {
             for (var j = 0; j < NUMROW; j++) {
@@ -247,7 +257,10 @@ function updateBackgroundCanvas() {
     }
 }
 
-function updateStructureCanvas() {
+/**
+ * Refresh the whole screen to update structures
+ */
+function refreshStructureCanvas() {
     strcxt.clearRect(0, 0, CWIDTH, CHEIGHT);
     loadImages(function (imgList) {
         for (var i = 0; i < NUMCOL; i++) {
@@ -311,6 +324,31 @@ function removeProjectedPlayer(playerObj, relCoords) {
     }
 }
 
+/**
+ * Shows a structure at the given location
+ * @param {*} structLocation global coords
+ * @param {*} structObj 
+ */
+function projectStructure(structLocation, structObj) {
+    var relCoords = getRelativeCoords(structLocation);
+    loadImages(function (imgList) {
+        strcxt.drawImage(imgList[structObj.id], BOXSIDE * relCoords.i, BOXSIDE * relCoords.j)
+    });
+}
+
+/**
+ * Removes a structure at the given location
+ * @param {*} structLocation global coords
+ */
+function removeProjectedStructure(structLocation) {
+    var relCoords = getRelativeCoords(structLocation);
+    strcxt.clearRect(BOXSIDE * relCoords.i, BOXSIDE * relCoords.j, BOXSIDE, BOXSIDE);
+}
+
+/**
+ * Removes player from the local player's game
+ * @param {*} playerObj 
+ */
 function removePlayer(playerObj) {
     if (playerList[playerObj.id]) {
         var relCoords = getRelativeCoords(playerObj);
@@ -372,7 +410,6 @@ function defaultAction(structId, location) {
                 sendPlayerAction(structId, defaultAction[structId], location);
             }
         }
-        console.log(structObj)
         if (structObj.actions["a1"]) {
             sendPlayerAction(structId, "a1", location);
         }

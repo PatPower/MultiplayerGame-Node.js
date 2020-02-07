@@ -53,11 +53,11 @@ module.exports.playerJoin = function (othPlayer, player) {
     io.to(othplayer.id).emit('playerJoin', player);
 }
 
-module.exports.playerRemove = function (othPlayer, dcPlayer) {
+module.exports.playerRemove = function (othPlayer, dcPlayerObj) {
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
-    io.to(othplayer.id).emit('playerRemove', dcPlayer);
+    io.to(othplayer.id).emit('playerRemove', dcPlayerObj);
 }
 
 module.exports.othPlayerMove = function (othPlayer, oldPlayer, data) {
