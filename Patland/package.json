@@ -6,6 +6,9 @@
   "scripts": {
     "start": "nodemon"
   },
+  "nodemonConfig": {
+    "ignore": ["static/json*"]
+  },
   "author": {
     "name": ""
   },
