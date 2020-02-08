@@ -23,11 +23,10 @@ function setupInventory(canvas) {
     canvas.width = INVWIDTH;
     canvas.height = INVHEIGHT;
     var invcxt = canvas.getContext('2d');
+    invcxt.fillStyle = "rgb(208, 146, 15)";
+    invcxt.fillRect(0, 20, INVWIDTH, INVHEIGHT);
     for (var i = 0; i < INVNUMCOL; i++) {
         for (var j = 0; j < INVNUMROW; j++) {
-            invcxt.fillStyle = "rgb(208, 146, 15)";
-            invcxt.fillRect(INVBOXSIDE * i, INVBOXSIDE * j + 20, INVBOXSIDE, INVBOXSIDE);
-            invcxt.fillStyle = "black";
             invcxt.strokeRect(INVBOXSIDE * i, INVBOXSIDE * j + 20, INVBOXSIDE, INVBOXSIDE);
         }
     }
