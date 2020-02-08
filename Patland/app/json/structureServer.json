@@ -1,20 +1,23 @@
 [
     {
         "id": 0,
-        "name": "air",
+        "name": "Air",
         "armor": -1,
         "health": 1,
         "passable": true,
-        "action": {}
+        "sprite": null,
+        "actions": {}
     },
     {
         "id": 1,
-        "name": "rock",
+        "name": "Rock",
         "armor": 1,
         "health": 1,
         "passable": false,
-        "action": {
+        "sprite": "/static/img/structures/rock.png",
+        "actions": {
             "a1": {
+                "name": "Mine",
                 "cond": {
                     "item": [
                         {
@@ -44,12 +47,14 @@
     },
     {
         "id": 2,
-        "name": "bag",
+        "name": "Bag",
         "armor": 1,
         "health": 1,
         "passable": false,
-        "action": {
+        "sprite": "/static/img/structures/bag.png",
+        "actions": {
             "a1": {
+                "name": "Pick Up",
                 "cond": {
                     "item": [],
                     "skill": {},
@@ -66,6 +71,7 @@
                 }
             },
             "a2": {
+                "name": "Get Rocks",
                 "cond": {
                     "item": [],
                     "skill": {},
@@ -91,6 +97,7 @@
                 }
             },
             "a3": {
+                "name": "Get Brick Walls",
                 "cond": {
                     "item": [],
                     "skill": {},
@@ -119,12 +126,14 @@
     },
     {
         "id": 3,
-        "name": "badbag",
+        "name": "Badbag",
         "armor": 1,
         "health": 1,
         "passable": false,
-        "action": {
+        "sprite": "/static/img/structures/badbag.png",
+        "actions": {
             "a1": {
+                "name": "Pick Up?",
                 "cond": {
                     "item": [],
                     "skill": {},
@@ -141,6 +150,7 @@
                 }
             },
             "a2": {
+                "name": "Pick Up (good)",
                 "cond": {
                     "item": [],
                     "skill": {},
@@ -160,12 +170,14 @@
     },
     {
         "id": 4,
-        "name": "brickwall",
+        "name": "Brick Wall",
         "armor": 5,
         "health": 50,
         "passable": false,
-        "action": {
+        "sprite": "/static/img/structures/brickWall.png",
+        "actions": {
             "a1": {
+                "name": "Mine",
                 "cond": {
                     "item": [
                         {

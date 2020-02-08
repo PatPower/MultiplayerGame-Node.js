@@ -193,7 +193,6 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
  * buildLoc: {i: int, j: int} the location where the structure is being placed
  */
 Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc) {
-    console.log("Build Action ", playerId, itemId, actionId, invSlot, buildLoc);
     var player = world.getPlayer(playerId);
     if (player) {
         // Make sure player has the item at the slot specified
@@ -205,7 +204,6 @@ Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc
                     // Determines if the location has no solid structures or players
                     if (checkLocationBuildable(buildLoc)) {
                         var itemAction = JsonController.getItemAction(itemId, actionId);
-                        console.log(itemAction)
                         var structId = itemAction.structId;
                         var structHealth = JsonController.getStructureHealth(structId);
                         if (structId) {
