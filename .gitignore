@@ -1,6 +1,6 @@
 
 package-lock.json
-Patland/node_modules/
-Patland/bin/
-Patland/obj/
-Patland/.vs
+node_modules/
+bin/
+obj/
+.vs
