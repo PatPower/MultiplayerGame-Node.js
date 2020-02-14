@@ -1,6 +1,6 @@
 craftElement = document.getElementById("crafting")
 craftctx = setupCraft(craftElement);
-craftTitle(craftctx);
+
 
 function setupCraft(canvas) {
     canvas.width = CRAFTINGWIDTH;
@@ -17,12 +17,12 @@ function setupCraft(canvas) {
 
     // Crafting boxes
     for (i = 0; i < 3; i++) {
-        cxt.strokeRect(10 + i * (INVBOXSIDE + 10), 110, INVBOXSIDE, INVBOXSIDE);
+        cxt.strokeRect(10 + i * (INVBOXSIDE + 10), 115, INVBOXSIDE, INVBOXSIDE);
         cxt.fillStyle = "black";
         cxt.font = "bold 16px Almendra SC";
-        cxt.fillText("Item " + `${i + 1}`, 10 + i * (INVBOXSIDE + 10), 90);
+        cxt.fillText("Item " + `${i + 1}`, 10 + i * (INVBOXSIDE + 10), 108);
     }
-
+    craftTitle(cxt);
     return cxt;
 }
 
