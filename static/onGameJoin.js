@@ -37,3 +37,4 @@ function loadImages(callback) {
 
 show_prompt();
 loadJson();
+

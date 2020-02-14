@@ -1,5 +1,5 @@
 var currentSelectedActionId = -1;
-
+var menuVisible = false;
 $(function () {
     // Map
     $.contextMenu({
@@ -10,9 +10,19 @@ $(function () {
             opt.$menu.css({ top: y, left: x - 30 });
         },
         build: function ($triggerElement, e) {
+            $('#tooltip').hide();
+
             var x = mousePos.x - $('#overlay').offset().left - 4;
             var y = mousePos.y - $('#overlay').offset().top - 4;
             return findMenuObj(x, y)
+        },
+        events: {
+            show: function (options) {
+                menuVisible = true;
+            },
+            hide: function (options) {
+                menuVisible = false;
+            }
         },
         zIndex: 4
     });
@@ -27,6 +37,14 @@ $(function () {
         },
         build: function ($triggerElement, e) {
             return findMenuObjInv(parseInt($triggerElement.attr("id").slice(4)) - 1);
+        },
+        events: {
+            show: function (options) {
+                menuVisible = true;
+            },
+            hide: function (options) {
+                menuVisible = false;
+            }
         },
         zIndex: 4
     });
@@ -171,10 +189,22 @@ function structHasActionAtMousePos(mousePos) {
         if (obj) {
             // If there are actions for this structure
             if (Object.keys(obj["actions"]).length > 0) {
-                return true;
+                return obj;
             }
         }
     }
-    return false;
+    return null;
 }
 
+$(function () {
+    $(document).tooltip({
+        track: true
+    });
+});
+
+function getActionName(structId, actionId) {
+    var structObj = getStructureObj({ id: structId, health: 0, owner: "game" });
+    if (structObj.actions[actionId]) {
+        return structObj.actions[actionId]
+    }
+}
