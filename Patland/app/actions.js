@@ -169,7 +169,7 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
                 for (item of itemAction.result.drop) {
                     var slot = world.addPlayerItem(player, item);
                     if (slot == -1) {
-                        console.log("Error: ", player.id, " inventory overflowed")
+                        console.log("CRITICAL ERROR!!!: ", player.id, " inventory overflowed")
                     }
                     console.log(item)
                     inventoryChanges.push({ item: item, pos: slot })
@@ -207,14 +207,16 @@ Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc
                     // Determines if the location has no solid structures or players
                     if (checkLocationBuildable(buildLoc)) {
                         var itemAction = JsonController.getItemAction(itemId, actionId);
-                        console.log(itemAction)
                         var structId = itemAction.structId;
                         var structHealth = JsonController.getStructureHealth(structId);
                         if (structId) {
                             world.placeStructure(buildLoc, structId, structHealth, player.id);
+                            world.removePlayerItem(player, invSlot, true);
                         } else {
-                            return { result: false, msg: "Not buildable here" };
+                            return { result: false, msg: "Item not placeable (actions)" };
                         }
+                    } else {
+                        return { result: false, msg: "Not buildable here" };
                     }
                 }
             }
@@ -224,7 +226,14 @@ Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc
 }
 
 function checkLocationBuildable(buildLoc) {
-    return true;
+    // If there is no structure there already
+    if (!world.getStructureAtLocation(buildLoc)) {
+        // If there is no player at that current location.	
+        if (world.getPlayersAtLocation(buildLoc).length == 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 module.exports = Action;
