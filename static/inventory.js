@@ -2,9 +2,9 @@
 var invElement = document.getElementById("inv");
 var itemArea = document.getElementById("itemArea");
 var invCxt = setupInventory(invElement);
-var itemJson = [];
 var currentSelectedSlot = -1;
 var buildAnimationId = -1;
+var itemJson = [];
 
 invTitle(invCxt)
 
@@ -46,14 +46,14 @@ function updateInventory(inventoryChanges) {
         currPlayer.inventory[invChange.pos] = invChange.item;
         if (invChange.item) {
             img.src = getItemIcon(invChange.item.id);
-            makeDraggable(i);
-            enableDragging(i);
+            makeDraggable("#item" + i);
+            enableDragging("#item" + i);
         } else {
             img.src = getItemIcon(-1);
 
-            preventDragging(i);
+            preventDragging("#item" + i);
         }
-        makeDroppable(i);
+        makeDroppable("#item" + i);
         // If item is being removed from inv and is currently selected, select the same item in inv or deselect
         if (invChange.pos == currentSelectedSlot) {
             if (invChange.item == null) {
@@ -84,8 +84,8 @@ function updateInvSize(newInventorySize) {
             img.setAttribute("class", "item");
             img.setAttribute("id", "item" + i);
             img.src = getItemIcon(-1);
-            preventDragging(i);
-            makeDroppable(i);
+            preventDragging("#item" + i);
+            makeDroppable("#item" + i);
         }
     } else {
         // Lock inv spots
@@ -94,7 +94,7 @@ function updateInvSize(newInventorySize) {
             img.setAttribute("class", "lockeditemslot");
             img.setAttribute("id", "item" + i);
             img.src = getItemIcon(-2);
-            preventDragging(i);
+            preventDragging("#item" + i);
             $('#item' + i).droppable('disable');
         }
     }
@@ -112,13 +112,13 @@ function initalizeInvItems() {
         if (item) {
             img.src = getItemIcon(item.id);
             itemArea.append(img);
-            makeDraggable(i);
+            makeDraggable("#item" + i);
         } else {
             img.src = getItemIcon(-1);
             itemArea.append(img);
-            preventDragging(i);
+            preventDragging("#item" + i);
         }
-        makeDroppable(i);
+        makeDroppable("#item" + i);
     }
     for (i = currPlayer.inventorySize + 1; i <= 60; i++) {
         var img = document.createElement('img');
@@ -126,7 +126,7 @@ function initalizeInvItems() {
         img.setAttribute("id", "item" + i);
         img.src = getItemIcon(-2);
         itemArea.append(img);
-        preventDragging(i);
+        preventDragging("#item" + i);
     }
 }
 
@@ -191,24 +191,24 @@ function getItemIcon(id) {
     }
 }
 
-function makeDraggable(i) {
-    $("#item" + i).draggable({
+function makeDraggable(id) {
+    $(id).draggable({
         opacity: 0.8,
         revert: true,
         revertDuration: 0,
     });
 }
 
-function makeDroppable(i) {
-    $("#item" + i).droppable({
+function makeDroppable(id) {
+    $(id).droppable({
         disabled: false,
         drop: function (event, ui) {
-            console.log(currPlayer.inventory)
-
             //Make item temp invisible
             var draggedItemId = ui.draggable.attr('id');
             document.getElementById(draggedItemId).src = getItemIcon(-1);
+            // Origin
             var pos1 = parseInt(draggedItemId.slice(4)) - 1
+            // Destination
             var pos2 = parseInt($(this).attr('id').slice(4)) - 1
             emitItemSwap(pos1, pos2);
             if (currentSelectedSlot == pos1) {
@@ -216,18 +216,18 @@ function makeDroppable(i) {
             } else if (currentSelectedSlot == pos2) {
                 selectInvItem(pos1);
             }
-
+            console.log(pos1, pos2)
         }
     });
 }
 
-function preventDragging(i) {
-    $("#item" + i).on('dragstart', function (event) {
+function preventDragging(id) {
+    $(id).on('dragstart', function (event) {
         event.preventDefault();
     });
 }
-function enableDragging(i) {
-    $("#item" + i).off('dragstart');
+function enableDragging(id) {
+    $(id).off('dragstart');
 }
 
 function getItemObj(id) {

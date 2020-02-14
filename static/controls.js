@@ -83,7 +83,6 @@ $(document).click(function (event) {
     var y = mousePos.y - $('#itemArea').offset().top;
     var i = Math.floor(x / BOXSIDE);
     var j = Math.floor(y / BOXSIDE);
-    console.log(i, j)
     if (i >= 0 && i < INVNUMCOL && j >= 0 && j < NUMROW && $(event.target).attr("id")) {
         var slot = parseInt($(event.target).attr("id").slice(4)) - 1;
         var actionId = getActionId(slot);
@@ -111,11 +110,14 @@ document.addEventListener('mouseup', function (e) {
 $("#click").hide();
 
 // Keeps track of the mouse position at all times
-$(document).bind('mousemove', function (e) {
-    mousePos.x = e.pageX;
-    mousePos.y = e.pageY;
-    mousePos.i = Math.floor((e.pageX - $('#overlay').offset().left - 4) / BOXSIDE);
-    mousePos.j = Math.floor((e.pageY - $('#overlay').offset().top - 4) / BOXSIDE);
+$(document).mousemove(function (e) {
+    // If the mousemove have valid coordinates
+    if (e.pageX && e.pageY) {
+        mousePos.x = e.pageX;
+        mousePos.y = e.pageY;
+    }
+    mousePos.i = Math.floor((mousePos.x - $('#overlay').offset().left - 4) / BOXSIDE);
+    mousePos.j = Math.floor((mousePos.y - $('#overlay').offset().top - 4) / BOXSIDE);
     // Wait for the screen to finish loading
     if (!windowLoaded) {
         return;
@@ -127,6 +129,12 @@ $(document).bind('mousemove', function (e) {
         }
         lastI = mousePos.i;
         lastJ = mousePos.j;
+    }
+    if ($('#tooltip').is(":visible")) {
+        $('#tooltip').css({
+            left: mousePos.x + 12,
+            top: mousePos.y - 30
+        });
     }
 });
 
@@ -147,7 +155,8 @@ function updateCursorType(mousePos) {
         return;
     }
     // TODO: have different mouse cursors for different situations
-    if (structHasActionAtMousePos(mousePos)) {
+    var structObj = structHasActionAtMousePos(mousePos);
+    if (structObj) {
         document.body.style.cursor = 'pointer';
         // If building mode is on, then remove placable struct at cursor
         if (currentSelectedSlot != -1) {
@@ -157,7 +166,14 @@ function updateCursorType(mousePos) {
                 visibility: "hidden"
             });
         }
+        if (!menuVisible) {
+            $('#tooltip').show();
+            $("#tooltiptext").text(getActionName(structObj.id, getDefaultAction(structObj.id)) + " (e)");
+        }
     } else {
+        if ($('#tooltip').is(":visible")) {
+            $('#tooltip').hide();
+        }
         // If in building mode and is hovering over a buildable area
         if (currentSelectedSlot != -1 && checkIfInteractible(mousePos)) {
             document.body.style.cursor = 'grabbing';
@@ -183,8 +199,4 @@ function updateCursorType(mousePos) {
             }
         }
     }
-}
-
-function moveSelectedBuild() {
-    //selectedBuild.s
 }

@@ -200,6 +200,17 @@ canvas {
     position: absolute;
 }
 
+#craftingArea {
+    margin-top: 4px;
+    margin-left: 7px;
+    padding: 0px;
+    width: 164px;
+    height: 304px;
+    float: left;
+    z-index: 5;
+    position: relative;
+}
+
 ::-moz-selection {
     background-color: transparent;
     color: #000;
@@ -208,4 +219,35 @@ canvas {
 ::selection {
     background-color: transparent;
     color: #000;
+}
+#tooltip {
+    position: absolute;
+    z-index: 10;
+    pointer-events: none;
+    height:24px;
+    margin: 0px;
+    margin-bottom: 0px;
+    padding: 0px;
+    background-color: rgb(165, 165, 0); 
+    border: 1px solid gray;
+    display: none;
+}
+
+#tooltiptext {
+    margin: 2px;
+    padding: 0px;
+}
+
+.craftitem {
+    width: 40px;
+    height:40px;
+    position: absolute;
+    z-index: 4;   
+}
+
+.itemOverlay{
+    width: 40px;
+    height:40px;
+    position: absolute;
+    z-index: 4;   
 }

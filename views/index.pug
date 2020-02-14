@@ -6,6 +6,7 @@ html
         link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.css")
         script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.js")
         script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.ui.position.js")
+        
         script(src="https://code.jquery.com/ui/1.12.1/jquery-ui.js")
         script(src="https://kit.fontawesome.com/b6abf5ebcd.js" crossorigin="anonymous")
         script(src="/static/const.js")
@@ -27,6 +28,7 @@ html
                 div(id="itemArea")
                 canvas(id="inv")
                 canvas(id="crafting")
+                div(id="craftingArea")
         script(src="/static/controls.js")
         script(src="/static/game.js")
         script(src="/static/customContextMenu.js")
@@ -37,3 +39,5 @@ html
         img(id="click" src="/static/img/circle.png")
         img(id="select" src="/static/img/select.png")
         img(id="selectedBuild")
+        div(id="tooltip")
+            p(id="tooltiptext")
