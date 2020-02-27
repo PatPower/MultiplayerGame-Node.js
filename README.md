@@ -5,9 +5,10 @@ Current version: https://patlands.herokuapp.com/ (Basically nothing as of now)
 
 Current Features:
 - Multiplayer
+- Building
 
 Features (In progress):
-- Building
+- Crafting
 
 Features (Planned): 
 - Randomly generated large world
