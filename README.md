@@ -11,7 +11,7 @@ Features (In progress):
 - Crafting
 
 Features (Planned): 
-- Randomly generated large world
+- Large randomly generated world
 - Caves
 - Dungeons
 - Gathering resources
