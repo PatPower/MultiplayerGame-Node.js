@@ -3,12 +3,6 @@
   "version": "0.0.0",
   "description": "Patland",
   "main": "server.js",
-  "scripts": {
-    "start": "nodemon"
-  },
-  "nodemonConfig": {
-    "ignore": ["static/json*"]
-  },
   "author": {
     "name": ""
   },

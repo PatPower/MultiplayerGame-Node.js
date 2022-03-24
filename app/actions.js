@@ -141,6 +141,7 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
                 var freedUpSpace = itemAction.result.removeItem.length;
                 // If used item is being destroyed, then make one free space
                 freedUpSpace += itemAction.result.destroy ? 1 : 0;
+                console.log("FREE", itemAction.result.drop.length, freeInvSpace + freedUpSpace)
                 if (itemAction.result.drop.length > freeInvSpace + freedUpSpace) {
                     return { result: false, msg: "Not enough inventory space!" };
                 }
@@ -148,7 +149,7 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
                 // EVENT:
                 if (itemAction.result.destroy) {
                     world.removePlayerItem(player, invSlot);
-                    inventoryChanges.push({ item: null, pos: invSlot });
+                    inventoryChanges.push({ item: null, pos: invSlot })
                 }
                 for (item of itemAction.result.degradeItems) {
                     // TODO: Degrade items
@@ -170,6 +171,7 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
                     if (slot == -1) {
                         console.log("CRITICAL ERROR!!!: ", player.id, " inventory overflowed")
                     }
+                    console.log(item)
                     inventoryChanges.push({ item: item, pos: slot })
                 }
                 if (itemAction.result.addToInvSize) {
@@ -193,6 +195,7 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
  * buildLoc: {i: int, j: int} the location where the structure is being placed
  */
 Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc) {
+    console.log("Build Action ", playerId, itemId, actionId, invSlot, buildLoc);
     var player = world.getPlayer(playerId);
     if (player) {
         // Make sure player has the item at the slot specified
@@ -225,7 +228,7 @@ Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc
 function checkLocationBuildable(buildLoc) {
     // If there is no structure there already
     if (!world.getStructureAtLocation(buildLoc)) {
-        // If there is no player at that current location.
+        // If there is no player at that current location.	
         if (world.getPlayersAtLocation(buildLoc).length == 0) {
             return true;
         }

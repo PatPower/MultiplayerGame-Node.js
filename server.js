@@ -5,7 +5,7 @@ var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 var World = require('./app/world.js');
 
-const port = 8080;
+const port = process.env.PORT || 80;
 
 app.set('port', port);
 app.set('view engine', 'pug');
