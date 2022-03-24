@@ -54,7 +54,7 @@
         "sprite": "/static/img/structures/bag.png",
         "actions": {
             "a1": {
-                "name": "Pick Up",
+                "name": "Increase Inventory Size",
                 "cond": {
                     "item": [],
                     "skill": {},
@@ -133,7 +133,7 @@
         "sprite": "/static/img/structures/badbag.png",
         "actions": {
             "a1": {
-                "name": "Pick Up?",
+                "name": "Decrease Inventory Size",
                 "cond": {
                     "item": [],
                     "skill": {},
@@ -150,7 +150,7 @@
                 }
             },
             "a2": {
-                "name": "Pick Up (good)",
+                "name": "Increase Inventory Size",
                 "cond": {
                     "item": [],
                     "skill": {},

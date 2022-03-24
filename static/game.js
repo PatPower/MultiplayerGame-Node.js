@@ -36,6 +36,7 @@ socket.on('setup', function (currentPlayer, pList, ground2D, structure2D, defaul
     projectSquares(pList);
     projectSquare(currentPlayer, {});
     initalizeInvItems();
+    setupCraftingArea();
 });
 
 socket.on('moveCurrPlayer', function (player, pList, ground2D, structure2D) {
@@ -47,6 +48,7 @@ socket.on('moveCurrPlayer', function (player, pList, ground2D, structure2D) {
     projectSquares(playerList);
     updateTileMarker(currPlayer);
     updateCursorType(mousePos);
+    $(document).mousemove();
 });
 
 /**
@@ -402,16 +404,24 @@ function checkIfNewCoordsOutBounds(player, movement) {
 }
 
 function defaultAction(structId, location) {
+    var defAction = getDefaultAction(structId);
+    if (defAction) {
+        sendPlayerAction(structId, defAction, location);
+    }
+}
+
+function getDefaultAction(structId) {
     var structObj = getStructureObj({ id: structId, health: 0, owner: "game" });
     if (structObj) {
         if (structId in defaultActions) {
-            var defaultAction = "a" + defaultAction[structId];
-            if (structObj.action[defaultAction]) {
-                sendPlayerAction(structId, defaultAction[structId], location);
+            var defAction = "a" + defaultActions[structId];
+            if (structObj.actions[defAction]) {
+                return defAction
             }
         }
         if (structObj.actions["a1"]) {
-            sendPlayerAction(structId, "a1", location);
+            return "a1"
         }
     }
+    return null
 }
