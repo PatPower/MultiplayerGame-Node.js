@@ -109,6 +109,8 @@ canvas {
     width: 350px;
     height: 620px;
     float: right;
+    display: flex;
+    flex-direction: row;
 }
 
 .item {
@@ -193,13 +195,19 @@ canvas {
     pointer-events: none;
 }
 
+#craftingSide {
+    width: 160px;
+    height: 300px;
+}
+
 #crafting {
     margin-left: 3px;
     width: 160px;
     height: 300px;
     border: 4px solid rgb(102, 51, 0);
     float: left;
-    position: absolute;
+    position: relative;
+
 }
 
 #craftingArea {
@@ -210,7 +218,7 @@ canvas {
     height: 304px;
     float: left;
     z-index: 5;
-    position: relative;
+    position: absolute;
 }
 
 ::-moz-selection {
