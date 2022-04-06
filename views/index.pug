@@ -16,7 +16,7 @@ html
     body
         div(id="viewport")
             h1(id="title") Patland
-            p(id="subheader") WASD to move, mouse and E to interact, right click to open menu
+            p(id="subheader") WASD to move, hover then (e) to interact, hover then right click to open menu
             canvas(id="tileMarker")
             div(id="screen1")
                 canvas(id="background")
@@ -27,14 +27,15 @@ html
             div(id="rightside")
                 div(id="itemArea")
                 canvas(id="inv")
-                //- canvas(id="crafting")
-                //- div(id="craftingArea")
+                div(id="craftingSide")
+                    canvas(id="crafting")
+                    div(id="craftingArea")
         script(src="/static/controls.js")
         script(src="/static/game.js")
         script(src="/static/customContextMenu.js")
         script(src="/static/coordinateInfo.js")
         script(src="/static/inventory.js")
-        //- script(src="/static/crafting.js")
+        script(src="/static/crafting.js")
 
         img(id="click" src="/static/img/circle.png")
         img(id="select" src="/static/img/select.png")
