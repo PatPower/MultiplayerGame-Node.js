@@ -213,25 +213,25 @@ function initalizeInvItems() {
 }
 
 function invLockIcon() {
-    var img = document.createElement('img');
-    img.setAttribute("class", "lockimg");
-    img.setAttribute("id", "lockimg");
-    img.src = getItemIcon(-2);
-    img.style.position = "absolute";
-    img.style.height = "22px";
-    img.style.width = "22px";
-    img.style.zIndex = "5";
+    // Temporarily disable lock icon creation to debug positioning issue
+    console.log('🔒 Lock icon creation disabled for debugging');
     
-    // Append to itemArea instead of document.body to keep it contained
-    itemArea.appendChild(img);
+    // Clean up any existing lock icons
+    var existingLockIcon = document.getElementById("lockimg");
+    if (existingLockIcon) {
+        existingLockIcon.remove();
+        console.log('🗑️ Removed existing lock icon');
+    }
     
-    $("#lockimg").on('dragstart', function (event) {
-        event.preventDefault();
+    // Also check for any lockimg elements that might be floating around
+    var lockimgs = document.querySelectorAll('.lockimg');
+    lockimgs.forEach(function(img) {
+        img.remove();
+        console.log('🗑️ Removed floating lock icon');
     });
     
-    if (currPlayer.inventorySize >= 60) {
-        img.style.visibility = 'hidden';
-    }
+    // Don't create any new lock icons for now
+    return;
 }
 
 function updateInvLockIcon() {
