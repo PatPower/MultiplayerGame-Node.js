@@ -218,15 +218,17 @@ function invLockIcon() {
     img.setAttribute("id", "lockimg");
     img.src = getItemIcon(-2);
     img.style.position = "absolute";
-    img.style.left = "138px";
-    img.style.top = "594px";
     img.style.height = "22px";
     img.style.width = "22px";
     img.style.zIndex = "5";
-    document.body.appendChild(img);
+    
+    // Append to itemArea instead of document.body to keep it contained
+    itemArea.appendChild(img);
+    
     $("#lockimg").on('dragstart', function (event) {
         event.preventDefault();
     });
+    
     if (currPlayer.inventorySize >= 60) {
         img.style.visibility = 'hidden';
     }
@@ -243,24 +245,23 @@ function updateInvLockIcon() {
     
     if (currPlayer.inventorySize >= 60) {
         img.style.visibility = 'hidden';
-        return
+        return;
     } else {
         img.style.visibility = 'visible';
     }
-    var invSpaceLeft = MAXINVSPACE - currPlayer.inventorySize
-    var rowsLeft = Math.floor(invSpaceLeft / 4)
-    if (invSpaceLeft >= 4) {
-        var x = (4 * INVBOXSIDE) / 2 - INVBOXSIDE / 2
-    } else {
-        var x = INVWIDTH / 2 + (INVWIDTH - invSpaceLeft * INVBOXSIDE) / 2 - INVBOXSIDE / 2
-    }
-    if (rowsLeft >= 1) {
-        var y = 600 / 2 + (600 - (INVBOXSIDE * rowsLeft)) / 2 - INVBOXSIDE / 2
-    } else {
-        var y = 600 - BOXSIDE
-    }
-    img.style.marginLeft = x + 'px';
-    img.style.marginTop = y + 'px';
+    
+    // Calculate position relative to the inventory area
+    var nextSlot = currPlayer.inventorySize; // 0-based index of next slot to unlock
+    var invX = nextSlot % 4; // Column (0-3)
+    var invY = Math.floor(nextSlot / 4); // Row
+    
+    // Position the lock icon over the next slot to be unlocked
+    var x = invX * INVBOXSIDE + INVBOXSIDE / 2 - 11; // Center horizontally (22px width / 2 = 11)
+    var y = invY * INVBOXSIDE + INVBOXSIDE / 2 - 11; // Center vertically (22px height / 2 = 11)
+    
+    // Use left/top instead of marginLeft/marginTop for absolute positioning
+    img.style.left = x + 'px';
+    img.style.top = y + 'px';
 }
 
 
