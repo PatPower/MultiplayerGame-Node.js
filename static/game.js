@@ -585,6 +585,18 @@ initializeSocket().then(socket => {
     
     // New function to draw all player names on the overlay canvas (above grid lines)
     function drawPlayerNames() {
+        // Clear the entire overlay canvas first
+        ovlycxt.clearRect(0, 0, CWIDTH, CHEIGHT);
+        
+        // Redraw the grid lines
+        ovlycxt.strokeStyle = 'black';
+        ovlycxt.lineWidth = 1;
+        for (var i = 0; i < NUMCOL; i++) {
+            for (var j = 0; j < NUMROW; j++) {
+                ovlycxt.strokeRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
+            }
+        }
+        
         // Draw names for other players
         for (var playerId in window.playerList) {
             var playerObj = window.playerList[playerId];
