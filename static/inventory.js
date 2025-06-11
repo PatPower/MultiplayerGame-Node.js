@@ -340,6 +340,11 @@ function selectInvItem(slot) {
         selectedItemId = currPlayer.inventory[slot].id;
     }
     
+    // Redraw current player immediately to show the selected item icon
+    if (window.projectSquare && window.currPlayer) {
+        window.projectSquare(window.currPlayer, {});
+    }
+    
     // Notify server about selection
     if (window.socket) {
         window.socket.emit('itemSelection', slot, selectedItemId);
@@ -367,6 +372,11 @@ function deselectInvItem() {
                 ovlycxt.strokeRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
             }
         }
+    }
+    
+    // Redraw current player immediately to remove the selected item icon
+    if (window.projectSquare && window.currPlayer) {
+        window.projectSquare(window.currPlayer, {});
     }
     
     // Notify server about deselection
