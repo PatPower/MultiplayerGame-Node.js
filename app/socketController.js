@@ -57,11 +57,16 @@ module.exports = function (socketIo, world, auth, database) {
                     }
                 });
                 
-                socket.on('invAction', function (id, actionId, invSlot) {
-                    var response = action.doInvAction(socket.id, id, actionId, invSlot);
-                    // If a condition is not met
-                    if (!response.result) {
-                        module.exports.message(socket.id, response.msg);
+                socket.on('invAction', async function (id, actionId, invSlot) {
+                    try {
+                        var response = await action.doInvAction(socket.id, id, actionId, invSlot);
+                        // If a condition is not met
+                        if (!response.result) {
+                            module.exports.message(socket.id, response.msg);
+                        }
+                    } catch (error) {
+                        console.error('Error in invAction:', error);
+                        module.exports.message(socket.id, 'Action failed');
                     }
                 });
                 

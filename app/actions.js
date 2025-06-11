@@ -133,7 +133,7 @@ Action.prototype.doAction = async function (playerId, structId, actionId, locati
  * actionId: a1, a2 or a3 depending if action 1, action 2 or action 3
  * invSlot: the slot of the used item
  */
-Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
+Action.prototype.doInvAction = async function (playerId, itemId, actionId, invSlot) {
     console.log("Inv Action ", playerId, itemId, actionId, invSlot)
     var player = world.getPlayer(playerId);
     console.log(player.inventory)
@@ -145,7 +145,7 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
             var inventoryChanges = [];
             // Check if action is "DefaultDrop"
             if (itemAction.name == "DefaultDrop") {
-                world.removePlayerItem(player, invSlot);
+                await world.removePlayerItem(player, invSlot);
                 inventoryChanges.push({ item: null, pos: invSlot })
             } else if (itemAction.name == "Select") {
                 console.log(itemId, " selected!");
@@ -185,7 +185,7 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
 
                 // EVENT:
                 if (itemAction.result.destroy) {
-                    world.removePlayerItem(player, invSlot);
+                    await world.removePlayerItem(player, invSlot);
                     inventoryChanges.push({ item: null, pos: invSlot })
                 }
                 for (item of itemAction.result.degradeItems) {
@@ -201,12 +201,12 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
                 for (itemId of itemAction.result.removeItem) {
                     var itemInfo = world.verifyPlayerItem(player, itemId);
                     if (itemInfo) {
-                        world.removePlayerItem(player, itemInfo.slot);
+                        await world.removePlayerItem(player, itemInfo.slot);
                         inventoryChanges.push({ item: null, pos: itemInfo.slot })
                     }
                 }
                 for (item of itemAction.result.drop) {
-                    var slot = world.addPlayerItem(player, item);
+                    var slot = await world.addPlayerItem(player, item);
                     if (slot == -1) {
                         console.log("CRITICAL ERROR!!!: ", player.id, " inventory overflowed")
                     }
@@ -214,7 +214,7 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
                     inventoryChanges.push({ item: item, pos: slot })
                 }
                 if (itemAction.result.addToInvSize) {
-                    world.changeInvSize(player, itemAction.result.addToInvSize)
+                    await world.changeInvSize(player, itemAction.result.addToInvSize)
                 }
             }
             if (inventoryChanges.length > 0) {

@@ -119,12 +119,12 @@ function updateInvSize(newInventorySize) {
         return;
     } else if (difference > 0) {
         // Unlock inv spots
-        for (var i = oldInvSize + 1; i < newInventorySize + 1; i++) {
-            var img = itemArea.childNodes[i];
+        for (var i = oldInvSize + 1; i <= newInventorySize; i++) {
+            var img = document.getElementById('item' + i);
             
             // Check if the DOM element exists
             if (!img) {
-                console.warn(`Inventory slot ${i} DOM element not found for size update`);
+                console.warn(`Inventory slot item${i} DOM element not found for size update`);
                 continue;
             }
             
@@ -137,11 +137,11 @@ function updateInvSize(newInventorySize) {
     } else {
         // Lock inv spots
         for (var i = oldInvSize; i > newInventorySize; i--) {
-            var img = itemArea.childNodes[i];
+            var img = document.getElementById('item' + i);
             
             // Check if the DOM element exists
             if (!img) {
-                console.warn(`Inventory slot ${i} DOM element not found for size update`);
+                console.warn(`Inventory slot item${i} DOM element not found for size update`);
                 continue;
             }
             
