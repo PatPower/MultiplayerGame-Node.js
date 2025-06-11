@@ -300,6 +300,9 @@ initializeSocket().then(socket => {
         projectSquares(pList);  // Now currPlayer is defined globally
         projectSquare(currentPlayer, {});
         
+        // Draw player names on top of grid lines
+        drawPlayerNames();
+        
         console.log('🎒 Initializing inventory...');
         initalizeInvItems();
         
@@ -324,6 +327,9 @@ initializeSocket().then(socket => {
         updateTileMarker(currPlayer);
         updateCursorType(mousePos);
         $(document).mousemove();
+        
+        // Redraw player names on top of grid lines
+        drawPlayerNames();
     });
 
     /**
@@ -379,14 +385,21 @@ initializeSocket().then(socket => {
         projectSquare(newP, getNewCoordsLocation(relCoords, movement));
         // Move the player in the locationMap
         movePlayer(othP, movement);
+        
+        // Redraw player names on top of grid lines
+        drawPlayerNames();
     });
 
     socket.on('playerJoin', function (playerObj) {
         addPlayer(playerObj);
+        // Redraw player names on top of grid lines
+        drawPlayerNames();
     });
 
     socket.on('playerRemove', function (playerObj) {
         removePlayer(playerObj);
+        // Redraw player names on top of grid lines
+        drawPlayerNames();
     });
 
     /**
@@ -564,44 +577,46 @@ initializeSocket().then(socket => {
         if (playerObj.id != currPlayer.id) {
             opcxt.fillStyle = playerObj.color;
             opcxt.fillRect(BOXSIDE * relCoords.i, BOXSIDE * relCoords.j, BOXSIDE, BOXSIDE);
-            
-            // Draw name centered above the player
-            opcxt.fillStyle = 'white';
-            opcxt.strokeStyle = 'black';
-            opcxt.lineWidth = 2;
-            opcxt.font = "bold 12px Arial";
-            opcxt.textAlign = 'center';
-            
-            var nameX = BOXSIDE * relCoords.i + BOXSIDE / 2; // Center horizontally
-            var nameY = BOXSIDE * relCoords.j - 5; // Position above the player
-            
-            // Draw text outline for better visibility
-            opcxt.strokeText(playerObj.name, nameX, nameY);
-            opcxt.fillText(playerObj.name, nameX, nameY);
-            
-            // Reset text alignment
-            opcxt.textAlign = 'start';
         } else { // Current player
             pcxt.fillStyle = 'cyan';
             pcxt.fillRect(BOXSIDE * 10, BOXSIDE * 7, BOXSIDE, BOXSIDE);
-            
-            // Draw name centered above the current player
-            pcxt.fillStyle = 'white';
-            pcxt.strokeStyle = 'black';
-            pcxt.lineWidth = 2;
-            pcxt.font = "bold 12px Arial";
-            pcxt.textAlign = 'center';
-            
-            var nameX = BOXSIDE * 10 + BOXSIDE / 2; // Center horizontally
-            var nameY = BOXSIDE * 7 - 5; // Position above the player
-            
-            // Draw text outline for better visibility
-            pcxt.strokeText(playerObj.name, nameX, nameY);
-            pcxt.fillText(playerObj.name, nameX, nameY);
-            
-            // Reset text alignment
-            pcxt.textAlign = 'start';
         }
+    }
+    
+    // New function to draw all player names on the overlay canvas (above grid lines)
+    function drawPlayerNames() {
+        // Draw names for other players
+        for (var playerId in window.playerList) {
+            var playerObj = window.playerList[playerId];
+            if (playerObj.id != window.currPlayer.id) {
+                var relCoords = getRelativeCoords(playerObj);
+                drawPlayerName(ovlycxt, playerObj.name, relCoords.i, relCoords.j);
+            }
+        }
+        
+        // Draw name for current player
+        if (window.currPlayer && window.currPlayer.name) {
+            drawPlayerName(ovlycxt, window.currPlayer.name, 10, 7);
+        }
+    }
+    
+    // Helper function to draw a single player name
+    function drawPlayerName(context, name, gridI, gridJ) {
+        context.fillStyle = 'white';
+        context.strokeStyle = 'black';
+        context.lineWidth = 2;
+        context.font = "bold 12px Arial";
+        context.textAlign = 'center';
+        
+        var nameX = BOXSIDE * gridI + BOXSIDE / 2; // Center horizontally
+        var nameY = BOXSIDE * gridJ - 5; // Position above the player
+        
+        // Draw text outline for better visibility
+        context.strokeText(name, nameX, nameY);
+        context.fillText(name, nameX, nameY);
+        
+        // Reset text alignment
+        context.textAlign = 'start';
     }
     /**
      * 
@@ -753,6 +768,7 @@ initializeSocket().then(socket => {
     window.setupOverlay = setupOverlay;
     window.setupCurrentPlayer = setupCurrentPlayer;
     window.setupOtherPlayers = setupOtherPlayers;
+    window.drawPlayerNames = drawPlayerNames;
 });
 
 // Add logout functionality
