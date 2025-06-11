@@ -236,8 +236,14 @@ Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc
     var structHealth = JsonController.getStructureHealth(structId);
     
     try {
+        // Place the structure first
         world.placeStructure(buildLoc, structId, structHealth, player.id);
-        world.removePlayerItem(player, invSlot, true);
+        
+        // Remove the item from inventory and send update to client
+        world.removePlayerItem(player, invSlot, false); // Don't auto-update
+        var inventoryChanges = [{ item: null, pos: invSlot }];
+        world.playerInventoryUpdate(player, inventoryChanges);
+        
         return { result: true, msg: "Structure placed successfully" };
     } catch (error) {
         console.error("Error placing structure:", error);
