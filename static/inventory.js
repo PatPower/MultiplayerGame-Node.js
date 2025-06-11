@@ -56,7 +56,9 @@ function updateInventory(inventoryChanges) {
     console.log('📦 Processing inventory update:', inventoryChanges);
     
     for (invChange of inventoryChanges) {
+        console.log('🔍 Processing change:', invChange);
         var i = invChange.pos + 1;
+        console.log('🎯 Updating DOM element:', 'item' + i, 'for inventory position:', invChange.pos);
         var img = itemArea.childNodes[i];
         
         // Check if the DOM element exists
