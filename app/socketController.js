@@ -2,45 +2,79 @@ var io;
 var Action = require('./actions.js');
 var action;
 
-module.exports = function (socketIo, world) {
+module.exports = function (socketIo, world, auth, database) {
     if (!io) {
         action = new Action(world);
         io = socketIo
-        // Add the WebSocket handlers
-        io.on('connection', function (socket) {
-            socket.on('new player', function (pname) {
-                world.createPlayer(socket.id, pname, io);
-            });
-            socket.on('disconnect', function () {
-                world.disconnectPlayer(socket.id, io);
-            });
-            socket.on('movement', function (data) {
-                world.movePlayer(socket.id, data, io);
-            });
-            socket.on('pAction', function (id, actionId, location) {
-                var response = action.doAction(socket.id, id, actionId, location);
-                // If a condition is not met
-                if (!response.result) {
-                    module.exports.message(socket.id, response.msg);
-                }
-            });
-            socket.on('invAction', function (id, actionId, invSlot) {
-                var response = action.doInvAction(socket.id, id, actionId, invSlot);
-                // If a condition is not met
-                if (!response.result) {
-                    module.exports.message(socket.id, response.msg);
-                }
-            });
-            socket.on('build', function (itemId, actionId, invSlot, buildLoc) {
-                var response = action.build(socket.id, itemId, actionId, invSlot, buildLoc);
-                // If a condition is not met
-                if (!response.result) {
-                    module.exports.message(socket.id, response.msg);
-                }
-            });
-            socket.on('itemSwap', function (pos1, pos2) {
-                world.itemSwap(socket.id, pos1, pos2);
-            });
+        // Add the WebSocket handlers with authentication
+        io.on('connection', async function (socket) {
+            try {
+                // Authenticate the socket connection
+                const user = await auth.authenticateSocket(socket);
+                console.log('Authenticated user connected:', user.email);
+                
+                socket.user = user;
+                
+                socket.on('new player', async function (pname) {
+                    try {
+                        // Use authenticated user data instead of just the provided name
+                        await world.createPlayer(socket.id, user);
+                    } catch (error) {
+                        console.error('Error creating player:', error);
+                        socket.emit('error', 'Failed to create player');
+                    }
+                });
+                
+                socket.on('disconnect', async function () {
+                    try {
+                        await world.disconnectPlayer(socket.id);
+                    } catch (error) {
+                        console.error('Error disconnecting player:', error);
+                    }
+                });
+                
+                socket.on('movement', function (data) {
+                    world.movePlayer(socket.id, data);
+                });
+                
+                socket.on('pAction', function (id, actionId, location) {
+                    var response = action.doAction(socket.id, id, actionId, location);
+                    // If a condition is not met
+                    if (!response.result) {
+                        module.exports.message(socket.id, response.msg);
+                    }
+                });
+                
+                socket.on('invAction', function (id, actionId, invSlot) {
+                    var response = action.doInvAction(socket.id, id, actionId, invSlot);
+                    // If a condition is not met
+                    if (!response.result) {
+                        module.exports.message(socket.id, response.msg);
+                    }
+                });
+                
+                socket.on('build', function (itemId, actionId, invSlot, buildLoc) {
+                    var response = action.build(socket.id, itemId, actionId, invSlot, buildLoc);
+                    // If a condition is not met
+                    if (!response.result) {
+                        module.exports.message(socket.id, response.msg);
+                    }
+                });
+                
+                socket.on('itemSwap', async function (pos1, pos2) {
+                    try {
+                        await world.itemSwap(socket.id, pos1, pos2);
+                    } catch (error) {
+                        console.error('Error swapping items:', error);
+                        socket.emit('error', 'Failed to swap items');
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Authentication failed:', error);
+                socket.emit('auth_error', 'Authentication failed');
+                socket.disconnect();
+            }
         });
     }
     return module.exports;

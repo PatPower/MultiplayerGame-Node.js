@@ -13,7 +13,18 @@ html
         script(src="/static/location.js") 
         script(src="/static/onGameJoin.js")
         link(rel='stylesheet', href='/static/css/index.css')
+        
+        // Pass user data to client
+        script.
+            window.authenticatedUser = !{JSON.stringify(user || null)};
     body
+        div(id="auth-info" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px; z-index: 1000;")
+            if user
+                div Welcome, #{user.name}!
+                div Email: #{user.email}
+            else
+                div Not authenticated
+        
         div(id="viewport")
             h1(id="title") Patland
             p(id="subheader") WASD to move, hover then (e) to interact, hover then right click to open menu

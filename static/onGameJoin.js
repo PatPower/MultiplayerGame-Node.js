@@ -1,13 +1,4 @@
-var name = "Pat";
-
-function show_prompt() {
-    do {
-        name = prompt("Please enter your name (max length 5)");
-    }
-    while (name.length > 5) {
-        $('#myinput').val(name);
-    }
-}
+var name = window.authenticatedUser ? window.authenticatedUser.name : "Anonymous";
 
 function loadJson() {
     $.getJSON("/static/json/structures.json", function (json) {
@@ -34,7 +25,6 @@ function loadImages(callback) {
     }
 }
 
-
-show_prompt();
+// No longer need to show prompt since we use authenticated user
 loadJson();
 

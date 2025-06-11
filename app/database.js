@@ -1,0 +1,123 @@
+const fs = require('fs').promises;
+const path = require('path');
+
+class Database {
+    constructor() {
+        this.dbType = process.env.DATABASE_TYPE || 'json';
+        this.dbPath = process.env.DATABASE_PATH || './data/players.json';
+        this.ensureDataDirectory();
+    }
+
+    async ensureDataDirectory() {
+        const dir = path.dirname(this.dbPath);
+        try {
+            await fs.access(dir);
+        } catch {
+            await fs.mkdir(dir, { recursive: true });
+        }
+    }
+
+    async loadPlayerData() {
+        try {
+            await fs.access(this.dbPath);
+            const data = await fs.readFile(this.dbPath, 'utf8');
+            return JSON.parse(data);
+        } catch (error) {
+            // File doesn't exist or is invalid, return empty object
+            return {};
+        }
+    }
+
+    async savePlayerData(data) {
+        await this.ensureDataDirectory();
+        await fs.writeFile(this.dbPath, JSON.stringify(data, null, 2));
+    }
+
+    async getPlayer(userId) {
+        const data = await this.loadPlayerData();
+        return data[userId] || null;
+    }
+
+    async savePlayer(userId, playerData) {
+        const data = await this.loadPlayerData();
+        data[userId] = {
+            ...playerData,
+            lastSaved: new Date().toISOString()
+        };
+        await this.savePlayerData(data);
+    }
+
+    async createPlayer(userId, email, name) {
+        const existingPlayer = await this.getPlayer(userId);
+        if (existingPlayer) {
+            return existingPlayer;
+        }
+
+        const newPlayer = {
+            userId: userId,
+            email: email,
+            name: name,
+            inventory: [
+                { id: 0, durability: 50 }, 
+                null, 
+                { id: 3, durability: 50 }, 
+                { id: 1, durability: 50 }, 
+                { id: 2, durability: 50 }
+            ],
+            inventorySize: 5,
+            skills: {
+                "mining": { level: 1, experience: 0 },
+                "woodcutting": { level: 1, experience: 0 }
+            },
+            position: { i: 10, j: 7 },
+            color: this.generatePlayerColor(),
+            createdAt: new Date().toISOString(),
+            lastLogin: new Date().toISOString()
+        };
+
+        await this.savePlayer(userId, newPlayer);
+        return newPlayer;
+    }
+
+    async updatePlayerInventory(userId, inventory, inventorySize) {
+        const player = await this.getPlayer(userId);
+        if (player) {
+            player.inventory = inventory;
+            player.inventorySize = inventorySize;
+            await this.savePlayer(userId, player);
+        }
+    }
+
+    async updatePlayerPosition(userId, position) {
+        const player = await this.getPlayer(userId);
+        if (player) {
+            player.position = position;
+            await this.savePlayer(userId, player);
+        }
+    }
+
+    async updatePlayerSkills(userId, skills) {
+        const player = await this.getPlayer(userId);
+        if (player) {
+            player.skills = skills;
+            await this.savePlayer(userId, player);
+        }
+    }
+
+    generatePlayerColor() {
+        const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'cyan'];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    async getAllPlayers() {
+        return await this.loadPlayerData();
+    }
+
+    async deletePlayer(userId) {
+        const data = await this.loadPlayerData();
+        delete data[userId];
+        await this.savePlayerData(data);
+    }
+}
+
+module.exports = Database;

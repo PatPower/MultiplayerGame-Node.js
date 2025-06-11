@@ -5,7 +5,8 @@ var worldStructureMap = [];
 var worldGroundMap = [];
 var worldPlayerMap = [];
 
-function World() {
+function World(database) {
+    this.database = database;
     var data = getDataFromDB();
     worldStructureMap = data.worldStructureMap;
     worldGroundMap = data.worldGroundMap;
@@ -113,51 +114,85 @@ World.prototype.checkIfInteractible = function (player, location) {
     return false;
 }
 
-World.prototype.createPlayer = function (id, pname) {
+World.prototype.createPlayer = async function (id, user) {
     var player;
-    // TODO: make a system to save a player and load it
-    // If player exists load it
-    if (false) {
-
-    } else {
-        // else create new player
-        player = {
-            id: id,
-            i: 10,
-            j: 7,
-            name: pname,
-            inventory: [{ id: 0, durability: 50 }, null, { id: 3, durability: 50 }, { id: 1, durability: 50 }, { id: 2, durability: 50 }],
-            inventorySize: 5,
-            skills: {
-                "mining": { level: 1, experience: 0 },
-                "woodcutting": { level: 1, experience: 0 }
-            },
-            color: 'red'
+    
+    try {
+        // Try to load existing player data from database
+        var savedPlayer = await this.database.getPlayer(user.id);
+        
+        if (savedPlayer) {
+            // Load existing player
+            player = {
+                id: id,
+                userId: user.id,
+                i: savedPlayer.position.i,
+                j: savedPlayer.position.j,
+                name: savedPlayer.name,
+                email: savedPlayer.email,
+                inventory: savedPlayer.inventory,
+                inventorySize: savedPlayer.inventorySize,
+                skills: savedPlayer.skills,
+                color: savedPlayer.color
+            };
+            
+            // Update last login
+            savedPlayer.lastLogin = new Date().toISOString();
+            await this.database.savePlayer(user.id, savedPlayer);
+        } else {
+            // Create new player in database
+            var newPlayerData = await this.database.createPlayer(user.id, user.email, user.name);
+            
+            player = {
+                id: id,
+                userId: user.id,
+                i: newPlayerData.position.i,
+                j: newPlayerData.position.j,
+                name: newPlayerData.name,
+                email: newPlayerData.email,
+                inventory: newPlayerData.inventory,
+                inventorySize: newPlayerData.inventorySize,
+                skills: newPlayerData.skills,
+                color: newPlayerData.color
+            };
         }
+        
         this.setPlayer(id, player);
         this.addPlayerLocation(player);
         this.createPFlag(id);
-    }
-    socketController.setup(this.getPlayer(id), this.getLocal2DPlayerDict(id), this.getLocal2DGround(player), this.getLocal2DStructure(player), {});
-    var range = getIJRange(player.i, player.j);
-    for (var i = range.lefti; i <= range.righti; i++) {
-        for (var j = range.topj; j <= range.bottomj; j++) {
-            if (worldPlayerMap[i][j].length > 0) {
-                for (othplayer of worldPlayerMap[i][j]) {
-                    if (othplayer.id != player.id) {
-                        socketController.playerJoin(othplayer, this.getPlayer(id));
+        
+        socketController.setup(this.getPlayer(id), this.getLocal2DPlayerDict(player), this.getLocal2DGround(player), this.getLocal2DStructure(player), {});
+        var range = getIJRange(player.i, player.j);
+        for (var i = range.lefti; i <= range.righti; i++) {
+            for (var j = range.topj; j <= range.bottomj; j++) {
+                if (worldPlayerMap[i][j].length > 0) {
+                    for (othplayer of worldPlayerMap[i][j]) {
+                        if (othplayer.id != player.id) {
+                            socketController.playerJoin(othplayer, this.getPlayer(id));
+                        }
                     }
                 }
             }
         }
+        this.moveLog[id] = [];
+        this.moveLog[id].push((new Date).getTime());
+        
+    } catch (error) {
+        console.error('Error creating/loading player:', error);
+        throw error;
     }
-    this.moveLog[id] = [];
-    this.moveLog[id].push((new Date).getTime());
 }
 
-World.prototype.disconnectPlayer = function (id) {
+World.prototype.disconnectPlayer = async function (id) {
     var dcPlayerObj = this.getPlayer(id);
     if (dcPlayerObj) {
+        // Save player data to database before disconnecting
+        try {
+            await this.savePlayerToDatabase(dcPlayerObj);
+        } catch (error) {
+            console.error('Error saving player data on disconnect:', error);
+        }
+        
         var range = getIJRange(dcPlayerObj.i, dcPlayerObj.j);
         this.removePlayerLocation(dcPlayerObj);
         for (var i = range.lefti; i <= range.righti; i++) {
@@ -165,10 +200,23 @@ World.prototype.disconnectPlayer = function (id) {
                 if (worldPlayerMap[i][j].length > 0) {
                     for (othplayer of worldPlayerMap[i][j]) {
                         socketController.playerRemove(othplayer, dcPlayerObj);
-                        this.deletePlayer(id);
                     }
                 }
             }
+        }
+        this.deletePlayer(id);
+    }
+}
+
+World.prototype.savePlayerToDatabase = async function (player) {
+    if (player.userId && this.database) {
+        try {
+            await this.database.updatePlayerInventory(player.userId, player.inventory, player.inventorySize);
+            await this.database.updatePlayerPosition(player.userId, { i: player.i, j: player.j });
+            await this.database.updatePlayerSkills(player.userId, player.skills);
+        } catch (error) {
+            console.error('Error saving player to database:', error);
+            throw error;
         }
     }
 }
@@ -374,7 +422,7 @@ function initializeTestMap() {
 /**
  * Swaps the positions of two items in the player's inventory
  */
-World.prototype.itemSwap = function (id, pos1, pos2) {
+World.prototype.itemSwap = async function (id, pos1, pos2) {
     // TODO: check for invalid positions
     var player = this.getPlayer(id);
     if (!player) {
@@ -388,10 +436,17 @@ World.prototype.itemSwap = function (id, pos1, pos2) {
 
     var inventoryChanges = [{ item: oldItem, pos: pos1 }, { item: player.inventory[pos2], pos: pos2 }]
 
-    socketController.playerInventoryUpdate(player, inventoryChanges)
+    socketController.playerInventoryUpdate(player, inventoryChanges);
+    
+    // Save to database
+    try {
+        await this.savePlayerToDatabase(player);
+    } catch (error) {
+        console.error('Error saving inventory swap:', error);
+    }
 }
 
-World.prototype.changeInvSize = function (player, invAddAmount) {
+World.prototype.changeInvSize = async function (player, invAddAmount) {
     var newInvSize = player.inventorySize + invAddAmount;
     // Removes the inventory slots on the player object
     if (invAddAmount < 0) {
@@ -414,21 +469,13 @@ World.prototype.changeInvSize = function (player, invAddAmount) {
         socketController.playerInventorySizeUpdate(player, newInvSize, player.inventory);
         player.inventorySize = newInvSize;
     }
-
-}
-/**
- * Removes items at the positions specified
- * @param {*} player 
- * @param {*} itemObj itemObj
- */
-World.prototype.addPlayerItem = function (player, itemObj) {
-    for (index in player.inventory) {
-        if (!player.inventory[index]) {
-            player.inventory[index] = itemObj;
-            return parseInt(index);
-        }
+    
+    // Save to database
+    try {
+        await this.savePlayerToDatabase(player);
+    } catch (error) {
+        console.error('Error saving inventory size change:', error);
     }
-    return -1;
 }
 
 /**
@@ -437,7 +484,7 @@ World.prototype.addPlayerItem = function (player, itemObj) {
  * @param {*} slot a list of inv pos (starting at 0)
  * @param {*} updateInv true to update player inv after removing
  */
-World.prototype.removePlayerItem = function (player, slot, updateInv) {
+World.prototype.removePlayerItem = async function (player, slot, updateInv) {
     console.log(slot, player.inventorySize)
     if (0 <= slot && slot < player.inventorySize) {
         player.inventory[slot] = null;
@@ -447,45 +494,36 @@ World.prototype.removePlayerItem = function (player, slot, updateInv) {
     if (updateInv) {
         this.playerInventoryUpdate(player, [{ item: null, pos: slot }]);
     }
+    
+    // Save to database
+    try {
+        await this.savePlayerToDatabase(player);
+    } catch (error) {
+        console.error('Error saving item removal:', error);
+    }
 }
 
 /**
- * Check if player item exists and returns the item object
- * @param {*} playerId
- * @param {*} itemId an item id
+ * Removes items at the positions specified
+ * @param {*} player 
+ * @param {*} itemObj itemObj
  */
-World.prototype.verifyPlayerItem = function (player, itemId, invSlot) {
-    var itemObj;
-    if (player) {
-        if (invSlot || invSlot == 0) {
-            var item = player.inventory[invSlot];
-            if (item && item.id == itemId) {
-                itemObj = JSON.parse(JSON.stringify(player));
-                itemObj["slot"] = invSlot;
+World.prototype.addPlayerItem = async function (player, itemObj) {
+    for (index in player.inventory) {
+        if (!player.inventory[index]) {
+            player.inventory[index] = itemObj;
+            
+            // Save to database
+            try {
+                await this.savePlayerToDatabase(player);
+            } catch (error) {
+                console.error('Error saving item addition:', error);
             }
-        } else {
-            var itemIndex = player.inventory.findIndex(o => o && o.id == itemId);
-            var item = player.inventory[itemIndex];
-            if (item && item.id == itemId) {
-                itemObj = JSON.parse(JSON.stringify(player));
-                itemObj["slot"] = itemIndex;
-            }
+            
+            return parseInt(index);
         }
     }
-    return itemObj;
-}
-
-/**
- * Check if player item exists and returns the item object
- * @param {*} playerId
- * @param {*} itemId an item id
- */
-World.prototype.playerInventoryUpdate = function (player, invChanges) {
-    if (player) {
-        if (invChanges.length) {
-            socketController.playerInventoryUpdate(player, invChanges);
-        }
-    }
+    return -1;
 }
 
 /**
