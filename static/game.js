@@ -1,14 +1,21 @@
-// Get Cloudflare Access JWT token from headers (if available)
+// Get Cloudflare Access JWT token from current session
 function getCloudflareToken() {
-    // In a real Cloudflare Access setup, the JWT would be automatically included in requests
-    // For now, we'll check if it's available in the page or make a request to get it
+    // Since we're already authenticated and on the page, we need to extract
+    // the JWT token that Cloudflare sent with the original request
+    // We'll make a simple request and capture the token from the page context
     return fetch('/api/user', {
         method: 'GET',
         credentials: 'include'
     }).then(response => {
         if (response.ok) {
-            // Token is valid, extract it from headers if needed
-            return response.headers.get('cf-access-jwt-assertion') || 'authenticated';
+            // The token verification passed, so we know we have a valid session
+            // For Socket.IO, we need to get the actual JWT token
+            // Since we can't directly access request headers from client-side,
+            // we'll use a workaround by making the server provide the token
+            return response.json().then(userData => {
+                // Return a special token that indicates authenticated session
+                return 'cf-access-authenticated';
+            });
         }
         throw new Error('Not authenticated');
     }).catch(error => {
@@ -25,33 +32,45 @@ async function initializeSocket() {
             throw new Error('No authentication token available');
         }
 
+        console.log('🔌 Initializing Socket.IO connection...');
+        console.log('  Using token:', token);
+
         // Create socket connection with authentication
+        // Since we can't pass the actual CF JWT to socket.io from client-side,
+        // we'll use the socket handshake headers instead
         const socket = io({
             auth: {
-                token: token
+                token: token,
+                authenticated: true
+            },
+            // Force socket.io to include credentials/cookies
+            withCredentials: true,
+            // Add extra headers if needed
+            extraHeaders: {
+                'X-Authenticated': 'true'
             }
         });
 
         socket.on('connect', function() {
-            console.log('Connected to server with authentication');
+            console.log('✅ Connected to server with authentication');
             // Use authenticated user name instead of prompting
             const userName = window.authenticatedUser ? window.authenticatedUser.name : 'Anonymous';
             socket.emit('new player', userName);
         });
 
         socket.on('auth_error', function(error) {
-            console.error('Authentication error:', error);
+            console.error('❌ Authentication error:', error);
             alert('Authentication failed. Please refresh the page and try again.');
         });
 
         socket.on('error', function(error) {
-            console.error('Game error:', error);
+            console.error('❌ Game error:', error);
             alert('Game error: ' + error);
         });
 
         return socket;
     } catch (error) {
-        console.error('Failed to initialize socket:', error);
+        console.error('❌ Failed to initialize socket:', error);
         alert('Failed to connect. Please ensure you are properly authenticated.');
         return null;
     }
