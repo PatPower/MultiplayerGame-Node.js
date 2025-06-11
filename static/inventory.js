@@ -1,4 +1,3 @@
-
 var invElement = document.getElementById("inv");
 var itemArea = document.getElementById("itemArea");
 var invCxt = setupInventory(invElement);
@@ -132,24 +131,17 @@ function initalizeInvItems() {
 
 function invLockIcon() {
     var img = document.createElement('img');
+    img.setAttribute("class", "lockimg");
     img.setAttribute("id", "lockimg");
-    img.src = getItemIcon(-3);
-    var invSpaceLeft = MAXINVSPACE - currPlayer.inventorySize
-    var rowsLeft = Math.floor(invSpaceLeft / 4)
-    if (invSpaceLeft >= 4) {
-        var x = (4 * INVBOXSIDE) / 2 - INVBOXSIDE / 2
-    } else {
-        var x = INVWIDTH / 2 + (INVWIDTH - invSpaceLeft * INVBOXSIDE) / 2 - INVBOXSIDE / 2
-    }
-    if (rowsLeft >= 1) {
-        var y = 600 / 2 + (600 - (INVBOXSIDE * rowsLeft)) / 2 - INVBOXSIDE / 2
-    } else {
-        var y = 600 - BOXSIDE
-    }
-    img.style.marginLeft = x + 'px';
-    img.style.marginTop = y + 'px';
-    itemArea.append(img);
-    $("lockimg").on('dragstart', function (event) {
+    img.src = getItemIcon(-2);
+    img.style.position = "absolute";
+    img.style.left = "138px";
+    img.style.top = "594px";
+    img.style.height = "22px";
+    img.style.width = "22px";
+    img.style.zIndex = "5";
+    document.body.appendChild(img);
+    $("#lockimg").on('dragstart', function (event) {
         event.preventDefault();
     });
     if (currPlayer.inventorySize >= 60) {

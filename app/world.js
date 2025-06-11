@@ -433,8 +433,8 @@ function initializeTestMap() {
     worldStructureMap[10][6] = { id: 3, health: 10, owner: "game" };
     worldGroundMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
     worldPlayerMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
-    for (i = 0; i < Settings.WORLDLIMIT; i++) {
-        for (j = 0; j < Settings.WORLDLIMIT; j++) {
+    for (var i = 0; i < Settings.WORLDLIMIT; i++) {
+        for (var j = 0; j < Settings.WORLDLIMIT; j++) {
             worldPlayerMap[i][j] = []
             worldGroundMap[i][j] = 0;
         }

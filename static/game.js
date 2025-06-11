@@ -560,4 +560,20 @@ initializeSocket().then(socket => {
     window.emitBuild = emitBuild;
     window.defaultAction = defaultAction;
     window.getDefaultAction = getDefaultAction;
+    
+    // Additional functions that other scripts may need
+    window.addPlayer = addPlayer;
+    window.removePlayer = removePlayer;
+    window.projectSquare = projectSquare;
+    window.removeProjectedPlayer = removeProjectedPlayer;
+    window.projectStructure = projectStructure;
+    window.removeProjectedStructure = removeProjectedStructure;
+    window.updateBackgroundCanvas = updateBackgroundCanvas;
+    window.refreshStructureCanvas = refreshStructureCanvas;
+    window.projectSquares = projectSquares;
+    window.setupBackground = setupBackground;
+    window.setupStructure = setupStructure;
+    window.setupOverlay = setupOverlay;
+    window.setupCurrentPlayer = setupCurrentPlayer;
+    window.setupOtherPlayers = setupOtherPlayers;
 });

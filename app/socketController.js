@@ -91,21 +91,21 @@ module.exports.playerJoin = function (othPlayer, player) {
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
-    io.to(othplayer.id).emit('playerJoin', player);
+    io.to(othPlayer.id).emit('playerJoin', player);
 }
 
 module.exports.playerRemove = function (othPlayer, dcPlayerObj) {
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
-    io.to(othplayer.id).emit('playerRemove', dcPlayerObj);
+    io.to(othPlayer.id).emit('playerRemove', dcPlayerObj);
 }
 
 module.exports.othPlayerMove = function (othPlayer, oldPlayer, data) {
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
-    io.to(othplayer.id).emit('othPlayerMove', oldPlayer, data);
+    io.to(othPlayer.id).emit('othPlayerMove', oldPlayer, data);
 }
 
 module.exports.moveCurrPlayer = function (player, localPlayerDict2D, localGround2D, localStructure2D) {
