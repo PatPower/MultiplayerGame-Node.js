@@ -38,21 +38,35 @@ function setupInventory(canvas) {
  * inventoryChanges: [ { item: { id: int, durability: int }, pos: int } , ... ]
  */
 function updateInventory(inventoryChanges) {
+    // Check if inventory is initialized first
+    if (!itemArea || !currPlayer || !currPlayer.inventory) {
+        console.warn('Inventory not initialized yet, skipping update');
+        return;
+    }
+    
     for (invChange of inventoryChanges) {
         var i = invChange.pos + 1;
         var img = itemArea.childNodes[i];
+        
+        // Check if the DOM element exists
+        if (!img) {
+            console.warn(`Inventory slot ${i} DOM element not found, skipping update for position ${invChange.pos}`);
+            continue;
+        }
+        
         var oldItemObj = currPlayer.inventory[invChange.pos];
         currPlayer.inventory[invChange.pos] = invChange.item;
+        
         if (invChange.item) {
             img.src = getItemIcon(invChange.item.id);
             makeDraggable("#item" + i);
             enableDragging("#item" + i);
         } else {
             img.src = getItemIcon(-1);
-
             preventDragging("#item" + i);
         }
         makeDroppable("#item" + i);
+        
         // If item is being removed from inv and is currently selected, select the same item in inv or deselect
         if (invChange.pos == currentSelectedSlot) {
             if (invChange.item == null) {
@@ -71,6 +85,12 @@ function updateInventory(inventoryChanges) {
 }
 
 function updateInvSize(newInventorySize) {
+    // Check if inventory is initialized first
+    if (!itemArea || !currPlayer) {
+        console.warn('Inventory not initialized yet, skipping size update');
+        return;
+    }
+    
     var oldInvSize = currPlayer.inventorySize;
     var difference = newInventorySize - oldInvSize;
     if (difference == 0) {
@@ -78,8 +98,14 @@ function updateInvSize(newInventorySize) {
     } else if (difference > 0) {
         // Unlock inv spots
         for (var i = oldInvSize + 1; i < newInventorySize + 1; i++) {
-
             var img = itemArea.childNodes[i];
+            
+            // Check if the DOM element exists
+            if (!img) {
+                console.warn(`Inventory slot ${i} DOM element not found for size update`);
+                continue;
+            }
+            
             img.setAttribute("class", "item");
             img.setAttribute("id", "item" + i);
             img.src = getItemIcon(-1);
@@ -90,6 +116,13 @@ function updateInvSize(newInventorySize) {
         // Lock inv spots
         for (var i = oldInvSize; i > newInventorySize; i--) {
             var img = itemArea.childNodes[i];
+            
+            // Check if the DOM element exists
+            if (!img) {
+                console.warn(`Inventory slot ${i} DOM element not found for size update`);
+                continue;
+            }
+            
             img.setAttribute("class", "lockeditemslot");
             img.setAttribute("id", "item" + i);
             img.src = getItemIcon(-2);
@@ -151,6 +184,13 @@ function invLockIcon() {
 
 function updateInvLockIcon() {
     var img = document.getElementById("lockimg");
+    
+    // Check if the lock icon element exists
+    if (!img) {
+        console.warn('Lock icon element not found, skipping update');
+        return;
+    }
+    
     if (currPlayer.inventorySize >= 60) {
         img.style.visibility = 'hidden';
         return
