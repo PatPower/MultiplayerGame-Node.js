@@ -88,9 +88,10 @@ initializeSocket().then(socket => {
     // Replace the global socket variable
     window.socket = socket;
 
-    var currPlayer = {}; // Current Player Object
-    var playerList = {};
-    var defaultActions = {};
+    // Make these variables globally accessible
+    window.currPlayer = {}; // Current Player Object
+    window.playerList = {};
+    window.defaultActions = {};
 
     // Setup the canvases
     var bgcxt;
@@ -116,10 +117,17 @@ initializeSocket().then(socket => {
         console.log('  Structure2D size:', structure2D ? structure2D.length : 'null');
         console.log('  Default Actions:', defaultActs);
         
-        // IMPORTANT: Set currPlayer FIRST before calling any functions that depend on it
-        currPlayer = currentPlayer;
-        playerList = pList;
-        defaultActions = defaultActs;
+        // IMPORTANT: Set global variables FIRST before calling any functions that depend on them
+        window.currPlayer = currentPlayer;
+        window.playerList = pList;
+        window.defaultActions = defaultActs;
+        
+        // Also set local variables for backward compatibility
+        var currPlayer = currentPlayer;
+        var playerList = pList;
+        var defaultActions = defaultActs;
+        
+        console.log('✅ Set currPlayer globally:', window.currPlayer);
         
         console.log('🗺️ Loading location map...');
         loadLocationMap(ground2D, structure2D, pList, currPlayer);
@@ -133,7 +141,7 @@ initializeSocket().then(socket => {
         
         console.log('🎯 Setting up game elements...');
         updateTileMarker(currPlayer);
-        projectSquares(pList);  // Now currPlayer is defined
+        projectSquares(pList);  // Now currPlayer is defined globally
         projectSquare(currentPlayer, {});
         
         console.log('🎒 Initializing inventory...');
@@ -146,8 +154,13 @@ initializeSocket().then(socket => {
     });
 
     socket.on('moveCurrPlayer', function (player, pList, ground2D, structure2D) {
-        currPlayer = player
-        playerList = pList;
+        window.currPlayer = player;
+        window.playerList = pList;
+        
+        // Also set local variables for backward compatibility
+        var currPlayer = player;
+        var playerList = pList;
+        
         loadLocationMap(ground2D, structure2D, pList, currPlayer);
         updateBackgroundCanvas();
         refreshStructureCanvas()
