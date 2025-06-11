@@ -151,8 +151,8 @@ function showUsernameModal(socket) {
             return;
         }
         
-        if (username.length > 20) {
-            showError('Username must be 20 characters or less');
+        if (username.length > 10) {
+            showError('Username must be 10 characters or less');
             return;
         }
         
@@ -564,15 +564,43 @@ initializeSocket().then(socket => {
         if (playerObj.id != currPlayer.id) {
             opcxt.fillStyle = playerObj.color;
             opcxt.fillRect(BOXSIDE * relCoords.i, BOXSIDE * relCoords.j, BOXSIDE, BOXSIDE);
-            opcxt.fillStyle = 'blue';
-            opcxt.font = "12px Arial";
-            opcxt.fillText(playerObj.name, BOXSIDE * relCoords.i, BOXSIDE * relCoords.j + 10);
-        } else { // Current players
+            
+            // Draw name centered above the player
+            opcxt.fillStyle = 'white';
+            opcxt.strokeStyle = 'black';
+            opcxt.lineWidth = 2;
+            opcxt.font = "bold 12px Arial";
+            opcxt.textAlign = 'center';
+            
+            var nameX = BOXSIDE * relCoords.i + BOXSIDE / 2; // Center horizontally
+            var nameY = BOXSIDE * relCoords.j - 5; // Position above the player
+            
+            // Draw text outline for better visibility
+            opcxt.strokeText(playerObj.name, nameX, nameY);
+            opcxt.fillText(playerObj.name, nameX, nameY);
+            
+            // Reset text alignment
+            opcxt.textAlign = 'start';
+        } else { // Current player
             pcxt.fillStyle = 'cyan';
             pcxt.fillRect(BOXSIDE * 10, BOXSIDE * 7, BOXSIDE, BOXSIDE);
-            pcxt.fillStyle = 'blue'
-            pcxt.font = "12px Arial";
-            pcxt.fillText(playerObj.name, BOXSIDE * 10, BOXSIDE * 7 + 10);
+            
+            // Draw name centered above the current player
+            pcxt.fillStyle = 'white';
+            pcxt.strokeStyle = 'black';
+            pcxt.lineWidth = 2;
+            pcxt.font = "bold 12px Arial";
+            pcxt.textAlign = 'center';
+            
+            var nameX = BOXSIDE * 10 + BOXSIDE / 2; // Center horizontally
+            var nameY = BOXSIDE * 7 - 5; // Position above the player
+            
+            // Draw text outline for better visibility
+            pcxt.strokeText(playerObj.name, nameX, nameY);
+            pcxt.fillText(playerObj.name, nameX, nameY);
+            
+            // Reset text alignment
+            pcxt.textAlign = 'start';
         }
     }
     /**

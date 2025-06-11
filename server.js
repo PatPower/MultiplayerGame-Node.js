@@ -81,8 +81,8 @@ app.post('/api/user/username', auth.middleware(), async (req, res) => {
         
         const trimmedUsername = username.trim();
         
-        if (trimmedUsername.length < 3 || trimmedUsername.length > 20) {
-            return res.status(400).json({ error: 'Username must be between 3 and 20 characters' });
+        if (trimmedUsername.length < 3 || trimmedUsername.length > 10) {
+            return res.status(400).json({ error: 'Username must be between 3 and 10 characters' });
         }
         
         if (!/^[a-zA-Z0-9_-]+$/.test(trimmedUsername)) {
