@@ -58,13 +58,16 @@ function updateInventory(inventoryChanges) {
     for (invChange of inventoryChanges) {
         console.log('🔍 Processing change:', invChange);
         var i = invChange.pos + 1;
-        console.log('🎯 Updating DOM element:', 'item' + i, 'for inventory position:', invChange.pos);
-        console.log('🔗 DOM element before update:', itemArea.childNodes[i]);
-        var img = itemArea.childNodes[i];
+        var targetElementId = 'item' + i;
+        console.log('🎯 Updating DOM element:', targetElementId, 'for inventory position:', invChange.pos);
+        
+        // Use getElementById instead of childNodes to avoid indexing issues
+        var img = document.getElementById(targetElementId);
+        console.log('🔗 DOM element before update:', img);
         
         // Check if the DOM element exists
         if (!img) {
-            console.warn(`Inventory slot ${i} DOM element not found, skipping update for position ${invChange.pos}`);
+            console.warn(`Inventory slot ${targetElementId} DOM element not found, skipping update for position ${invChange.pos}`);
             continue;
         }
         
@@ -75,16 +78,16 @@ function updateInventory(inventoryChanges) {
         if (invChange.item) {
             console.log('🆕 Setting new item icon:', getItemIcon(invChange.item.id));
             img.src = getItemIcon(invChange.item.id);
-            makeDraggable("#item" + i);
-            enableDragging("#item" + i);
+            makeDraggable("#" + targetElementId);
+            enableDragging("#" + targetElementId);
         } else {
             console.log('🗑️ Setting empty icon');
             img.src = getItemIcon(-1);
-            preventDragging("#item" + i);
+            preventDragging("#" + targetElementId);
         }
-        makeDroppable("#item" + i);
+        makeDroppable("#" + targetElementId);
         
-        console.log('✅ DOM element after update:', itemArea.childNodes[i]);
+        console.log('✅ DOM element after update:', img);
         
         // If item is being removed from inv and is currently selected, select the same item in inv or deselect
         if (invChange.pos == currentSelectedSlot) {
