@@ -603,6 +603,40 @@ World.prototype.playerInventoryUpdate = function (player, inventoryChanges) {
 }
 
 /**
+ * Updates a player's selected item and broadcasts to other players
+ * @param {*} playerId The socket ID of the player
+ * @param {*} selectedSlot The inventory slot selected (-1 for none)
+ * @param {*} itemId The ID of the selected item (null if deselecting)
+ */
+World.prototype.updatePlayerSelection = function (playerId, selectedSlot, itemId) {
+    var player = this.getPlayer(playerId);
+    if (!player) {
+        return;
+    }
+    
+    // Update player's selection data
+    player.selectedSlot = selectedSlot;
+    player.selectedItemId = itemId;
+    
+    // Broadcast to other players in range
+    var range = getIJRange(player.i, player.j);
+    for (var i = range.lefti; i <= range.righti; i++) {
+        for (var j = range.topj; j <= range.bottomj; j++) {
+            if (worldPlayerMap[i][j].length > 0) {
+                for (othPlayer of worldPlayerMap[i][j]) {
+                    if (othPlayer.id != player.id) {
+                        socketController.playerSelectionUpdate(othPlayer, {
+                            id: player.id,
+                            selectedSlot: selectedSlot,
+                            selectedItemId: itemId
+                        });
+                    }
+                }
+            }
+        }
+    }
+}
+/**
  * Returns an object with the left/right bound and top/bottom bound of i and j respectively
  * If the player is near the border, the i's and j's will be either 0 or the Settings.WORLDLIMIT - 1
  * However the true i and j's will ignore the constraints above and can give < 0 or > Settings.WORLDLIMIT - 1

@@ -333,6 +333,17 @@ function selectInvItem(slot) {
     });
     animateBuildingArea();
     currentSelectedSlot = slot;
+    
+    // Get the selected item ID
+    var selectedItemId = null;
+    if (currPlayer.inventory[slot]) {
+        selectedItemId = currPlayer.inventory[slot].id;
+    }
+    
+    // Notify server about selection
+    if (window.socket) {
+        window.socket.emit('itemSelection', slot, selectedItemId);
+    }
 }
 
 function deselectInvItem() {
@@ -356,6 +367,11 @@ function deselectInvItem() {
                 ovlycxt.strokeRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
             }
         }
+    }
+    
+    // Notify server about deselection
+    if (window.socket) {
+        window.socket.emit('itemSelection', -1, null);
     }
 }
 

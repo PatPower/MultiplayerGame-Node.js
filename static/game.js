@@ -424,6 +424,18 @@ initializeSocket().then(socket => {
         updateInvSize(inventorySize);
         currPlayer.inventory = newInventory;
     })
+    
+    socket.on('playerSelectionUpdate', function (playerData) {
+        // Update the player's selection data in our local playerList
+        if (window.playerList[playerData.id]) {
+            window.playerList[playerData.id].selectedSlot = playerData.selectedSlot;
+            window.playerList[playerData.id].selectedItemId = playerData.selectedItemId;
+            
+            // Redraw all players to show the updated selection
+            projectSquares(window.playerList);
+            drawPlayerNames();
+        }
+    });
 
     // TODO: make a socket that gets responses for invalid movement or actions done
 
@@ -586,10 +598,44 @@ initializeSocket().then(socket => {
         if (playerObj.id != currPlayer.id) {
             opcxt.fillStyle = playerObj.color;
             opcxt.fillRect(BOXSIDE * relCoords.i, BOXSIDE * relCoords.j, BOXSIDE, BOXSIDE);
+            
+            // Draw selected item icon if player has something selected
+            if (playerObj.selectedItemId && playerObj.selectedItemId !== null) {
+                drawSelectedItemOnPlayer(opcxt, playerObj.selectedItemId, relCoords.i, relCoords.j);
+            }
         } else { // Current player
             pcxt.fillStyle = 'cyan';
             pcxt.fillRect(BOXSIDE * 10, BOXSIDE * 7, BOXSIDE, BOXSIDE);
+            
+            // Draw selected item icon if current player has something selected
+            if (currentSelectedSlot !== -1 && currPlayer.inventory[currentSelectedSlot]) {
+                drawSelectedItemOnPlayer(pcxt, currPlayer.inventory[currentSelectedSlot].id, 10, 7);
+            }
         }
+    }
+    
+    // Helper function to draw selected item icon on a player
+    function drawSelectedItemOnPlayer(context, itemId, gridI, gridJ) {
+        // Get the item icon
+        var itemIcon = getItemIcon(itemId);
+        if (!itemIcon) return;
+        
+        // Create an image element and draw it
+        var img = new Image();
+        img.onload = function() {
+            // Draw the item icon in the top-right corner of the player square
+            var iconSize = BOXSIDE * 0.4; // 40% of box size
+            var iconX = BOXSIDE * gridI + BOXSIDE - iconSize - 2; // Top-right corner with 2px margin
+            var iconY = BOXSIDE * gridJ + 2; // Top with 2px margin
+            
+            // Draw a semi-transparent background
+            context.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            context.fillRect(iconX - 1, iconY - 1, iconSize + 2, iconSize + 2);
+            
+            // Draw the item icon
+            context.drawImage(img, iconX, iconY, iconSize, iconSize);
+        };
+        img.src = itemIcon;
     }
     
     // New function to draw all player names on the overlay canvas (above grid lines)

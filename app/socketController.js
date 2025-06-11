@@ -87,6 +87,14 @@ module.exports = function (socketIo, world, auth, database) {
                     }
                 });
                 
+                socket.on('itemSelection', function (selectedSlot, itemId) {
+                    try {
+                        world.updatePlayerSelection(socket.id, selectedSlot, itemId);
+                    } catch (error) {
+                        console.error('Error updating player selection:', error);
+                    }
+                });
+                
             } catch (error) {
                 console.error('Authentication failed:', error);
                 socket.emit('auth_error', 'Authentication failed');
@@ -178,4 +186,11 @@ module.exports.playerInventorySizeUpdate = function (player, inventorySize, newI
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(player.id).emit('playerInventorySizeUpdate', inventorySize, newInventory);
+}
+
+module.exports.playerSelectionUpdate = function (othPlayer, playerObj) {
+    if (!io) {
+        throw new Error("Error: Can't use this function until io is properly initalized");
+    }
+    io.to(othPlayer.id).emit('playerSelectionUpdate', playerObj);
 }
