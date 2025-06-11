@@ -9,10 +9,11 @@ html
         
         script(src="https://code.jquery.com/ui/1.12.1/jquery-ui.js")
         script(src="https://kit.fontawesome.com/b6abf5ebcd.js" crossorigin="anonymous")
-        script(src="/static/const.js")
-        script(src="/static/location.js") 
-        script(src="/static/onGameJoin.js")
-        link(rel='stylesheet', href='/static/css/index.css')
+        - var timestamp = Date.now()
+        script(src=`/static/const.js?v=${timestamp}`)
+        script(src=`/static/location.js?v=${timestamp}`) 
+        script(src=`/static/onGameJoin.js?v=${timestamp}`)
+        link(rel='stylesheet', href=`/static/css/index.css?v=${timestamp}`)
         
         // Pass user data to client
         script.
@@ -41,12 +42,12 @@ html
                 div(id="craftingSide")
                     canvas(id="crafting")
                     div(id="craftingArea")
-        script(src="/static/controls.js")
-        script(src="/static/game.js")
-        script(src="/static/customContextMenu.js")
-        script(src="/static/coordinateInfo.js")
-        script(src="/static/inventory.js")
-        script(src="/static/crafting.js")
+        script(src=`/static/controls.js?v=${timestamp}`)
+        script(src=`/static/game.js?v=${timestamp}`)
+        script(src=`/static/customContextMenu.js?v=${timestamp}`)
+        script(src=`/static/coordinateInfo.js?v=${timestamp}`)
+        script(src=`/static/inventory.js?v=${timestamp}`)
+        script(src=`/static/crafting.js?v=${timestamp}`)
 
         img(id="click" src="/static/img/circle.png")
         img(id="select" src="/static/img/select.png")
