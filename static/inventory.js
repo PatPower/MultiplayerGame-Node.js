@@ -149,6 +149,17 @@ function updateInvSize(newInventorySize) {
 
 function initalizeInvItems() {
     console.log('🏗️ Initializing inventory items...');
+    console.log('📋 Player inventory contents:');
+    for (let i = 0; i < currPlayer.inventory.length; i++) {
+        const item = currPlayer.inventory[i];
+        if (item) {
+            console.log(`  Slot ${i}: ${getItemObj(item.id)?.name || 'Unknown'} (ID: ${item.id})`);
+        } else {
+            console.log(`  Slot ${i}: Empty`);
+        }
+    }
+    console.log('📋 DOM elements being created:');
+    
     invLockIcon();
     for (var i = 1; i <= currPlayer.inventorySize; i++) {
         var item = currPlayer.inventory[i - 1];
@@ -156,10 +167,13 @@ function initalizeInvItems() {
         img.setAttribute("class", "item");
         img.setAttribute("id", "item" + i);
         if (item) {
+            const itemName = getItemObj(item.id)?.name || 'Unknown';
+            console.log(`  DOM item${i} → Slot ${i-1}: ${itemName} (ID: ${item.id})`);
             img.src = getItemIcon(item.id);
             itemArea.append(img);
             makeDraggable("#item" + i);
         } else {
+            console.log(`  DOM item${i} → Slot ${i-1}: Empty`);
             img.src = getItemIcon(-1);
             itemArea.append(img);
             preventDragging("#item" + i);
