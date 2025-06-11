@@ -6,12 +6,36 @@ module.exports = function (socketIo, world, auth, database) {
     if (!io) {
         action = new Action(world);
         io = socketIo
+        
+        const DEV_MODE = process.env.DEV_MODE === 'true' || process.env.NODE_ENV === 'development';
+        
         // Add the WebSocket handlers with authentication
         io.on('connection', async function (socket) {
             try {
-                // Authenticate the socket connection
-                const user = await auth.authenticateSocket(socket);
-                console.log('✅ Authenticated user connected:', user.email);
+                let user;
+                
+                if (DEV_MODE) {
+                    // In dev mode, generate a random user for each socket connection
+                    const adjectives = ['Swift', 'Brave', 'Wise', 'Bold', 'Clever', 'Strong', 'Quick', 'Sharp', 'Bright', 'Noble', 'Wild', 'Free', 'Cool', 'Fast', 'Smart'];
+                    const nouns = ['Explorer', 'Builder', 'Miner', 'Crafter', 'Hunter', 'Warrior', 'Trader', 'Pioneer', 'Adventurer', 'Hero', 'Coder', 'Gamer', 'Player', 'Ninja', 'Wizard'];
+                    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+                    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+                    const number = Math.floor(Math.random() * 1000);
+                    const username = `${adjective}${noun}${number}`;
+                    
+                    user = {
+                        id: `dev_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                        email: `${username.toLowerCase()}@dev.local`,
+                        name: username,
+                        username: username,
+                        isDev: true
+                    };
+                    console.log('🔧 Dev mode socket: Generated user', user.username);
+                } else {
+                    // Authenticate the socket connection normally
+                    user = await auth.authenticateSocket(socket);
+                    console.log('✅ Authenticated user connected:', user.email);
+                }
                 
                 socket.user = user;
                 
@@ -193,4 +217,16 @@ module.exports.playerSelectionUpdate = function (othPlayer, playerObj) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(othPlayer.id).emit('playerSelectionUpdate', playerObj);
+}
+
+module.exports.playerActionBroadcast = function (othPlayer, playerObj, actionType, structId) {
+    if (!io) {
+        throw new Error("Error: Can't use this function until io is properly initalized");
+    }
+    io.to(othPlayer.id).emit('playerActionBroadcast', {
+        playerId: playerObj.id,
+        actionType: actionType,
+        structId: structId,
+        position: { i: playerObj.i, j: playerObj.j }
+    });
 }

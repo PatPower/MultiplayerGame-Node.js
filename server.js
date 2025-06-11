@@ -9,6 +9,9 @@ var CloudflareAuth = require('./app/auth.js');
 var Database = require('./app/database.js');
 
 const port = process.env.PORT || 80;
+const DEV_MODE = process.env.DEV_MODE === 'true' || process.env.NODE_ENV === 'development';
+
+console.log('🔧 Development Mode:', DEV_MODE ? 'ENABLED' : 'DISABLED');
 
 // Initialize authentication and database
 const auth = new CloudflareAuth();
@@ -30,22 +33,66 @@ app.use((req, res, next) => {
     next();
 });
 
+// Helper function to generate random dev user
+function generateDevUser() {
+    const adjectives = ['Swift', 'Brave', 'Wise', 'Bold', 'Clever', 'Strong', 'Quick', 'Sharp', 'Bright', 'Noble', 'Wild', 'Free', 'Cool', 'Fast', 'Smart'];
+    const nouns = ['Explorer', 'Builder', 'Miner', 'Crafter', 'Hunter', 'Warrior', 'Trader', 'Pioneer', 'Adventurer', 'Hero', 'Coder', 'Gamer', 'Player', 'Ninja', 'Wizard'];
+    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    const number = Math.floor(Math.random() * 1000);
+    const username = `${adjective}${noun}${number}`;
+    
+    return {
+        id: `dev_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        email: `${username.toLowerCase()}@dev.local`,
+        name: username,
+        username: username,
+        isDev: true
+    };
+}
+
+// Dev mode middleware
+function devModeMiddleware() {
+    return (req, res, next) => {
+        if (DEV_MODE) {
+            // Generate a random dev user for each request
+            req.user = generateDevUser();
+            console.log('🔧 Dev mode: Generated user', req.user.username);
+            next();
+        } else {
+            // Use normal Cloudflare authentication
+            auth.middleware()(req, res, next);
+        }
+    };
+}
+
 // Routes
-app.get('/', auth.middleware(), (req, res) => {
+app.get('/', devModeMiddleware(), (req, res) => {
     console.log('🏠 Serving homepage for user:', req.user.email);
-    res.render('index', { user: req.user });
+    res.render('index', { user: req.user, devMode: DEV_MODE });
 });
 
 // API endpoint to get user info
-app.get('/api/user', auth.middleware(), (req, res) => {
+app.get('/api/user', devModeMiddleware(), (req, res) => {
     console.log('👤 API user info request for:', req.user.email);
-    res.json(req.user);
+    res.json({ ...req.user, devMode: DEV_MODE });
 });
 
 // API endpoint to get user profile (including username status)
-app.get('/api/user/profile', auth.middleware(), async (req, res) => {
+app.get('/api/user/profile', devModeMiddleware(), async (req, res) => {
     try {
         console.log('👤 API user profile request for:', req.user.email);
+        
+        if (DEV_MODE) {
+            // In dev mode, user always has a username ready
+            res.json({
+                hasUsername: true,
+                username: req.user.username,
+                email: req.user.email,
+                devMode: true
+            });
+            return;
+        }
         
         // Check if user has a saved profile in database
         const savedPlayer = await database.getPlayer(req.user.id);
@@ -69,9 +116,16 @@ app.get('/api/user/profile', auth.middleware(), async (req, res) => {
 });
 
 // API endpoint to save username
-app.post('/api/user/username', auth.middleware(), async (req, res) => {
+app.post('/api/user/username', devModeMiddleware(), async (req, res) => {
     try {
         console.log('👤 API username save request for:', req.user.email);
+        
+        if (DEV_MODE) {
+            // In dev mode, just return success with the current username
+            res.json({ success: true, username: req.user.username, devMode: true });
+            return;
+        }
+        
         const { username } = req.body;
         
         // Validate username
@@ -120,7 +174,10 @@ server.listen(port, function () {
     console.log('🚀 Server started successfully!');
     console.log('  Port:', port);
     console.log('  Environment:', process.env.NODE_ENV || 'production');
-    console.log('  Cloudflare Team Domain:', process.env.CLOUDFLARE_TEAM_DOMAIN);
+    console.log('  Dev Mode:', DEV_MODE ? 'ENABLED' : 'DISABLED');
+    if (!DEV_MODE) {
+        console.log('  Cloudflare Team Domain:', process.env.CLOUDFLARE_TEAM_DOMAIN);
+    }
     console.log('========================================');
 });
 
