@@ -59,6 +59,7 @@ function updateInventory(inventoryChanges) {
         console.log('🔍 Processing change:', invChange);
         var i = invChange.pos + 1;
         console.log('🎯 Updating DOM element:', 'item' + i, 'for inventory position:', invChange.pos);
+        console.log('🔗 DOM element before update:', itemArea.childNodes[i]);
         var img = itemArea.childNodes[i];
         
         // Check if the DOM element exists
@@ -68,17 +69,22 @@ function updateInventory(inventoryChanges) {
         }
         
         var oldItemObj = currPlayer.inventory[invChange.pos];
+        console.log('🔄 Updating inventory array: position', invChange.pos, 'from', oldItemObj, 'to', invChange.item);
         currPlayer.inventory[invChange.pos] = invChange.item;
         
         if (invChange.item) {
+            console.log('🆕 Setting new item icon:', getItemIcon(invChange.item.id));
             img.src = getItemIcon(invChange.item.id);
             makeDraggable("#item" + i);
             enableDragging("#item" + i);
         } else {
+            console.log('🗑️ Setting empty icon');
             img.src = getItemIcon(-1);
             preventDragging("#item" + i);
         }
         makeDroppable("#item" + i);
+        
+        console.log('✅ DOM element after update:', itemArea.childNodes[i]);
         
         // If item is being removed from inv and is currently selected, select the same item in inv or deselect
         if (invChange.pos == currentSelectedSlot) {
