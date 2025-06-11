@@ -532,8 +532,8 @@ initializeSocket().then(socket => {
     function getDefaultAction(structId) {
         var structObj = getStructureObj({ id: structId, health: 0, owner: "game" });
         if (structObj) {
-            if (structId in defaultActions) {
-                var defAction = "a" + defaultActions[structId];
+            if (structId in window.defaultActions) {
+                var defAction = "a" + window.defaultActions[structId];
                 if (structObj.actions[defAction]) {
                     return defAction
                 }
@@ -544,4 +544,13 @@ initializeSocket().then(socket => {
         }
         return null
     }
+
+    // Make functions globally accessible for other scripts
+    window.sendPlayerAction = sendPlayerAction;
+    window.sendPlayerInvAction = sendPlayerInvAction;
+    window.emitMovement = emitMovement;
+    window.emitItemSwap = emitItemSwap;
+    window.emitBuild = emitBuild;
+    window.defaultAction = defaultAction;
+    window.getDefaultAction = getDefaultAction;
 });
