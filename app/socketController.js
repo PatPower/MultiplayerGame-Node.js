@@ -134,6 +134,11 @@ module.exports.playerJoin = function (othPlayer, player) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(othPlayer.id).emit('playerJoin', player);
+    
+    // Also send the current selection state of the joining player to others in range
+    if (player.selectedItemId !== null && player.selectedItemId !== undefined) {
+        io.to(othPlayer.id).emit('playerSelectionUpdate', player.id, player.selectedItemId);
+    }
 }
 
 module.exports.playerRemove = function (othPlayer, dcPlayerObj) {
@@ -212,9 +217,15 @@ module.exports.playerInventorySizeUpdate = function (player, inventorySize, newI
     io.to(player.id).emit('playerInventorySizeUpdate', inventorySize, newInventory);
 }
 
-module.exports.playerSelectionUpdate = function (othPlayer, playerObj) {
+module.exports.playerSelectionUpdate = function (othPlayer, playerId, selectedItemId) {
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
-    io.to(othPlayer.id).emit('playerSelectionUpdate', playerObj);
+    console.log('📡 DEBUG: socketController.playerSelectionUpdate called');
+    console.log('  Target player:', othPlayer.name, '(ID:', othPlayer.id, ')');
+    console.log('  Source player ID:', playerId);
+    console.log('  Selected item ID:', selectedItemId);
+    
+    io.to(othPlayer.id).emit('playerSelectionUpdate', playerId, selectedItemId);
+    console.log('✅ DEBUG: playerSelectionUpdate event emitted to socket:', othPlayer.id);
 }

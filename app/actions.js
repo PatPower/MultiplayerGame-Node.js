@@ -17,7 +17,7 @@ Action.prototype.doAction = async function (playerId, structId, actionId, locati
     console.log("  Structure ID:", structId);
     console.log("  Action ID:", actionId);
     console.log("  Location:", location);
-    
+
     if (world.verifyStructureLocation(location, structId)) {
         var player = world.getPlayer(playerId);
         if (player) {
@@ -31,12 +31,18 @@ Action.prototype.doAction = async function (playerId, structId, actionId, locati
                         console.log(`  Slot ${i}: Empty`);
                     }
                 }
-                
+
                 var structureAction = JsonController.getStructureAction(structId, actionId);
                 console.log("🎯 Structure action:", structureAction);
-                
-                // Removed mining action broadcasting functionality
-                
+                // Check if this is a mining action that requires a pickaxe to be selected
+                if (structureAction.name === "Mine") {
+                    // Check if player has a pickaxe selected
+                    if (player.selectedItemId !== 0) {
+                        return { result: false, msg: "You need to select a pickaxe to mine!" };
+                    }
+                    console.log("✅ Player has pickaxe selected, mining allowed");
+                }
+
                 // CONDITIONS:
                 for (itemCond of structureAction.cond.item) {
                     var itemInfo = world.verifyPlayerItem(player, itemCond.id);
@@ -50,15 +56,11 @@ Action.prototype.doAction = async function (playerId, structId, actionId, locati
                 }
                 for (skillCond in structureAction.cond.skill) {
                     // TODO: Check if player skill meets condition
-                    if (false) {
-                        return { result: false, reason: "Level required: " + "{skill level}" };
-                    }
+                    //return { result: false, reason: "Level required: " + "{skill level}" };
                 }
                 for (pFlag of structureAction.cond.pFlag) {
                     // TODO: Check if flag is enabled
-                    if (false) {
-                        return { result: false, reason: "You can't do this yet" };
-                    }
+                    //return { result: false, reason: "You can't do this yet" };
                 }
 
                 var inventoryChanges = [];
@@ -67,7 +69,7 @@ Action.prototype.doAction = async function (playerId, structId, actionId, locati
                 var freeInvSpace = player.inventory.filter(o => o == null).length
                 console.log("📊 Free inventory space:", freeInvSpace);
                 console.log("📊 Items to drop:", structureAction.result.drop.length);
-                
+
                 if (structureAction.result.drop.length > freeInvSpace) {
                     return { result: false, msg: "Not enough inventory space!" };
                 }
@@ -92,7 +94,7 @@ Action.prototype.doAction = async function (playerId, structId, actionId, locati
                     world.removePlayerItem(player, itemInfo.slot);
                     inventoryChanges.push({ item: null, pos: itemInfo.slot })
                 }
-                
+
                 console.log("🎁 Processing item drops:");
                 for (item of structureAction.result.drop) {
                     console.log("  Dropping item:", item);
@@ -104,11 +106,11 @@ Action.prototype.doAction = async function (playerId, structId, actionId, locati
                     }
                     inventoryChanges.push({ item: item, pos: slot })
                 }
-                
+
                 if (structureAction.result.addToInvSize) {
                     await world.changeInvSize(player, structureAction.result.addToInvSize)
                 }
-                
+
                 console.log("📦 Player inventory after action:");
                 for (let i = 0; i < player.inventory.length; i++) {
                     const item = player.inventory[i];
@@ -118,7 +120,7 @@ Action.prototype.doAction = async function (playerId, structId, actionId, locati
                         console.log(`  Slot ${i}: Empty`);
                     }
                 }
-                
+
                 console.log("📡 Sending inventory changes:", inventoryChanges);
                 // Updates the player's inventory
                 world.playerInventoryUpdate(player, inventoryChanges)
@@ -242,12 +244,12 @@ Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc
     console.log("  Action ID:", actionId);
     console.log("  Inventory Slot:", invSlot);
     console.log("  Build Location:", buildLoc);
-    
+
     var player = world.getPlayer(playerId);
     if (!player) {
         return { result: false, msg: "Player not found" };
     }
-    
+
     console.log("📦 Player inventory before build:");
     for (let i = 0; i < player.inventory.length; i++) {
         const item = player.inventory[i];
@@ -257,54 +259,54 @@ Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc
             console.log(`  Slot ${i}: Empty`);
         }
     }
-    
+
     // Make sure player has the item at the slot specified
     var itemVerification = world.verifyPlayerItem(player, itemId, invSlot);
     if (!itemVerification) {
         console.log("❌ Item verification failed!");
         return { result: false, msg: "Item not found in specified slot" };
     }
-    
+
     console.log("✅ Item verification passed:");
     console.log("  Found item:", itemVerification);
-    
+
     // Check if the structure being placed is around the player
     if (!world.checkIfInteractible(player, buildLoc)) {
         return { result: false, msg: "Too far to build here" };
     }
-    
+
     // Also check if the build location is not on top of the player
     if (player.i == buildLoc.i && player.j == buildLoc.j) {
         return { result: false, msg: "Cannot build on yourself" };
     }
-    
+
     // Determines if the location has no solid structures or players
     if (!checkLocationBuildable(buildLoc)) {
         return { result: false, msg: "Not buildable here" };
     }
-    
+
     var itemAction = JsonController.getItemAction(itemId, actionId);
     if (!itemAction) {
         return { result: false, msg: "Invalid action for this item" };
     }
-    
+
     var structId = itemAction.structId;
     if (!structId && structId !== 0) {
         return { result: false, msg: "Item not placeable (no structure ID)" };
     }
-    
+
     var structHealth = JsonController.getStructureHealth(structId);
-    
+
     try {
         // Place the structure first
         world.placeStructure(buildLoc, structId, structHealth, player.id);
         console.log("🏗️ Structure placed successfully");
-        
+
         // Remove the item from inventory and send update to client
         console.log("🗑️ Removing item from slot:", invSlot);
         world.removePlayerItem(player, invSlot, false); // Don't auto-update
         var inventoryChanges = [{ item: null, pos: invSlot }];
-        
+
         console.log("📦 Player inventory after removal:");
         for (let i = 0; i < player.inventory.length; i++) {
             const item = player.inventory[i];
@@ -314,10 +316,10 @@ Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc
                 console.log(`  Slot ${i}: Empty`);
             }
         }
-        
+
         console.log("📡 Sending inventory update:", inventoryChanges);
         world.playerInventoryUpdate(player, inventoryChanges);
-        
+
         return { result: true, msg: "Structure placed successfully" };
     } catch (error) {
         console.error("Error placing structure:", error);

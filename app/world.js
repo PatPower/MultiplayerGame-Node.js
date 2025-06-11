@@ -139,7 +139,9 @@ World.prototype.createPlayer = async function (id, user) {
                 inventory: savedPlayer.inventory,
                 inventorySize: savedPlayer.inventorySize,
                 skills: savedPlayer.skills,
-                color: savedPlayer.color
+                color: savedPlayer.color,
+                selectedSlot: -1,
+                selectedItemId: null
             };
             
             // Update last login
@@ -160,7 +162,9 @@ World.prototype.createPlayer = async function (id, user) {
                 inventory: newPlayerData.inventory,
                 inventorySize: newPlayerData.inventorySize,
                 skills: newPlayerData.skills,
-                color: newPlayerData.color
+                color: newPlayerData.color,
+                selectedSlot: -1,
+                selectedItemId: null
             };
         }
         
@@ -187,6 +191,11 @@ World.prototype.createPlayer = async function (id, user) {
                     for (othplayer of worldPlayerMap[i][j]) {
                         if (othplayer.id != player.id) {
                             socketController.playerJoin(othplayer, this.getPlayer(id));
+                            
+                            // Send existing player's selection state to the new player
+                            if (othplayer.selectedItemId !== null && othplayer.selectedItemId !== undefined) {
+                                socketController.playerSelectionUpdate(this.getPlayer(id), othplayer.id, othplayer.selectedItemId);
+                            }
                         }
                     }
                 }
@@ -609,32 +618,47 @@ World.prototype.playerInventoryUpdate = function (player, inventoryChanges) {
  * @param {*} itemId The ID of the selected item (null if deselecting)
  */
 World.prototype.updatePlayerSelection = function (playerId, selectedSlot, itemId) {
+    console.log('🔧 DEBUG: updatePlayerSelection called');
+    console.log('  Player ID:', playerId);
+    console.log('  Selected Slot:', selectedSlot);
+    console.log('  Item ID:', itemId);
+    
     var player = this.getPlayer(playerId);
     if (!player) {
+        console.log('❌ DEBUG: Player not found for ID:', playerId);
         return;
     }
+    
+    console.log('✅ DEBUG: Player found:', player.name);
+    console.log('  Player position:', { i: player.i, j: player.j });
     
     // Update player's selection data
     player.selectedSlot = selectedSlot;
     player.selectedItemId = itemId;
     
+    console.log('📝 DEBUG: Updated player selection state');
+    console.log('  New selectedSlot:', player.selectedSlot);
+    console.log('  New selectedItemId:', player.selectedItemId);
+    
     // Broadcast to other players in range
     var range = getIJRange(player.i, player.j);
+    console.log('📡 DEBUG: Broadcasting to players in range:', range);
+    
+    var playersNotified = 0;
     for (var i = range.lefti; i <= range.righti; i++) {
         for (var j = range.topj; j <= range.bottomj; j++) {
             if (worldPlayerMap[i][j].length > 0) {
                 for (othPlayer of worldPlayerMap[i][j]) {
                     if (othPlayer.id != player.id) {
-                        socketController.playerSelectionUpdate(othPlayer, {
-                            id: player.id,
-                            selectedSlot: selectedSlot,
-                            selectedItemId: itemId
-                        });
+                        console.log('📤 DEBUG: Sending selection update to player:', othPlayer.name, '(ID:', othPlayer.id, ')');
+                        socketController.playerSelectionUpdate(othPlayer, player.id, itemId);
+                        playersNotified++;
                     }
                 }
             }
         }
     }
+    console.log('✅ DEBUG: Total players notified about selection:', playersNotified);
 }
 
 /**

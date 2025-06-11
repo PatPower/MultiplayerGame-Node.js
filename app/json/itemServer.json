@@ -7,6 +7,9 @@
         "Durability": 50,
         "actions": {
             "a1": {
+                "name": "Select"
+            },
+            "a2": {
                 "name": "DefaultDrop"
             }
         }

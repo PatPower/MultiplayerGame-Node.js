@@ -319,7 +319,7 @@ function getItemObj(id) {
 }
 
 function selectInvItem(slot) {
-    console.log("ION")
+    console.log("📦 DEBUG: selectInvItem called with slot:", slot);
 
     var rect = $(itemArea).offset();
     var invX = slot % 4;
@@ -340,6 +340,11 @@ function selectInvItem(slot) {
         selectedItemId = currPlayer.inventory[slot].id;
     }
     
+    console.log("🎯 DEBUG: Item selection details:");
+    console.log("  Slot:", slot);
+    console.log("  Item ID:", selectedItemId);
+    console.log("  Current player inventory:", currPlayer.inventory);
+    
     // Redraw current player immediately to show the selected item icon
     if (window.projectSquare && window.currPlayer) {
         window.projectSquare(window.currPlayer, {});
@@ -347,7 +352,14 @@ function selectInvItem(slot) {
     
     // Notify server about selection
     if (window.socket) {
+        console.log("📡 DEBUG: Sending itemSelection to server");
+        console.log("  Socket exists:", !!window.socket);
+        console.log("  Sending slot:", slot);
+        console.log("  Sending itemId:", selectedItemId);
         window.socket.emit('itemSelection', slot, selectedItemId);
+        console.log("✅ DEBUG: itemSelection event emitted");
+    } else {
+        console.log("❌ DEBUG: No socket available to send selection");
     }
 }
 

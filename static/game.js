@@ -429,15 +429,32 @@ initializeSocket().then(socket => {
         currPlayer.inventory = newInventory;
     })
     
-    socket.on('playerSelectionUpdate', function (playerData) {
+    socket.on('playerSelectionUpdate', function (playerId, selectedItemId) {
+        console.log('📥 DEBUG: Client received playerSelectionUpdate');
+        console.log('  Player ID:', playerId);
+        console.log('  Selected item ID:', selectedItemId);
+        console.log('  Current playerList:', Object.keys(window.playerList));
+        console.log('  Player exists in list:', !!window.playerList[playerId]);
+        
         // Update the player's selection data in our local playerList
-        if (window.playerList[playerData.id]) {
-            window.playerList[playerData.id].selectedSlot = playerData.selectedSlot;
-            window.playerList[playerData.id].selectedItemId = playerData.selectedItemId;
+        if (window.playerList[playerId]) {
+            console.log('✅ DEBUG: Found player in list, updating selection');
+            console.log('  Player name:', window.playerList[playerId].name);
+            console.log('  Old selectedItemId:', window.playerList[playerId].selectedItemId);
+            
+            window.playerList[playerId].selectedItemId = selectedItemId;
+            
+            console.log('  New selectedItemId:', window.playerList[playerId].selectedItemId);
+            console.log('🎨 DEBUG: Calling projectSquares to redraw players');
             
             // Redraw all players to show the updated selection
             projectSquares(window.playerList);
             drawPlayerNames();
+            
+            console.log('✅ DEBUG: Player selection update complete');
+        } else {
+            console.log('❌ DEBUG: Player not found in playerList');
+            console.log('  Available players:', Object.keys(window.playerList));
         }
     });
 
@@ -621,7 +638,7 @@ initializeSocket().then(socket => {
             opcxt.fillRect(BOXSIDE * relCoords.i, BOXSIDE * relCoords.j, BOXSIDE, BOXSIDE);
             
             // Draw selected item icon if player has something selected
-            if (playerObj.selectedItemId && playerObj.selectedItemId !== null) {
+            if (playerObj.selectedItemId !== null) {
                 drawSelectedItemOnPlayer(opcxt, playerObj.selectedItemId, relCoords.i, relCoords.j);
             }
         } else { // Current player
@@ -651,6 +668,7 @@ initializeSocket().then(socket => {
             context.drawImage(img, iconX, iconY, iconSize, iconSize);
         };
         img.src = itemIcon;
+        console.log('🖼️ Drawing item icon for ID:', itemId, 'at grid position:', gridI, gridJ);
     }
     
     // Helper function to show pickaxe icon during mining
@@ -932,11 +950,6 @@ initializeSocket().then(socket => {
     function defaultAction(structId, location) {
         var defAction = getDefaultAction(structId);
         if (defAction) {
-            // Removed mining pickaxe icon functionality
-            // if (structId === 1 && defAction === "a1") {
-            //     // Show pickaxe icon for mining action
-            //     showMiningPickaxe();
-            // }
             sendPlayerAction(structId, defAction, location);
         }
     }
