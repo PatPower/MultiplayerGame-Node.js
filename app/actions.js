@@ -12,13 +12,29 @@ function Action(worldArg) {
  * location: {i: int, j: int} of the interacted structure
  */
 Action.prototype.doAction = function (playerId, structId, actionId, location) {
-    console.log("STRUCT ACTION", playerId, structId, actionId, location)
+    console.log("🛠️ STRUCTURE ACTION DEBUG:");
+    console.log("  Player ID:", playerId);
+    console.log("  Structure ID:", structId);
+    console.log("  Action ID:", actionId);
+    console.log("  Location:", location);
+    
     if (world.verifyStructureLocation(location, structId)) {
         var player = world.getPlayer(playerId);
         if (player) {
             if (world.checkIfInteractible(player, location)) {
-                console.log(structId, actionId)
+                console.log("📦 Player inventory before action:");
+                for (let i = 0; i < player.inventory.length; i++) {
+                    const item = player.inventory[i];
+                    if (item) {
+                        console.log(`  Slot ${i}: ID ${item.id} (${JsonController.getItemName(item.id)})`);
+                    } else {
+                        console.log(`  Slot ${i}: Empty`);
+                    }
+                }
+                
                 var structureAction = JsonController.getStructureAction(structId, actionId);
+                console.log("🎯 Structure action:", structureAction);
+                
                 // CONDITIONS:
                 for (itemCond of structureAction.cond.item) {
                     var itemInfo = world.verifyPlayerItem(player, itemCond.id);
@@ -47,12 +63,16 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
 
                 // Check if there is enough space in inventory for items
                 var freeInvSpace = player.inventory.filter(o => o == null).length
+                console.log("📊 Free inventory space:", freeInvSpace);
+                console.log("📊 Items to drop:", structureAction.result.drop.length);
+                
                 if (structureAction.result.drop.length > freeInvSpace) {
                     return { result: false, msg: "Not enough inventory space!" };
                 }
 
                 // EVENT:
                 if (structureAction.result.destroy) {
+                    console.log("💥 Destroying structure at:", location);
                     world.removeStructure(location);
                 }
                 for (item of structureAction.result.degradeItems) {
@@ -70,17 +90,34 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
                     world.removePlayerItem(player, itemInfo.slot);
                     inventoryChanges.push({ item: null, pos: itemInfo.slot })
                 }
+                
+                console.log("🎁 Processing item drops:");
                 for (item of structureAction.result.drop) {
+                    console.log("  Dropping item:", item);
                     var slot = world.addPlayerItem(player, item);
                     if (slot == -1) {
                         console.log("Error: ", player.id, " inventory overflowed")
+                    } else {
+                        console.log("  Added to slot:", slot);
                     }
-                    console.log(item)
                     inventoryChanges.push({ item: item, pos: slot })
                 }
+                
                 if (structureAction.result.addToInvSize) {
                     world.changeInvSize(player, structureAction.result.addToInvSize)
                 }
+                
+                console.log("📦 Player inventory after action:");
+                for (let i = 0; i < player.inventory.length; i++) {
+                    const item = player.inventory[i];
+                    if (item) {
+                        console.log(`  Slot ${i}: ID ${item.id} (${JsonController.getItemName(item.id)})`);
+                    } else {
+                        console.log(`  Slot ${i}: Empty`);
+                    }
+                }
+                
+                console.log("📡 Sending inventory changes:", inventoryChanges);
                 // Updates the player's inventory
                 world.playerInventoryUpdate(player, inventoryChanges)
             }
