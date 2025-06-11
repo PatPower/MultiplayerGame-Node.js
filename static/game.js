@@ -577,3 +577,18 @@ initializeSocket().then(socket => {
     window.setupCurrentPlayer = setupCurrentPlayer;
     window.setupOtherPlayers = setupOtherPlayers;
 });
+
+// Add logout functionality
+$(document).ready(function() {
+    $('#logout-btn').click(function() {
+        if (confirm('Are you sure you want to logout?')) {
+            // Disconnect from the game socket
+            if (window.socket) {
+                window.socket.disconnect();
+            }
+            
+            // Clear Cloudflare Access session by redirecting to logout URL
+            window.location.href = '/cdn-cgi/access/logout';
+        }
+    });
+});

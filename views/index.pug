@@ -23,6 +23,7 @@ html
             if user
                 div Welcome, #{user.name}!
                 div Email: #{user.email}
+                button(id="logout-btn" style="margin-top: 10px; padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;") Logout
             else
                 div Not authenticated
         
