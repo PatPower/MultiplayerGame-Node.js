@@ -139,6 +139,13 @@ initializeSocket().then(socket => {
         ovlycxt = setupOverlay(document.getElementById('overlay'));
         pcxt = setupCurrentPlayer(document.getElementById('player'));
         
+        // Make canvas contexts globally accessible
+        window.bgcxt = bgcxt;
+        window.strcxt = strcxt;
+        window.opcxt = opcxt;
+        window.ovlycxt = ovlycxt;
+        window.pcxt = pcxt;
+        
         console.log('🎯 Setting up game elements...');
         updateTileMarker(currPlayer);
         projectSquares(pList);  // Now currPlayer is defined globally
