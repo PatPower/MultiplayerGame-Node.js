@@ -359,11 +359,15 @@ initializeSocket().then(socket => {
         // Other player moves out of view
         if (checkIfNewCoordsOutBounds(othP, movement)) {
             removePlayer(othP);
+            // Redraw player names after removing player
+            drawPlayerNames();
             return;
         }
         // Other player moves in view
         if (!playerList[othP.id]) {
             addPlayer(getNewCoordsLocation(othP, movement));
+            // Redraw player names after adding player
+            drawPlayerNames();
             return;
         }
         var relCoords = getRelativeCoords(othP)
@@ -534,14 +538,19 @@ initializeSocket().then(socket => {
 
     function updateBackgroundCanvas() {
         // Background
-        //bgcxt.clearRect(0, 0, canvas.width, canvas.height);
+        // Fill entire canvas with blue first
+        bgcxt.fillStyle = "blue";
+        bgcxt.fillRect(0, 0, CWIDTH, CHEIGHT);
+        
         for (var i = 0; i < NUMCOL; i++) {
             for (var j = 0; j < NUMROW; j++) {
                 if (locationMap[i][j].ground.backgroundColor) {
                     bgcxt.fillStyle = locationMap[i][j].ground.backgroundColor;
                     bgcxt.fillRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
                 } else {
-                    bgcxt.clearRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
+                    // Fill void areas with blue instead of clearing
+                    bgcxt.fillStyle = "blue";
+                    bgcxt.fillRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
                 }
             }
         }
@@ -597,11 +606,16 @@ initializeSocket().then(socket => {
             }
         }
         
+        // Debug: Log current player positions
+        console.log('Drawing names for players:');
+        console.log('Current player:', window.currPlayer?.name, 'at', window.currPlayer?.i, window.currPlayer?.j);
+        
         // Draw names for other players
         for (var playerId in window.playerList) {
             var playerObj = window.playerList[playerId];
             if (playerObj.id != window.currPlayer.id) {
                 var relCoords = getRelativeCoords(playerObj);
+                console.log('Other player:', playerObj.name, 'global pos:', playerObj.i, playerObj.j, 'relative pos:', relCoords.i, relCoords.j);
                 drawPlayerName(ovlycxt, playerObj.name, relCoords.i, relCoords.j);
             }
         }
