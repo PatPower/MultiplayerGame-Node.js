@@ -197,16 +197,37 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
  * buildLoc: {i: int, j: int} the location where the structure is being placed
  */
 Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc) {
-    console.log("Build Action ", playerId, itemId, actionId, invSlot, buildLoc);
+    console.log("🔨 BUILD ACTION DEBUG:");
+    console.log("  Player ID:", playerId);
+    console.log("  Item ID:", itemId);
+    console.log("  Action ID:", actionId);
+    console.log("  Inventory Slot:", invSlot);
+    console.log("  Build Location:", buildLoc);
+    
     var player = world.getPlayer(playerId);
     if (!player) {
         return { result: false, msg: "Player not found" };
     }
     
+    console.log("📦 Player inventory before build:");
+    for (let i = 0; i < player.inventory.length; i++) {
+        const item = player.inventory[i];
+        if (item) {
+            console.log(`  Slot ${i}: ID ${item.id} (${JsonController.getItemName(item.id)})`);
+        } else {
+            console.log(`  Slot ${i}: Empty`);
+        }
+    }
+    
     // Make sure player has the item at the slot specified
-    if (!world.verifyPlayerItem(player, itemId, invSlot)) {
+    var itemVerification = world.verifyPlayerItem(player, itemId, invSlot);
+    if (!itemVerification) {
+        console.log("❌ Item verification failed!");
         return { result: false, msg: "Item not found in specified slot" };
     }
+    
+    console.log("✅ Item verification passed:");
+    console.log("  Found item:", itemVerification);
     
     // Check if the structure being placed is around the player
     if (!world.checkIfInteractible(player, buildLoc)) {
@@ -238,10 +259,24 @@ Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc
     try {
         // Place the structure first
         world.placeStructure(buildLoc, structId, structHealth, player.id);
+        console.log("🏗️ Structure placed successfully");
         
         // Remove the item from inventory and send update to client
+        console.log("🗑️ Removing item from slot:", invSlot);
         world.removePlayerItem(player, invSlot, false); // Don't auto-update
         var inventoryChanges = [{ item: null, pos: invSlot }];
+        
+        console.log("📦 Player inventory after removal:");
+        for (let i = 0; i < player.inventory.length; i++) {
+            const item = player.inventory[i];
+            if (item) {
+                console.log(`  Slot ${i}: ID ${item.id} (${JsonController.getItemName(item.id)})`);
+            } else {
+                console.log(`  Slot ${i}: Empty`);
+            }
+        }
+        
+        console.log("📡 Sending inventory update:", inventoryChanges);
         world.playerInventoryUpdate(player, inventoryChanges);
         
         return { result: true, msg: "Structure placed successfully" };
