@@ -550,6 +550,59 @@ World.prototype.addPlayerItem = async function (player, itemObj) {
 }
 
 /**
+ * Verifies if a player has a specific item at a given slot or anywhere in inventory
+ * @param {*} player The player object
+ * @param {*} itemId The ID of the item to verify
+ * @param {*} invSlot Optional - specific slot to check (0-based index)
+ * @returns {Object|boolean} Returns item info object {slot, durability} if found, false if not found
+ */
+World.prototype.verifyPlayerItem = function (player, itemId, invSlot) {
+    if (!player || !player.inventory) {
+        return false;
+    }
+    
+    // If specific slot is provided, check only that slot
+    if (typeof invSlot !== 'undefined' && invSlot !== null) {
+        if (invSlot >= 0 && invSlot < player.inventory.length) {
+            var item = player.inventory[invSlot];
+            if (item && item.id === itemId) {
+                return {
+                    slot: invSlot,
+                    durability: item.durability || 0,
+                    item: item
+                };
+            }
+        }
+        return false;
+    }
+    
+    // Otherwise, search entire inventory for the item
+    for (var i = 0; i < player.inventory.length; i++) {
+        var item = player.inventory[i];
+        if (item && item.id === itemId) {
+            return {
+                slot: i,
+                durability: item.durability || 0,
+                item: item
+            };
+        }
+    }
+    
+    return false;
+}
+
+/**
+ * Updates the player's inventory on the client side
+ * @param {*} player 
+ * @param {*} inventoryChanges 
+ */
+World.prototype.playerInventoryUpdate = function (player, inventoryChanges) {
+    if (inventoryChanges && inventoryChanges.length > 0) {
+        socketController.playerInventoryUpdate(player, inventoryChanges);
+    }
+}
+
+/**
  * Returns an object with the left/right bound and top/bottom bound of i and j respectively
  * If the player is near the border, the i's and j's will be either 0 or the Settings.WORLDLIMIT - 1
  * However the true i and j's will ignore the constraints above and can give < 0 or > Settings.WORLDLIMIT - 1

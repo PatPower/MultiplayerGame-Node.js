@@ -163,8 +163,10 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
                 // REMINDER TO MAKE SURE THIS ITEM IS ALSO CHECKED IN THE CONDITIONS
                 for (itemId of itemAction.result.removeItem) {
                     var itemInfo = world.verifyPlayerItem(player, itemId);
-                    world.removePlayerItem(player, invSlot);
-                    inventoryChanges.push({ item: null, pos: invSlot })
+                    if (itemInfo) {
+                        world.removePlayerItem(player, itemInfo.slot);
+                        inventoryChanges.push({ item: null, pos: itemInfo.slot })
+                    }
                 }
                 for (item of itemAction.result.drop) {
                     var slot = world.addPlayerItem(player, item);
@@ -197,32 +199,50 @@ Action.prototype.doInvAction = function (playerId, itemId, actionId, invSlot) {
 Action.prototype.build = function (playerId, itemId, actionId, invSlot, buildLoc) {
     console.log("Build Action ", playerId, itemId, actionId, invSlot, buildLoc);
     var player = world.getPlayer(playerId);
-    if (player) {
-        // Make sure player has the item at the slot specified
-        if (world.verifyPlayerItem(player, itemId, invSlot)) {
-            // Check if the structure being placed is around the player
-            if (world.checkIfInteractible(player, buildLoc)) {
-                // Also check if the build location is not on top of the player
-                if (!(player.i == buildLoc.i && player.j == buildLoc.j)) {
-                    // Determines if the location has no solid structures or players
-                    if (checkLocationBuildable(buildLoc)) {
-                        var itemAction = JsonController.getItemAction(itemId, actionId);
-                        var structId = itemAction.structId;
-                        var structHealth = JsonController.getStructureHealth(structId);
-                        if (structId) {
-                            world.placeStructure(buildLoc, structId, structHealth, player.id);
-                            world.removePlayerItem(player, invSlot, true);
-                        } else {
-                            return { result: false, msg: "Item not placeable (actions)" };
-                        }
-                    } else {
-                        return { result: false, msg: "Not buildable here" };
-                    }
-                }
-            }
-        }
+    if (!player) {
+        return { result: false, msg: "Player not found" };
     }
-    return { result: true, msg: "" };
+    
+    // Make sure player has the item at the slot specified
+    if (!world.verifyPlayerItem(player, itemId, invSlot)) {
+        return { result: false, msg: "Item not found in specified slot" };
+    }
+    
+    // Check if the structure being placed is around the player
+    if (!world.checkIfInteractible(player, buildLoc)) {
+        return { result: false, msg: "Too far to build here" };
+    }
+    
+    // Also check if the build location is not on top of the player
+    if (player.i == buildLoc.i && player.j == buildLoc.j) {
+        return { result: false, msg: "Cannot build on yourself" };
+    }
+    
+    // Determines if the location has no solid structures or players
+    if (!checkLocationBuildable(buildLoc)) {
+        return { result: false, msg: "Not buildable here" };
+    }
+    
+    var itemAction = JsonController.getItemAction(itemId, actionId);
+    if (!itemAction) {
+        return { result: false, msg: "Invalid action for this item" };
+    }
+    
+    var structId = itemAction.structId;
+    if (!structId && structId !== 0) {
+        return { result: false, msg: "Item not placeable (no structure ID)" };
+    }
+    
+    var structHealth = JsonController.getStructureHealth(structId);
+    
+    try {
+        world.placeStructure(buildLoc, structId, structHealth, player.id);
+        world.removePlayerItem(player, invSlot, true);
+        return { result: true, msg: "Structure placed successfully" };
+    } catch (error) {
+        console.error("Error placing structure:", error);
+        return { result: false, msg: "Failed to place structure" };
+    }
 }
 
 function checkLocationBuildable(buildLoc) {
