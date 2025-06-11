@@ -606,16 +606,11 @@ initializeSocket().then(socket => {
             }
         }
         
-        // Debug: Log current player positions
-        console.log('Drawing names for players:');
-        console.log('Current player:', window.currPlayer?.name, 'at', window.currPlayer?.i, window.currPlayer?.j);
-        
         // Draw names for other players
         for (var playerId in window.playerList) {
             var playerObj = window.playerList[playerId];
             if (playerObj.id != window.currPlayer.id) {
                 var relCoords = getRelativeCoords(playerObj);
-                console.log('Other player:', playerObj.name, 'global pos:', playerObj.i, playerObj.j, 'relative pos:', relCoords.i, relCoords.j);
                 drawPlayerName(ovlycxt, playerObj.name, relCoords.i, relCoords.j);
             }
         }
@@ -778,6 +773,8 @@ initializeSocket().then(socket => {
     window.emitBuild = emitBuild;
     window.defaultAction = defaultAction;
     window.getDefaultAction = getDefaultAction;
+    window.getNewCoordsLocation = getNewCoordsLocation;
+    window.checkIfNewCoordsOutBounds = checkIfNewCoordsOutBounds;
     
     // Additional functions that other scripts may need
     window.addPlayer = addPlayer;
