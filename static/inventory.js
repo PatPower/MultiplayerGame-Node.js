@@ -4,6 +4,8 @@ var invCxt = setupInventory(invElement);
 var currentSelectedSlot = -1;
 var buildAnimationId = -1;
 var itemJson = [];
+var inventoryInitialized = false;
+var pendingInventoryUpdates = [];
 
 invTitle(invCxt)
 
@@ -38,11 +40,20 @@ function setupInventory(canvas) {
  * inventoryChanges: [ { item: { id: int, durability: int }, pos: int } , ... ]
  */
 function updateInventory(inventoryChanges) {
+    // If inventory isn't initialized yet, queue the updates
+    if (!inventoryInitialized) {
+        console.log('📦 Inventory not initialized yet, queueing update:', inventoryChanges);
+        pendingInventoryUpdates.push(inventoryChanges);
+        return;
+    }
+    
     // Check if inventory is initialized first
     if (!itemArea || !currPlayer || !currPlayer.inventory) {
         console.warn('Inventory not initialized yet, skipping update');
         return;
     }
+    
+    console.log('📦 Processing inventory update:', inventoryChanges);
     
     for (invChange of inventoryChanges) {
         var i = invChange.pos + 1;
@@ -135,6 +146,7 @@ function updateInvSize(newInventorySize) {
 }
 
 function initalizeInvItems() {
+    console.log('🏗️ Initializing inventory items...');
     invLockIcon();
     for (var i = 1; i <= currPlayer.inventorySize; i++) {
         var item = currPlayer.inventory[i - 1];
@@ -159,6 +171,19 @@ function initalizeInvItems() {
         img.src = getItemIcon(-2);
         itemArea.append(img);
         preventDragging("#item" + i);
+    }
+    
+    // Mark inventory as initialized
+    inventoryInitialized = true;
+    console.log('✅ Inventory initialization complete!');
+    
+    // Process any queued updates
+    if (pendingInventoryUpdates.length > 0) {
+        console.log('📦 Processing', pendingInventoryUpdates.length, 'queued inventory updates');
+        for (var update of pendingInventoryUpdates) {
+            updateInventory(update);
+        }
+        pendingInventoryUpdates = []; // Clear the queue
     }
 }
 
