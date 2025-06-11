@@ -71,6 +71,10 @@ $(document).click(function (event) {
                 console.log("Error: Undefined action ID (controls)")
                 return
             }
+            console.log("🔨 BUILD DEBUG:");
+            console.log("  selectedSlot:", currentSelectedSlot);
+            console.log("  selectedItem:", currPlayer.inventory[currentSelectedSlot]);
+            console.log("  itemId:", getSelectedItemId());
             emitBuild(getSelectedItemId(), currentSelectedActionId, currentSelectedSlot, getGlobalCoords({ i: mousePos.i, j: mousePos.j }))
         } else {
             // If left clicked outside of buildable region and on map
@@ -85,6 +89,11 @@ $(document).click(function (event) {
     var j = Math.floor(y / BOXSIDE);
     if (i >= 0 && i < INVNUMCOL && j >= 0 && j < NUMROW && $(event.target).attr("id")) {
         var slot = parseInt($(event.target).attr("id").slice(4)) - 1;
+        console.log("📦 INVENTORY CLICK DEBUG:");
+        console.log("  DOM element:", $(event.target).attr("id"));
+        console.log("  calculated slot:", slot);
+        console.log("  item at slot:", currPlayer.inventory[slot]);
+        
         var actionId = getActionId(slot);
         if (actionId) {
             if (currentSelectedSlot == -1 || slot != currentSelectedSlot) {
