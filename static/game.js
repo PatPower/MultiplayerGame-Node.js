@@ -36,8 +36,6 @@ async function initializeSocket() {
         console.log('  Using token:', token);
 
         // Create socket connection with authentication
-        // Since we can't pass the actual CF JWT to socket.io from client-side,
-        // we'll use the socket handshake headers instead
         const socket = io({
             auth: {
                 token: token,
@@ -55,12 +53,8 @@ async function initializeSocket() {
             console.log('✅ Connected to server with authentication');
             console.log('🔍 Checking window.authenticatedUser:', window.authenticatedUser);
             
-            // Use authenticated user name instead of prompting
-            const userName = window.authenticatedUser ? window.authenticatedUser.name : 'Anonymous';
-            console.log('👤 Using player name:', userName);
-            console.log('📤 Emitting "new player" event...');
-            
-            socket.emit('new player', userName);
+            // Check if user needs to choose a username
+            checkUserNameSetup(socket);
         });
 
         socket.on('auth_error', function(error) {
@@ -78,6 +72,161 @@ async function initializeSocket() {
         console.error('❌ Failed to initialize socket:', error);
         alert('Failed to connect. Please ensure you are properly authenticated.');
         return null;
+    }
+}
+
+// Check if user needs to set up their username
+async function checkUserNameSetup(socket) {
+    try {
+        // Check if user already has a saved username
+        const response = await fetch('/api/user/profile', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const userData = await response.json();
+            if (userData.hasUsername) {
+                // User already has a username, proceed with game
+                console.log('👤 User already has username:', userData.username);
+                socket.emit('new player', userData.username);
+            } else {
+                // User needs to choose a username
+                console.log('👤 User needs to choose username');
+                showUsernameModal(socket);
+            }
+        } else {
+            // Fallback - show username modal
+            showUsernameModal(socket);
+        }
+    } catch (error) {
+        console.error('Error checking username:', error);
+        // Fallback - show username modal
+        showUsernameModal(socket);
+    }
+}
+
+// Show the username selection modal
+function showUsernameModal(socket) {
+    const modal = document.getElementById('username-modal');
+    const input = document.getElementById('username-input');
+    const submitBtn = document.getElementById('username-submit');
+    const randomBtn = document.getElementById('username-random');
+    const errorDiv = document.getElementById('username-error');
+    
+    // Show the modal
+    modal.style.display = 'flex';
+    
+    // Focus on input
+    setTimeout(() => input.focus(), 100);
+    
+    // Generate random username function
+    function generateRandomUsername() {
+        const adjectives = ['Swift', 'Brave', 'Wise', 'Bold', 'Clever', 'Strong', 'Quick', 'Sharp', 'Bright', 'Noble'];
+        const nouns = ['Explorer', 'Builder', 'Miner', 'Crafter', 'Hunter', 'Warrior', 'Trader', 'Pioneer', 'Adventurer', 'Hero'];
+        const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+        const noun = nouns[Math.floor(Math.random() * nouns.length)];
+        const number = Math.floor(Math.random() * 1000);
+        return `${adjective}${noun}${number}`;
+    }
+    
+    // Handle random name button
+    randomBtn.addEventListener('click', function() {
+        input.value = generateRandomUsername();
+        input.focus();
+    });
+    
+    // Handle form submission
+    function submitUsername() {
+        const username = input.value.trim();
+        
+        // Validate username
+        if (!username) {
+            showError('Please enter a username');
+            return;
+        }
+        
+        if (username.length < 3) {
+            showError('Username must be at least 3 characters long');
+            return;
+        }
+        
+        if (username.length > 20) {
+            showError('Username must be 20 characters or less');
+            return;
+        }
+        
+        if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+            showError('Username can only contain letters, numbers, underscores, and hyphens');
+            return;
+        }
+        
+        // Disable form while submitting
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating...';
+        input.disabled = true;
+        randomBtn.disabled = true;
+        
+        // Save username and start game
+        saveUsernameAndStart(socket, username);
+    }
+    
+    function showError(message) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        input.focus();
+    }
+    
+    // Handle submit button click
+    submitBtn.addEventListener('click', submitUsername);
+    
+    // Handle Enter key press
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            submitUsername();
+        }
+    });
+}
+
+// Save username and start the game
+async function saveUsernameAndStart(socket, username) {
+    try {
+        const response = await fetch('/api/user/username', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ username: username })
+        });
+        
+        if (response.ok) {
+            // Hide modal
+            document.getElementById('username-modal').style.display = 'none';
+            
+            // Start the game
+            console.log('👤 Username saved, starting game with:', username);
+            socket.emit('new player', username);
+        } else {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to save username');
+        }
+    } catch (error) {
+        console.error('Error saving username:', error);
+        
+        // Re-enable form
+        const submitBtn = document.getElementById('username-submit');
+        const input = document.getElementById('username-input');
+        const randomBtn = document.getElementById('username-random');
+        const errorDiv = document.getElementById('username-error');
+        
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Start Playing';
+        input.disabled = false;
+        randomBtn.disabled = false;
+        
+        errorDiv.textContent = error.message || 'Failed to save username. Please try again.';
+        errorDiv.style.display = 'block';
     }
 }
 
