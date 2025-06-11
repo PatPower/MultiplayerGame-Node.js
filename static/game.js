@@ -116,6 +116,7 @@ initializeSocket().then(socket => {
         console.log('  Structure2D size:', structure2D ? structure2D.length : 'null');
         console.log('  Default Actions:', defaultActs);
         
+        // IMPORTANT: Set currPlayer FIRST before calling any functions that depend on it
         currPlayer = currentPlayer;
         playerList = pList;
         defaultActions = defaultActs;
@@ -132,7 +133,7 @@ initializeSocket().then(socket => {
         
         console.log('🎯 Setting up game elements...');
         updateTileMarker(currPlayer);
-        projectSquares(pList);
+        projectSquares(pList);  // Now currPlayer is defined
         projectSquare(currentPlayer, {});
         
         console.log('🎒 Initializing inventory...');
