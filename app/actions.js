@@ -11,7 +11,7 @@ function Action(worldArg) {
  * actionId: a1, a2 or a3 depending if action 1, action 2 or action 3
  * location: {i: int, j: int} of the interacted structure
  */
-Action.prototype.doAction = function (playerId, structId, actionId, location) {
+Action.prototype.doAction = async function (playerId, structId, actionId, location) {
     console.log("🛠️ STRUCTURE ACTION DEBUG:");
     console.log("  Player ID:", playerId);
     console.log("  Structure ID:", structId);
@@ -94,7 +94,7 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
                 console.log("🎁 Processing item drops:");
                 for (item of structureAction.result.drop) {
                     console.log("  Dropping item:", item);
-                    var slot = world.addPlayerItem(player, item);
+                    var slot = await world.addPlayerItem(player, item);
                     if (slot == -1) {
                         console.log("Error: ", player.id, " inventory overflowed")
                     } else {
@@ -104,7 +104,7 @@ Action.prototype.doAction = function (playerId, structId, actionId, location) {
                 }
                 
                 if (structureAction.result.addToInvSize) {
-                    world.changeInvSize(player, structureAction.result.addToInvSize)
+                    await world.changeInvSize(player, structureAction.result.addToInvSize)
                 }
                 
                 console.log("📦 Player inventory after action:");

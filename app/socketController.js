@@ -44,11 +44,16 @@ module.exports = function (socketIo, world, auth, database) {
                     world.movePlayer(socket.id, data);
                 });
                 
-                socket.on('pAction', function (id, actionId, location) {
-                    var response = action.doAction(socket.id, id, actionId, location);
-                    // If a condition is not met
-                    if (!response.result) {
-                        module.exports.message(socket.id, response.msg);
+                socket.on('pAction', async function (id, actionId, location) {
+                    try {
+                        var response = await action.doAction(socket.id, id, actionId, location);
+                        // If a condition is not met
+                        if (!response.result) {
+                            module.exports.message(socket.id, response.msg);
+                        }
+                    } catch (error) {
+                        console.error('Error in pAction:', error);
+                        module.exports.message(socket.id, 'Action failed');
                     }
                 });
                 
