@@ -120,17 +120,20 @@ $("#click").hide();
 
 // Keeps track of the mouse position at all times
 $(document).mousemove(function (e) {
-    // If the mousemove have valid coordinates
-    if (e.pageX && e.pageY) {
+    // Check if event object exists and has valid coordinates
+    if (e && e.pageX && e.pageY) {
         mousePos.x = e.pageX;
         mousePos.y = e.pageY;
+        
+        mousePos.i = Math.floor((mousePos.x - $('#overlay').offset().left - 4) / BOXSIDE);
+        mousePos.j = Math.floor((mousePos.y - $('#overlay').offset().top - 4) / BOXSIDE);
     }
-    mousePos.i = Math.floor((mousePos.x - $('#overlay').offset().left - 4) / BOXSIDE);
-    mousePos.j = Math.floor((mousePos.y - $('#overlay').offset().top - 4) / BOXSIDE);
+    
     // Wait for the screen to finish loading
     if (!windowLoaded) {
         return;
     }
+    
     if (lastI != mousePos.i || lastJ != mousePos.j) {
         // If on map
         if (mousePos.i >= 0 && NUMCOL > mousePos.i && mousePos.j >= 0 && NUMROW > mousePos.j) {
@@ -139,6 +142,7 @@ $(document).mousemove(function (e) {
         lastI = mousePos.i;
         lastJ = mousePos.j;
     }
+    
     if ($('#tooltip').is(":visible")) {
         $('#tooltip').css({
             left: mousePos.x + 12,
