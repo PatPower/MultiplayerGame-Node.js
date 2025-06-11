@@ -11,21 +11,28 @@ module.exports = function (socketIo, world, auth, database) {
             try {
                 // Authenticate the socket connection
                 const user = await auth.authenticateSocket(socket);
-                console.log('Authenticated user connected:', user.email);
+                console.log('✅ Authenticated user connected:', user.email);
                 
                 socket.user = user;
                 
                 socket.on('new player', async function (pname) {
+                    console.log('🎮 "new player" event received for:', user.email);
+                    console.log('  Player name:', pname);
+                    console.log('  Socket ID:', socket.id);
+                    
                     try {
                         // Use authenticated user data instead of just the provided name
+                        console.log('🏗️ Creating player...');
                         await world.createPlayer(socket.id, user);
+                        console.log('✅ Player creation completed successfully');
                     } catch (error) {
-                        console.error('Error creating player:', error);
+                        console.error('❌ Error creating player:', error);
                         socket.emit('error', 'Failed to create player');
                     }
                 });
                 
                 socket.on('disconnect', async function () {
+                    console.log('👋 Player disconnecting:', user.email);
                     try {
                         await world.disconnectPlayer(socket.id);
                     } catch (error) {
@@ -112,8 +119,17 @@ module.exports.setup = function (currPlayer, localPlayerDict2D, localGround2D, l
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
+    
+    console.log('📡 socketController.setup called:');
+    console.log('  Player ID:', currPlayer.id);
+    console.log('  Player position:', { i: currPlayer.i, j: currPlayer.j });
+    console.log('  Player inventory size:', currPlayer.inventorySize);
+    console.log('  Local players count:', Object.keys(localPlayerDict2D).length);
+    console.log('  Emitting setup event to socket:', currPlayer.id);
+    
     io.to(currPlayer.id).emit('setup', currPlayer, localPlayerDict2D, localGround2D, localStructure2D, defaultActions);
-
+    
+    console.log('✅ Setup event emitted successfully');
 }
 module.exports.message = function (id, msg) {
     if (!io) {

@@ -118,10 +118,16 @@ World.prototype.createPlayer = async function (id, user) {
     var player;
     
     try {
+        console.log('🌍 World.createPlayer called:');
+        console.log('  Socket ID:', id);
+        console.log('  User:', user);
+        
         // Try to load existing player data from database
+        console.log('📂 Checking for existing player data...');
         var savedPlayer = await this.database.getPlayer(user.id);
         
         if (savedPlayer) {
+            console.log('✅ Found existing player data');
             // Load existing player
             player = {
                 id: id,
@@ -140,6 +146,7 @@ World.prototype.createPlayer = async function (id, user) {
             savedPlayer.lastLogin = new Date().toISOString();
             await this.database.savePlayer(user.id, savedPlayer);
         } else {
+            console.log('🆕 Creating new player data');
             // Create new player in database
             var newPlayerData = await this.database.createPlayer(user.id, user.email, user.name);
             
@@ -157,11 +164,22 @@ World.prototype.createPlayer = async function (id, user) {
             };
         }
         
+        console.log('📍 Player object created:', {
+            id: player.id,
+            position: { i: player.i, j: player.j },
+            inventorySize: player.inventorySize,
+            name: player.name
+        });
+        
+        console.log('🏗️ Setting up player in world...');
         this.setPlayer(id, player);
         this.addPlayerLocation(player);
         this.createPFlag(id);
         
+        console.log('📡 Emitting setup event...');
         socketController.setup(this.getPlayer(id), this.getLocal2DPlayerDict(player), this.getLocal2DGround(player), this.getLocal2DStructure(player), {});
+        
+        console.log('👥 Notifying other players...');
         var range = getIJRange(player.i, player.j);
         for (var i = range.lefti; i <= range.righti; i++) {
             for (var j = range.topj; j <= range.bottomj; j++) {
@@ -174,11 +192,16 @@ World.prototype.createPlayer = async function (id, user) {
                 }
             }
         }
+        
+        console.log('⏰ Initializing movement log...');
         this.moveLog[id] = [];
         this.moveLog[id].push((new Date).getTime());
         
+        console.log('✅ Player creation and setup complete!');
+        
     } catch (error) {
-        console.error('Error creating/loading player:', error);
+        console.error('❌ Error in createPlayer:', error);
+        console.error('Stack trace:', error.stack);
         throw error;
     }
 }
