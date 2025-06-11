@@ -218,15 +218,3 @@ module.exports.playerSelectionUpdate = function (othPlayer, playerObj) {
     }
     io.to(othPlayer.id).emit('playerSelectionUpdate', playerObj);
 }
-
-module.exports.playerActionBroadcast = function (othPlayer, playerObj, actionType, structId) {
-    if (!io) {
-        throw new Error("Error: Can't use this function until io is properly initalized");
-    }
-    io.to(othPlayer.id).emit('playerActionBroadcast', {
-        playerId: playerObj.id,
-        actionType: actionType,
-        structId: structId,
-        position: { i: playerObj.i, j: playerObj.j }
-    });
-}

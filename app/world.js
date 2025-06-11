@@ -638,32 +638,6 @@ World.prototype.updatePlayerSelection = function (playerId, selectedSlot, itemId
 }
 
 /**
- * Broadcasts player actions to other players in range
- * @param {*} player The player performing the action
- * @param {*} actionType The type of action (e.g., "mining")
- * @param {*} structId The structure being acted upon
- */
-World.prototype.broadcastPlayerAction = function (player, actionType, structId) {
-    if (!player) {
-        return;
-    }
-    
-    // Broadcast to other players in range
-    var range = getIJRange(player.i, player.j);
-    for (var i = range.lefti; i <= range.righti; i++) {
-        for (var j = range.topj; j <= range.bottomj; j++) {
-            if (worldPlayerMap[i][j].length > 0) {
-                for (othPlayer of worldPlayerMap[i][j]) {
-                    if (othPlayer.id != player.id) {
-                        socketController.playerActionBroadcast(othPlayer, player, actionType, structId);
-                    }
-                }
-            }
-        }
-    }
-}
-
-/**
  * Returns an object with the left/right bound and top/bottom bound of i and j respectively
  * If the player is near the border, the i's and j's will be either 0 or the Settings.WORLDLIMIT - 1
  * However the true i and j's will ignore the constraints above and can give < 0 or > Settings.WORLDLIMIT - 1

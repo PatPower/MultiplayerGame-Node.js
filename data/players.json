@@ -5276,13 +5276,13 @@
       }
     },
     "position": {
-      "i": 8,
-      "j": 10
+      "i": 13,
+      "j": 9
     },
     "color": "cyan",
     "createdAt": "2025-06-11T20:36:57.710Z",
     "lastLogin": "2025-06-11T20:36:57.710Z",
-    "lastSaved": "2025-06-11T20:39:01.836Z"
+    "lastSaved": "2025-06-11T20:41:52.467Z"
   },
   "dev_1749674264668_vvpdn7naz": {
     "userId": "dev_1749674264668_vvpdn7naz",
@@ -5428,6 +5428,87 @@
     "color": "pink",
     "createdAt": "2025-06-11T20:37:51.679Z",
     "lastLogin": "2025-06-11T20:37:51.679Z",
-    "lastSaved": "2025-06-11T20:38:48.825Z"
+    "lastSaved": "2025-06-11T20:42:11.739Z"
+  },
+  "dev_1749674512792_9ffichaxg": {
+    "userId": "dev_1749674512792_9ffichaxg",
+    "email": "smartwizard304@dev.local",
+    "name": "SmartWizard304",
+    "username": "SmartWizard304",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      null,
+      {
+        "id": 1,
+        "durability": 50
+      },
+      null
+    ],
+    "inventorySize": 5,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 12,
+      "j": 8
+    },
+    "color": "blue",
+    "createdAt": "2025-06-11T20:41:52.810Z",
+    "lastLogin": "2025-06-11T20:41:52.810Z",
+    "lastSaved": "2025-06-11T20:42:02.462Z"
+  },
+  "dev_1749674531956_877b68u7j": {
+    "userId": "dev_1749674531956_877b68u7j",
+    "email": "quickexplorer392@dev.local",
+    "name": "QuickExplorer392",
+    "username": "QuickExplorer392",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      null,
+      {
+        "id": 1,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 10,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 8,
+      "j": 7
+    },
+    "color": "blue",
+    "createdAt": "2025-06-11T20:42:11.976Z",
+    "lastLogin": "2025-06-11T20:42:11.976Z",
+    "lastSaved": "2025-06-11T20:42:24.824Z"
   }
 }

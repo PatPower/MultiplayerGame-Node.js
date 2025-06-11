@@ -932,11 +932,11 @@ initializeSocket().then(socket => {
     function defaultAction(structId, location) {
         var defAction = getDefaultAction(structId);
         if (defAction) {
-            // Check if this is a mining action on a rock
-            if (structId === 1 && defAction === "a1") {
-                // Show pickaxe icon for mining action
-                showMiningPickaxe();
-            }
+            // Removed mining pickaxe icon functionality
+            // if (structId === 1 && defAction === "a1") {
+            //     // Show pickaxe icon for mining action
+            //     showMiningPickaxe();
+            // }
             sendPlayerAction(structId, defAction, location);
         }
     }

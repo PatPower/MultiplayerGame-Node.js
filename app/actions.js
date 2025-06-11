@@ -35,10 +35,7 @@ Action.prototype.doAction = async function (playerId, structId, actionId, locati
                 var structureAction = JsonController.getStructureAction(structId, actionId);
                 console.log("🎯 Structure action:", structureAction);
                 
-                // Broadcast action to other players for visual effects (like mining icons)
-                if (structId === 1 && actionId === "a1") { // Mining rock action
-                    world.broadcastPlayerAction(player, "mining", structId);
-                }
+                // Removed mining action broadcasting functionality
                 
                 // CONDITIONS:
                 for (itemCond of structureAction.cond.item) {
