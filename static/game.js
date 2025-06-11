@@ -53,8 +53,13 @@ async function initializeSocket() {
 
         socket.on('connect', function() {
             console.log('✅ Connected to server with authentication');
+            console.log('🔍 Checking window.authenticatedUser:', window.authenticatedUser);
+            
             // Use authenticated user name instead of prompting
             const userName = window.authenticatedUser ? window.authenticatedUser.name : 'Anonymous';
+            console.log('👤 Using player name:', userName);
+            console.log('📤 Emitting "new player" event...');
+            
             socket.emit('new player', userName);
         });
 
@@ -104,20 +109,39 @@ initializeSocket().then(socket => {
      * {structureId: actionId}
     */
     socket.on('setup', function (currentPlayer, pList, ground2D, structure2D, defaultActs) {
+        console.log('🎮 Setup event received!');
+        console.log('  Current Player:', currentPlayer);
+        console.log('  Player List:', pList);
+        console.log('  Ground2D size:', ground2D ? ground2D.length : 'null');
+        console.log('  Structure2D size:', structure2D ? structure2D.length : 'null');
+        console.log('  Default Actions:', defaultActs);
+        
         currPlayer = currentPlayer;
         playerList = pList;
         defaultActions = defaultActs;
+        
+        console.log('🗺️ Loading location map...');
         loadLocationMap(ground2D, structure2D, pList, currPlayer);
+        
+        console.log('🎨 Setting up canvases...');
         bgcxt = setupBackground(document.getElementById('background'));
         strcxt = setupStructure(document.getElementById('structure'));
         opcxt = setupOtherPlayers(document.getElementById('otherPlayers'));
         ovlycxt = setupOverlay(document.getElementById('overlay'));
         pcxt = setupCurrentPlayer(document.getElementById('player'));
+        
+        console.log('🎯 Setting up game elements...');
         updateTileMarker(currPlayer);
         projectSquares(pList);
         projectSquare(currentPlayer, {});
+        
+        console.log('🎒 Initializing inventory...');
         initalizeInvItems();
+        
+        console.log('🔨 Setting up crafting area...');
         setupCraftingArea();
+        
+        console.log('✅ Game setup complete!');
     });
 
     socket.on('moveCurrPlayer', function (player, pList, ground2D, structure2D) {
