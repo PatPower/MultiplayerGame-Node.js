@@ -462,9 +462,13 @@ initializeSocket().then(socket => {
 
             console.log('✅ DEBUG: Player selection update complete');
         } else {
-            console.log('❌ DEBUG: Player not found in playerList');
-            console.log('  Available players:', Object.keys(window.playerList));
+            console.log('❌ DEBUG: Player not found in playerList for selection update:', playerId);
         }
+    });
+
+    socket.on('inventoryFull', function () {
+        console.log("🚨 inventoryFull socket event received!");
+        showInventoryFullMessage();
     });
 
     // TODO: make a socket that gets responses for invalid movement or actions done

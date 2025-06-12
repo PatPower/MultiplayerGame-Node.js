@@ -1,5 +1,6 @@
 var world;
 var JsonController = require('./jsonController.js');
+var socketController = require('./socketController.js');
 
 function Action(worldArg) {
     world = worldArg;
@@ -77,7 +78,7 @@ Action.prototype.doAction = async function (playerId, structId, actionId, locati
                 console.log("📊 Items to drop:", structureAction.result.drop.length);
 
                 if (structureAction.result.drop.length > freeInvSpace) {
-                    return { result: false, msg: "Not enough inventory space!" };
+                    return { result: false, msg: "Not enough inventory space!", inventoryFull: true };
                 }
 
                 // EVENT:
@@ -107,6 +108,8 @@ Action.prototype.doAction = async function (playerId, structId, actionId, locati
                     var slot = await world.addPlayerItem(player, item);
                     if (slot == -1) {
                         console.log("Error: ", player.id, " inventory overflowed")
+                        // Return flag instead of calling socketController directly
+                        return { result: false, msg: "Inventory overflow during item drop!", inventoryFull: true };
                     } else {
                         console.log("  Added to slot:", slot);
                     }
@@ -190,7 +193,7 @@ Action.prototype.doInvAction = async function (playerId, itemId, actionId, invSl
                 freedUpSpace += itemAction.result.destroy ? 1 : 0;
                 console.log("FREE", itemAction.result.drop.length, freeInvSpace + freedUpSpace)
                 if (itemAction.result.drop.length > freeInvSpace + freedUpSpace) {
-                    return { result: false, msg: "Not enough inventory space!" };
+                    return { result: false, msg: "Not enough inventory space!", inventoryFull: true };
                 }
 
                 // EVENT:
@@ -219,6 +222,8 @@ Action.prototype.doInvAction = async function (playerId, itemId, actionId, invSl
                     var slot = await world.addPlayerItem(player, item);
                     if (slot == -1) {
                         console.log("CRITICAL ERROR!!!: ", player.id, " inventory overflowed")
+                        // Return flag instead of calling socketController directly
+                        return { result: false, msg: "Inventory overflow during item drop!", inventoryFull: true };
                     }
                     console.log(item)
                     inventoryChanges.push({ item: item, pos: slot })

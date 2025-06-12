@@ -121,13 +121,6 @@ function findMenuObj(x, y) {
             return players;
         })(),
     };
-    itemsDict["sep1"] = "---------";
-    itemsDict["quit"] = {
-        name: "quit",
-        icon: function () {
-            return "context-menu-icon context-menu-icon-quit";
-        },
-    };
     menuDict["items"] = itemsDict;
     return menuDict;
 }
@@ -192,13 +185,6 @@ function findMenuObjInv(invSlot) {
             };
         }
     }
-    itemsDict["sep1"] = "---------";
-    itemsDict["quit"] = {
-        name: "quit",
-        icon: function () {
-            return "context-menu-icon context-menu-icon-quit";
-        },
-    };
     menuDict["items"] = itemsDict;
     return menuDict;
 }

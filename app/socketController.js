@@ -107,6 +107,10 @@ module.exports = function (socketIo, world, auth, database) {
                         // If a condition is not met
                         if (!response.result) {
                             module.exports.message(socket.id, response.msg);
+                            // Check if inventory was full and send notification
+                            if (response.inventoryFull) {
+                                module.exports.inventoryFull({ id: socket.id });
+                            }
                         }
                     } catch (error) {
                         console.error('Error in pAction:', error);
@@ -120,6 +124,10 @@ module.exports = function (socketIo, world, auth, database) {
                         // If a condition is not met
                         if (!response.result) {
                             module.exports.message(socket.id, response.msg);
+                            // Check if inventory was full and send notification
+                            if (response.inventoryFull) {
+                                module.exports.inventoryFull({ id: socket.id });
+                            }
                         }
                     } catch (error) {
                         console.error('Error in invAction:', error);
@@ -261,4 +269,11 @@ module.exports.playerSelectionUpdate = function (othPlayer, playerId, selectedIt
 
     io.to(othPlayer.id).emit('playerSelectionUpdate', playerId, selectedItemId);
     console.log('✅ DEBUG: playerSelectionUpdate event emitted to socket:', othPlayer.id);
+}
+
+module.exports.inventoryFull = function (player) {
+    if (!io) {
+        throw new Error("Error: Can't use this function until io is properly initalized");
+    }
+    io.to(player.id).emit('inventoryFull');
 }

@@ -459,40 +459,50 @@ function getActionId(slot) {
 }
 
 /**
- * Shows a highlight over the first pickaxe found in the inventory
+ * Shows a message when inventory is full and fades it away after 2 seconds
  */
-function highlightPickaxe() {
-    // Find the first pickaxe (item id 0) in the inventory
-    var pickaxeSlot = -1;
-    for (var i = 0; i < currPlayer.inventory.length; i++) {
-        if (currPlayer.inventory[i] && currPlayer.inventory[i].id === 0) {
-            pickaxeSlot = i;
-            break;
-        }
-    }
+function showInventoryFullMessage() {
+    console.log("🚨 showInventoryFullMessage() called!");
+    var messageElement = $("#inventoryFullMessage");
+    console.log("📦 Message element found:", messageElement.length > 0);
+    console.log("📦 Message element:", messageElement);
 
-    if (pickaxeSlot !== -1) {
-        // Calculate position relative to the inventory area
-        var rect = $(itemArea).offset();
-        var invX = pickaxeSlot % 4;
-        var invY = Math.floor(pickaxeSlot / 4);
+    // Calculate player position on screen
+    // Player is always at grid position (HORIZONTALRADIUS, VERTICALRADIUS) = (10, 7)
+    // Overlay canvas has margins: 30px left, 20px top
+    var playerScreenX = 30 + (HORIZONTALRADIUS * BOXSIDE) + (BOXSIDE / 2); // Center of player square horizontally
+    var playerScreenY = 20 + (VERTICALRADIUS * BOXSIDE); // Top of player square
 
-        $("#pickaxeHighlight").css({
-            visibility: "visible",
-            top: rect.top + invY * INVBOXSIDE,
-            left: rect.left + invX * INVBOXSIDE,
-        });
-    }
+    // Position message above the player
+    messageElement.css({
+        position: 'absolute',
+        left: playerScreenX + 15, // 20px to the right of player
+        top: playerScreenY - 60, // 60px above player
+        transform: 'translateX(-50%)', // Center horizontally on player
+        zIndex: 10000
+    });
+
+    // Show the message with a fade-in effect
+    messageElement.stop(true, true).fadeIn(300);
+    console.log("✅ Message should now be visible above player");
+
+    // Hide the message after 2 seconds with a fade-out effect
+    setTimeout(function () {
+        console.log("⏰ Hiding message after timeout");
+        messageElement.fadeOut(500);
+    }, 2000);
 }
 
 /**
- * Hides the pickaxe highlight
+ * Test function to manually trigger the inventory full message
  */
-function hidePickaxeHighlight() {
-    $("#pickaxeHighlight").css({
-        visibility: "hidden"
-    });
+function testInventoryFullMessage() {
+    console.log("🧪 Testing inventory full message...");
+    showInventoryFullMessage();
 }
+
+// Make test function globally accessible
+window.testInventoryFullMessage = testInventoryFullMessage;
 
 /**
  * Shows a highlight over the first axe found in the inventory

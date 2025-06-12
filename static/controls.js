@@ -65,24 +65,110 @@ document.addEventListener('keyup', function (e) {
 });
 
 $(document).click(function (event) {
-    if (currentSelectedSlot != -1) {
-        if (checkIfInteractible({ i: mousePos.i, j: mousePos.j })) {
-            if (currentSelectedActionId == -1) {
-                console.log("Error: Undefined action ID (controls)")
-                return
-            }
-            console.log("🔨 BUILD DEBUG:");
-            console.log("  selectedSlot:", currentSelectedSlot);
-            console.log("  selectedItem:", currPlayer.inventory[currentSelectedSlot]);
-            console.log("  itemId:", getSelectedItemId());
-            emitBuild(getSelectedItemId(), currentSelectedActionId, currentSelectedSlot, getGlobalCoords({ i: mousePos.i, j: mousePos.j }))
-        } else {
-            // If left clicked outside of buildable region and on map
-            if (mousePos.i >= 0 && NUMCOL > mousePos.i && mousePos.j >= 0 && NUMROW > mousePos.j) {
-                deselectInvItem();
+    // Check if we're clicking on a structure (not in building mode)
+    if (currentSelectedSlot == -1) {
+        // If clicking on the game map (not inventory)
+        if (mousePos.i >= 0 && NUMCOL > mousePos.i && mousePos.j >= 0 && NUMROW > mousePos.j) {
+            // Check if there's a structure at mouse position that we can interact with
+            var structId = locationMap[mousePos.i][mousePos.j].structure.id;
+            if (structId && checkIfInteractible({ i: mousePos.i, j: mousePos.j })) {
+                // Perform default action on left click
+                defaultAction(structId, getGlobalCoords({ i: mousePos.i, j: mousePos.j }));
+
+                // Show interaction effect (same as E key)
+                $("#click").stop().show(function () {
+                    $(this).css({
+                        opacity: 1,
+                        width: 8,
+                        height: 8,
+                    })
+                }).css({ position: "absolute", top: mousePos.y - 4, left: mousePos.x - 4 }).animate({
+                    opacity: 1,
+                    width: 24,
+                    height: 24,
+                    top: mousePos.y - 12,
+                    left: mousePos.x - 12
+                }, 300, function () {
+                    $(this).css({
+                        opacity: 0,
+                        width: 0,
+                        height: 0,
+                    })
+                });
+
+                // Prevent further processing of this click
+                return;
             }
         }
     }
+
+    // Building mode logic - check if item is placeable
+    if (currentSelectedSlot != -1) {
+        var selectedItem = currPlayer.inventory[currentSelectedSlot];
+        if (selectedItem) {
+            var itemObj = getItemObj(selectedItem.id);
+
+            // Check if item has a placeable structure
+            var isPlaceable = itemObj && itemObj.placeableStructId !== null && itemObj.placeableStructId !== undefined;
+
+            if (isPlaceable && checkIfInteractible({ i: mousePos.i, j: mousePos.j })) {
+                // Handle placeable items (building mode)
+                if (currentSelectedActionId == -1) {
+                    console.log("Error: Undefined action ID (controls)")
+                    return
+                }
+                console.log("🔨 BUILD DEBUG:");
+                console.log("  selectedSlot:", currentSelectedSlot);
+                console.log("  selectedItem:", currPlayer.inventory[currentSelectedSlot]);
+                console.log("  itemId:", getSelectedItemId());
+                emitBuild(getSelectedItemId(), currentSelectedActionId, currentSelectedSlot, getGlobalCoords({ i: mousePos.i, j: mousePos.j }))
+            } else if (!isPlaceable) {
+                // Handle non-placeable items (tools like pickaxe, axe, etc.)
+                // If clicking on the game map (not inventory)
+                if (mousePos.i >= 0 && NUMCOL > mousePos.i && mousePos.j >= 0 && NUMROW > mousePos.j) {
+                    // Check if there's a structure at mouse position that we can interact with
+                    var structId = locationMap[mousePos.i][mousePos.j].structure.id;
+                    if (structId && checkIfInteractible({ i: mousePos.i, j: mousePos.j })) {
+                        // Perform default action on the structure using the selected tool
+                        defaultAction(structId, getGlobalCoords({ i: mousePos.i, j: mousePos.j }));
+
+                        // Show interaction effect
+                        $("#click").stop().show(function () {
+                            $(this).css({
+                                opacity: 1,
+                                width: 8,
+                                height: 8,
+                            })
+                        }).css({ position: "absolute", top: mousePos.y - 4, left: mousePos.x - 4 }).animate({
+                            opacity: 1,
+                            width: 24,
+                            height: 24,
+                            top: mousePos.y - 12,
+                            left: mousePos.x - 12
+                        }, 300, function () {
+                            $(this).css({
+                                opacity: 0,
+                                width: 0,
+                                height: 0,
+                            })
+                        });
+
+                        // Prevent further processing of this click
+                        return;
+                    } else {
+                        // If left clicked outside of interactable range on map, deselect item
+                        deselectInvItem();
+                    }
+                }
+            } else {
+                // If left clicked outside of buildable region and on map, deselect item
+                if (mousePos.i >= 0 && NUMCOL > mousePos.i && mousePos.j >= 0 && NUMROW > mousePos.j) {
+                    deselectInvItem();
+                }
+            }
+        }
+    }
+
     var x = mousePos.x - $('#itemArea').offset().left;
     var y = mousePos.y - $('#itemArea').offset().top;
     var i = Math.floor(x / BOXSIDE);
@@ -188,9 +274,17 @@ function updateCursorType(mousePos) {
         if (!menuVisible) {
             $('#tooltip').show();
 
+            // ALWAYS hide both tool highlights first to prevent overlap
+            if (typeof hidePickaxeHighlight === 'function') {
+                hidePickaxeHighlight();
+            }
+            if (typeof hideAxeHighlight === 'function') {
+                hideAxeHighlight();
+            }
+
             // Get the action name
             var actionName = getActionName(structObj.id, getDefaultAction(structObj.id));
-            var tooltipText = actionName + " (e)";
+            var tooltipText = actionName + " (click or e)"; // Updated to show both options
 
             // Check if this is a mining action and if player has pickaxe selected
             if (actionName === "Mine") {
@@ -202,14 +296,9 @@ function updateCursorType(mousePos) {
 
                 if (!hasPickaxeSelected) {
                     tooltipText = "Select pickaxe to Mine";
-                    // Show pickaxe highlight
+                    // Show ONLY pickaxe highlight
                     if (typeof highlightPickaxe === 'function') {
                         highlightPickaxe();
-                    }
-                } else {
-                    // Hide pickaxe highlight if it's showing
-                    if (typeof hidePickaxeHighlight === 'function') {
-                        hidePickaxeHighlight();
                     }
                 }
             }
@@ -223,14 +312,9 @@ function updateCursorType(mousePos) {
 
                 if (!hasAxeSelected) {
                     tooltipText = "Select axe to Chop";
-                    // Show axe highlight
+                    // Show ONLY axe highlight
                     if (typeof highlightAxe === 'function') {
                         highlightAxe();
-                    }
-                } else {
-                    // Hide axe highlight if it's showing
-                    if (typeof hideAxeHighlight === 'function') {
-                        hideAxeHighlight();
                     }
                 }
             } else {
