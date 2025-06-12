@@ -457,3 +457,39 @@ function getActionId(slot) {
     }
     return;
 }
+
+/**
+ * Shows a highlight over the first pickaxe found in the inventory
+ */
+function highlightPickaxe() {
+    // Find the first pickaxe (item id 0) in the inventory
+    var pickaxeSlot = -1;
+    for (var i = 0; i < currPlayer.inventory.length; i++) {
+        if (currPlayer.inventory[i] && currPlayer.inventory[i].id === 0) {
+            pickaxeSlot = i;
+            break;
+        }
+    }
+
+    if (pickaxeSlot !== -1) {
+        // Calculate position relative to the inventory area
+        var rect = $(itemArea).offset();
+        var invX = pickaxeSlot % 4;
+        var invY = Math.floor(pickaxeSlot / 4);
+
+        $("#pickaxeHighlight").css({
+            visibility: "visible",
+            top: rect.top + invY * INVBOXSIDE,
+            left: rect.left + invX * INVBOXSIDE,
+        });
+    }
+}
+
+/**
+ * Hides the pickaxe highlight
+ */
+function hidePickaxeHighlight() {
+    $("#pickaxeHighlight").css({
+        visibility: "hidden"
+    });
+}

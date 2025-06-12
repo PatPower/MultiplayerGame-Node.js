@@ -187,11 +187,47 @@ function updateCursorType(mousePos) {
         }
         if (!menuVisible) {
             $('#tooltip').show();
-            $("#tooltiptext").text(getActionName(structObj.id, getDefaultAction(structObj.id)) + " (e)");
+
+            // Get the action name
+            var actionName = getActionName(structObj.id, getDefaultAction(structObj.id));
+            var tooltipText = actionName + " (e)";
+
+            // Check if this is a mining action and if player has pickaxe selected
+            if (actionName === "Mine") {
+                // Check if player has a pickaxe (item id 0) selected
+                var hasPickaxeSelected = false;
+                if (currentSelectedSlot !== -1 && currPlayer.inventory[currentSelectedSlot] && currPlayer.inventory[currentSelectedSlot].id === 0) {
+                    hasPickaxeSelected = true;
+                }
+
+                if (!hasPickaxeSelected) {
+                    tooltipText = "Select pickaxe to Mine";
+                    // Show pickaxe highlight
+                    if (typeof highlightPickaxe === 'function') {
+                        highlightPickaxe();
+                    }
+                } else {
+                    // Hide pickaxe highlight if it's showing
+                    if (typeof hidePickaxeHighlight === 'function') {
+                        hidePickaxeHighlight();
+                    }
+                }
+            } else {
+                // Hide pickaxe highlight for non-mining actions
+                if (typeof hidePickaxeHighlight === 'function') {
+                    hidePickaxeHighlight();
+                }
+            }
+
+            $("#tooltiptext").text(tooltipText);
         }
     } else {
         if ($('#tooltip').is(":visible")) {
             $('#tooltip').hide();
+            // Hide pickaxe highlight when tooltip is hidden
+            if (typeof hidePickaxeHighlight === 'function') {
+                hidePickaxeHighlight();
+            }
         }
         // If in building mode and is hovering over a buildable area
         if (currentSelectedSlot != -1 && checkIfInteractible(mousePos)) {
