@@ -8,8 +8,30 @@ var Settings = {
     WORLDLIMIT: 100,
     HORIZONTALRADIUS: 0,
     VERTICALRADIUS: 0,
-    MILLISECONDMAX: 000,
-    MAXINVSIZE: 60
+    MILLISECONDMAX: 0,
+    MAXINVSIZE: 60,
+
+    // World Generation Settings
+    WORLD_GENERATION: {
+        // Spawn rates (0.0 to 1.0, where 1.0 = 100% chance)
+        TREE_SPAWN_RATE: 0.05,        // 5% chance per tile (reduced from 15%)
+        ROCK_SPAWN_RATE: 0.04,        // 4% chance per tile (reduced from 12%)
+        MONUMENT_SPAWN_RATE: 0.0008,  // 0.08% chance per tile (reduced from 0.2%)
+
+        // Clustering settings (higher values = more clustering)
+        TREE_CLUSTER_STRENGTH: 0.3,   // Reduced clustering (was 0.7)
+        ROCK_CLUSTER_STRENGTH: 0.25,  // Reduced clustering (was 0.6)
+        CLUSTER_RADIUS: 3,             // How far to look for clustering
+
+        // Monument settings
+        MONUMENT_MIN_SIZE: 3,          // Minimum monument size (3x3)
+        MONUMENT_MAX_SIZE: 6,          // Maximum monument size (6x6)
+        MONUMENT_MIN_SPACING: 15,      // Minimum distance between monuments
+
+        // Generation bounds (avoid spawning too close to spawn point)
+        SAFE_ZONE_RADIUS: 5,          // No structures within this radius of spawn
+        SPAWN_POINT: { i: 10, j: 10 } // Default spawn point
+    }
 }
 
 Settings.NUMCOL = Math.floor(Settings.CWIDTH / Settings.BOXSIDE);

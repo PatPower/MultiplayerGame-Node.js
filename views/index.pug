@@ -63,10 +63,12 @@ html
         script(src=`/static/coordinateInfo.js?v=${timestamp}`)
         script(src=`/static/inventory.js?v=${timestamp}`)
         script(src=`/static/crafting.js?v=${timestamp}`)
+        script(src=`/static/worldGenAdmin.js?v=${timestamp}`)
 
         img(id="click" src="/static/img/circle.png")
         img(id="select" src="/static/img/select.png")
         img(id="pickaxeHighlight" src="/static/img/select.png" style="visibility: hidden; position: absolute; width: 40px; height: 40px; top: 0; left: 0; z-index: 6; pointer-events: none; background: rgba(255, 0, 0, 0.2); border: none;")
+        img(id="axeHighlight" src="/static/img/select.png" style="visibility: hidden; position: absolute; width: 40px; height: 40px; top: 0; left: 0; z-index: 6; pointer-events: none; background: rgba(0, 255, 0, 0.2); border: none;")
         img(id="selectedBuild")
         div(id="tooltip")
             p(id="tooltiptext")

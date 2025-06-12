@@ -212,10 +212,34 @@ function updateCursorType(mousePos) {
                         hidePickaxeHighlight();
                     }
                 }
+            }
+            // Check if this is a chopping action and if player has axe selected
+            else if (actionName === "Chop") {
+                // Check if player has an axe (item id 6) selected
+                var hasAxeSelected = false;
+                if (currentSelectedSlot !== -1 && currPlayer.inventory[currentSelectedSlot] && currPlayer.inventory[currentSelectedSlot].id === 6) {
+                    hasAxeSelected = true;
+                }
+
+                if (!hasAxeSelected) {
+                    tooltipText = "Select axe to Chop";
+                    // Show axe highlight
+                    if (typeof highlightAxe === 'function') {
+                        highlightAxe();
+                    }
+                } else {
+                    // Hide axe highlight if it's showing
+                    if (typeof hideAxeHighlight === 'function') {
+                        hideAxeHighlight();
+                    }
+                }
             } else {
-                // Hide pickaxe highlight for non-mining actions
+                // Hide pickaxe and axe highlights for other actions
                 if (typeof hidePickaxeHighlight === 'function') {
                     hidePickaxeHighlight();
+                }
+                if (typeof hideAxeHighlight === 'function') {
+                    hideAxeHighlight();
                 }
             }
 
@@ -224,9 +248,12 @@ function updateCursorType(mousePos) {
     } else {
         if ($('#tooltip').is(":visible")) {
             $('#tooltip').hide();
-            // Hide pickaxe highlight when tooltip is hidden
+            // Hide tool highlights when tooltip is hidden
             if (typeof hidePickaxeHighlight === 'function') {
                 hidePickaxeHighlight();
+            }
+            if (typeof hideAxeHighlight === 'function') {
+                hideAxeHighlight();
             }
         }
         // If in building mode and is hovering over a buildable area
@@ -239,7 +266,8 @@ function updateCursorType(mousePos) {
             if (selectedItem) {
                 var itemObj = getItemObj(selectedItem.id);
                 if (itemObj && itemObj.placeableStructId !== null && itemObj.placeableStructId !== undefined) {
-                    var structureObj = structureJson[itemObj.placeableStructId];
+                    // Find structure by ID instead of array index
+                    var structureObj = structureJson.find(s => s.id === itemObj.placeableStructId);
                     if (structureObj && structureObj.sprite) {
                         var structSrc = structureObj.sprite;
                         // Sets the src to the one selected

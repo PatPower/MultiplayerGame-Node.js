@@ -119,6 +119,37 @@
         }
     },
     {
+        "id": 5,
+        "name": "Wood",
+        "icon": "/static/img/items/5.png",
+        "placeableStructId": 6,
+        "Durability": 50,
+        "actions": {
+            "a1": {
+                "name": "Select",
+                "structId": 6
+            },
+            "a2": {
+                "name": "DefaultDrop"
+            }
+        }
+    },
+    {
+        "id": 6,
+        "name": "Axe",
+        "icon": "/static/img/items/6.png",
+        "placeableStructId": null,
+        "Durability": 50,
+        "actions": {
+            "a1": {
+                "name": "Select"
+            },
+            "a2": {
+                "name": "DefaultDrop"
+            }
+        }
+    },
+    {
         "id": -1,
         "name": "Nothing",
         "icon": "/static/img/items/-1.png",

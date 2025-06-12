@@ -493,3 +493,39 @@ function hidePickaxeHighlight() {
         visibility: "hidden"
     });
 }
+
+/**
+ * Shows a highlight over the first axe found in the inventory
+ */
+function highlightAxe() {
+    // Find the first axe (item id 6) in the inventory
+    var axeSlot = -1;
+    for (var i = 0; i < currPlayer.inventory.length; i++) {
+        if (currPlayer.inventory[i] && currPlayer.inventory[i].id === 6) {
+            axeSlot = i;
+            break;
+        }
+    }
+
+    if (axeSlot !== -1) {
+        // Calculate position relative to the inventory area
+        var rect = $(itemArea).offset();
+        var invX = axeSlot % 4;
+        var invY = Math.floor(axeSlot / 4);
+
+        $("#axeHighlight").css({
+            visibility: "visible",
+            top: rect.top + invY * INVBOXSIDE,
+            left: rect.left + invX * INVBOXSIDE,
+        });
+    }
+}
+
+/**
+ * Hides the axe highlight
+ */
+function hideAxeHighlight() {
+    $("#axeHighlight").css({
+        visibility: "hidden"
+    });
+}

@@ -8444,5 +8444,1362 @@
     "createdAt": "2025-06-12T04:20:36.663Z",
     "lastLogin": "2025-06-12T04:20:36.663Z",
     "lastSaved": "2025-06-12T04:21:39.671Z"
+  },
+  "dev_1749703842744_1zaqcqjg7": {
+    "userId": "dev_1749703842744_1zaqcqjg7",
+    "email": "freeplayer445@dev.local",
+    "name": "FreePlayer445",
+    "username": "FreePlayer445",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 10,
+      "j": 7
+    },
+    "color": "orange",
+    "createdAt": "2025-06-12T04:50:42.760Z",
+    "lastLogin": "2025-06-12T04:50:42.760Z",
+    "lastSaved": "2025-06-12T04:50:42.968Z"
+  },
+  "dev_1749703843091_gckkzt4kg": {
+    "userId": "dev_1749703843091_gckkzt4kg",
+    "email": "sharpwizard845@dev.local",
+    "name": "SharpWizard845",
+    "username": "SharpWizard845",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 7,
+      "j": 6
+    },
+    "color": "orange",
+    "createdAt": "2025-06-12T04:50:43.109Z",
+    "lastLogin": "2025-06-12T04:50:43.109Z",
+    "lastSaved": "2025-06-12T04:52:05.346Z"
+  },
+  "dev_1749703925682_xx26zqr6v": {
+    "userId": "dev_1749703925682_xx26zqr6v",
+    "email": "strongwarrior54@dev.local",
+    "name": "StrongWarrior54",
+    "username": "StrongWarrior54",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 5,
+      "j": 5
+    },
+    "color": "pink",
+    "createdAt": "2025-06-12T04:52:05.805Z",
+    "lastLogin": "2025-06-12T04:52:05.805Z",
+    "lastSaved": "2025-06-12T04:52:57.308Z"
+  },
+  "dev_1749703977486_7q2yac55i": {
+    "userId": "dev_1749703977486_7q2yac55i",
+    "email": "coolbuilder167@dev.local",
+    "name": "CoolBuilder167",
+    "username": "CoolBuilder167",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 9,
+      "j": 6
+    },
+    "color": "yellow",
+    "createdAt": "2025-06-12T04:52:57.614Z",
+    "lastLogin": "2025-06-12T04:52:57.614Z",
+    "lastSaved": "2025-06-12T04:52:58.947Z"
+  },
+  "dev_1749703979223_mso3dbaa7": {
+    "userId": "dev_1749703979223_mso3dbaa7",
+    "email": "strongwarrior101@dev.local",
+    "name": "StrongWarrior101",
+    "username": "StrongWarrior101",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 9,
+      "j": 7
+    },
+    "color": "orange",
+    "createdAt": "2025-06-12T04:52:59.367Z",
+    "lastLogin": "2025-06-12T04:52:59.367Z",
+    "lastSaved": "2025-06-12T04:53:12.518Z"
+  },
+  "dev_1749703992844_es00q6hg2": {
+    "userId": "dev_1749703992844_es00q6hg2",
+    "email": "wiseninja881@dev.local",
+    "name": "WiseNinja881",
+    "username": "WiseNinja881",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 6,
+      "j": 3
+    },
+    "color": "green",
+    "createdAt": "2025-06-12T04:53:12.983Z",
+    "lastLogin": "2025-06-12T04:53:12.983Z",
+    "lastSaved": "2025-06-12T04:53:16.401Z"
+  },
+  "dev_1749704031471_f71mvoik5": {
+    "userId": "dev_1749704031471_f71mvoik5",
+    "email": "strongcrafter74@dev.local",
+    "name": "StrongCrafter74",
+    "username": "StrongCrafter74",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 6,
+      "j": 4
+    },
+    "color": "cyan",
+    "createdAt": "2025-06-12T04:53:51.514Z",
+    "lastLogin": "2025-06-12T04:53:51.514Z",
+    "lastSaved": "2025-06-12T05:01:28.458Z"
+  },
+  "dev_1749704488904_ojpwkvrbe": {
+    "userId": "dev_1749704488904_ojpwkvrbe",
+    "email": "cleverplayer403@dev.local",
+    "name": "CleverPlayer403",
+    "username": "CleverPlayer403",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 6,
+      "j": 3
+    },
+    "color": "pink",
+    "createdAt": "2025-06-12T05:01:29.023Z",
+    "lastLogin": "2025-06-12T05:01:29.023Z",
+    "lastSaved": "2025-06-12T05:01:33.491Z"
+  },
+  "dev_1749704580723_0tmzwp427": {
+    "userId": "dev_1749704580723_0tmzwp427",
+    "email": "brightcoder343@dev.local",
+    "name": "BrightCoder343",
+    "username": "BrightCoder343",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 10,
+      "j": 7
+    },
+    "color": "purple",
+    "createdAt": "2025-06-12T05:03:00.861Z",
+    "lastLogin": "2025-06-12T05:03:00.861Z",
+    "lastSaved": "2025-06-12T05:03:00.863Z"
+  },
+  "dev_1749704735744_8nxpji3ad": {
+    "userId": "dev_1749704735744_8nxpji3ad",
+    "email": "noblehero481@dev.local",
+    "name": "NobleHero481",
+    "username": "NobleHero481",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 10,
+      "j": 7
+    },
+    "color": "blue",
+    "createdAt": "2025-06-12T05:05:35.870Z",
+    "lastLogin": "2025-06-12T05:05:35.870Z",
+    "lastSaved": "2025-06-12T05:05:35.871Z"
+  },
+  "dev_1749704822742_6jhyp3t7c": {
+    "userId": "dev_1749704822742_6jhyp3t7c",
+    "email": "smartexplorer413@dev.local",
+    "name": "SmartExplorer413",
+    "username": "SmartExplorer413",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 6,
+      "j": 4
+    },
+    "color": "blue",
+    "createdAt": "2025-06-12T05:07:02.762Z",
+    "lastLogin": "2025-06-12T05:07:02.762Z",
+    "lastSaved": "2025-06-12T05:07:22.616Z"
+  },
+  "dev_1749704842765_c32ukdi5n": {
+    "userId": "dev_1749704842765_c32ukdi5n",
+    "email": "bravebuilder729@dev.local",
+    "name": "BraveBuilder729",
+    "username": "BraveBuilder729",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 10,
+      "j": 7
+    },
+    "color": "orange",
+    "createdAt": "2025-06-12T05:07:22.777Z",
+    "lastLogin": "2025-06-12T05:07:22.777Z",
+    "lastSaved": "2025-06-12T05:07:45.751Z"
+  },
+  "dev_1749704865949_ek9nxtrqy": {
+    "userId": "dev_1749704865949_ek9nxtrqy",
+    "email": "cleverplayer735@dev.local",
+    "name": "CleverPlayer735",
+    "username": "CleverPlayer735",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 4,
+      "j": 5
+    },
+    "color": "green",
+    "createdAt": "2025-06-12T05:07:45.967Z",
+    "lastLogin": "2025-06-12T05:07:45.967Z",
+    "lastSaved": "2025-06-12T05:10:36.106Z"
+  },
+  "dev_1749705036343_du7quyw8z": {
+    "userId": "dev_1749705036343_du7quyw8z",
+    "email": "wildpioneer112@dev.local",
+    "name": "WildPioneer112",
+    "username": "WildPioneer112",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 9,
+      "j": 5
+    },
+    "color": "blue",
+    "createdAt": "2025-06-12T05:10:36.363Z",
+    "lastLogin": "2025-06-12T05:10:36.363Z",
+    "lastSaved": "2025-06-12T05:10:43.560Z"
+  },
+  "dev_1749705082199_joaozloq6": {
+    "userId": "dev_1749705082199_joaozloq6",
+    "email": "strongwarrior661@dev.local",
+    "name": "StrongWarrior661",
+    "username": "StrongWarrior661",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 10,
+      "j": 6
+    },
+    "color": "orange",
+    "createdAt": "2025-06-12T05:11:22.214Z",
+    "lastLogin": "2025-06-12T05:11:22.214Z",
+    "lastSaved": "2025-06-12T05:11:25.408Z"
+  },
+  "dev_1749705085564_06nzd62zc": {
+    "userId": "dev_1749705085564_06nzd62zc",
+    "email": "cleverpioneer393@dev.local",
+    "name": "CleverPioneer393",
+    "username": "CleverPioneer393",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 10,
+      "j": 7
+    },
+    "color": "red",
+    "createdAt": "2025-06-12T05:11:25.576Z",
+    "lastLogin": "2025-06-12T05:11:25.576Z",
+    "lastSaved": "2025-06-12T05:11:25.577Z"
+  },
+  "dev_1749705110031_nmxc2iqkn": {
+    "userId": "dev_1749705110031_nmxc2iqkn",
+    "email": "wisetrader970@dev.local",
+    "name": "WiseTrader970",
+    "username": "WiseTrader970",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 10,
+      "j": 7
+    },
+    "color": "purple",
+    "createdAt": "2025-06-12T05:11:50.050Z",
+    "lastLogin": "2025-06-12T05:11:50.050Z",
+    "lastSaved": "2025-06-12T05:11:50.051Z"
+  },
+  "dev_1749705157847_tjcz6ah19": {
+    "userId": "dev_1749705157847_tjcz6ah19",
+    "email": "boldhunter719@dev.local",
+    "name": "BoldHunter719",
+    "username": "BoldHunter719",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 10,
+      "j": 7
+    },
+    "color": "blue",
+    "createdAt": "2025-06-12T05:12:37.865Z",
+    "lastLogin": "2025-06-12T05:12:37.865Z",
+    "lastSaved": "2025-06-12T05:12:37.866Z"
+  },
+  "dev_1749705196725_pgb4ne696": {
+    "userId": "dev_1749705196725_pgb4ne696",
+    "email": "boldhero426@dev.local",
+    "name": "BoldHero426",
+    "username": "BoldHero426",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 10,
+      "j": 7
+    },
+    "color": "green",
+    "createdAt": "2025-06-12T05:13:16.844Z",
+    "lastLogin": "2025-06-12T05:13:16.844Z",
+    "lastSaved": "2025-06-12T05:13:16.846Z"
+  },
+  "dev_1749705227205_9px7rqci1": {
+    "userId": "dev_1749705227205_9px7rqci1",
+    "email": "strongexplorer163@dev.local",
+    "name": "StrongExplorer163",
+    "username": "StrongExplorer163",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "reqDurability": -1
+      },
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "reqDurability": -1
+      },
+      {
+        "id": 3,
+        "reqDurability": -1
+      },
+      {
+        "id": 3,
+        "reqDurability": -1
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 37,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 10,
+      "j": 8
+    },
+    "color": "yellow",
+    "createdAt": "2025-06-12T05:13:47.218Z",
+    "lastLogin": "2025-06-12T05:13:47.218Z",
+    "lastSaved": "2025-06-12T05:20:22.769Z"
+  },
+  "dev_1749705623051_o2s5kpz79": {
+    "userId": "dev_1749705623051_o2s5kpz79",
+    "email": "sharpninja625@dev.local",
+    "name": "SharpNinja625",
+    "username": "SharpNinja625",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 10,
+      "j": 7
+    },
+    "color": "orange",
+    "createdAt": "2025-06-12T05:20:23.163Z",
+    "lastLogin": "2025-06-12T05:20:23.163Z",
+    "lastSaved": "2025-06-12T05:20:23.164Z"
+  },
+  "dev_1749705638658_ocbqctvr5": {
+    "userId": "dev_1749705638658_ocbqctvr5",
+    "email": "wisewizard335@dev.local",
+    "name": "WiseWizard335",
+    "username": "WiseWizard335",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 30,
+      "j": 36
+    },
+    "color": "yellow",
+    "createdAt": "2025-06-12T05:20:38.674Z",
+    "lastLogin": "2025-06-12T05:20:38.674Z",
+    "lastSaved": "2025-06-12T05:23:08.889Z"
+  },
+  "dev_1749705790239_qfzgmkhmy": {
+    "userId": "dev_1749705790239_qfzgmkhmy",
+    "email": "strongexplorer825@dev.local",
+    "name": "StrongExplorer825",
+    "username": "StrongExplorer825",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      {
+        "id": 3,
+        "reqDurability": -1
+      }
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 33,
+      "j": 14
+    },
+    "color": "orange",
+    "createdAt": "2025-06-12T05:23:10.364Z",
+    "lastLogin": "2025-06-12T05:23:10.364Z",
+    "lastSaved": "2025-06-12T05:24:06.407Z"
+  },
+  "dev_1749705936973_0su1l29mx": {
+    "userId": "dev_1749705936973_0su1l29mx",
+    "email": "quickwizard830@dev.local",
+    "name": "QuickWizard830",
+    "username": "QuickWizard830",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 12,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 10,
+      "j": 7
+    },
+    "color": "pink",
+    "createdAt": "2025-06-12T05:25:37.105Z",
+    "lastLogin": "2025-06-12T05:25:37.105Z",
+    "lastSaved": "2025-06-12T05:25:37.107Z"
   }
 }

@@ -75,7 +75,7 @@ class Database {
                 { id: 3, durability: 50 },
                 { id: 1, durability: 50 },
                 { id: 2, durability: 50 },
-                null,
+                { id: 6, durability: 50 },
                 null,
                 null,
                 null,

@@ -204,5 +204,83 @@
                 }
             }
         }
+    },
+    {
+        "id": 5,
+        "name": "Tree",
+        "armor": 2,
+        "health": 30,
+        "passable": false,
+        "sprite": "/static/img/structures/tree.png",
+        "actions": {
+            "a1": {
+                "name": "Chop",
+                "cond": {
+                    "item": [
+                        {
+                            "id": 6,
+                            "reqDurability": 1
+                        }
+                    ],
+                    "skill": {},
+                    "pFlag": []
+                },
+                "result": {
+                    "destroy": true,
+                    "degradeItems": [],
+                    "updatePFlag": [],
+                    "expGain": [],
+                    "removeItem": [],
+                    "drop": [
+                        {
+                            "id": 5,
+                            "reqDurability": -1
+                        },
+                        {
+                            "id": 5,
+                            "reqDurability": -1
+                        }
+                    ],
+                    "addToInvSize": 0
+                }
+            }
+        }
+    },
+    {
+        "id": 6,
+        "name": "Wood Wall",
+        "armor": 3,
+        "health": 25,
+        "passable": false,
+        "sprite": "/static/img/structures/woodWall.png",
+        "actions": {
+            "a1": {
+                "name": "Chop",
+                "cond": {
+                    "item": [
+                        {
+                            "id": 6,
+                            "reqDurability": 1
+                        }
+                    ],
+                    "skill": {},
+                    "pFlag": []
+                },
+                "result": {
+                    "destroy": true,
+                    "degradeItems": [],
+                    "updatePFlag": [],
+                    "expGain": [],
+                    "removeItem": [],
+                    "drop": [
+                        {
+                            "id": 5,
+                            "reqDurability": -1
+                        }
+                    ],
+                    "addToInvSize": 0
+                }
+            }
+        }
     }
 ]
