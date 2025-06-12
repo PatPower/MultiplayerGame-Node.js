@@ -138,7 +138,6 @@ function showUsernameModal(socket) {
     const modal = document.getElementById('username-modal');
     const input = document.getElementById('username-input');
     const submitBtn = document.getElementById('username-submit');
-    const randomBtn = document.getElementById('username-random');
     const errorDiv = document.getElementById('username-error');
 
     // Show the modal
@@ -146,22 +145,6 @@ function showUsernameModal(socket) {
 
     // Focus on input
     setTimeout(() => input.focus(), 100);
-
-    // Generate random username function
-    function generateRandomUsername() {
-        const adjectives = ['Swift', 'Brave', 'Wise', 'Bold', 'Clever', 'Strong', 'Quick', 'Sharp', 'Bright', 'Noble'];
-        const nouns = ['Explorer', 'Builder', 'Miner', 'Crafter', 'Hunter', 'Warrior', 'Trader', 'Pioneer', 'Adventurer', 'Hero'];
-        const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-        const noun = nouns[Math.floor(Math.random() * nouns.length)];
-        const number = Math.floor(Math.random() * 1000);
-        return `${adjective}${noun}${number}`;
-    }
-
-    // Handle random name button
-    randomBtn.addEventListener('click', function () {
-        input.value = generateRandomUsername();
-        input.focus();
-    });
 
     // Handle form submission
     function submitUsername() {
@@ -192,7 +175,6 @@ function showUsernameModal(socket) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Creating...';
         input.disabled = true;
-        randomBtn.disabled = true;
 
         // Save username and start game
         saveUsernameAndStart(socket, username);
@@ -244,13 +226,11 @@ async function saveUsernameAndStart(socket, username) {
         // Re-enable form
         const submitBtn = document.getElementById('username-submit');
         const input = document.getElementById('username-input');
-        const randomBtn = document.getElementById('username-random');
         const errorDiv = document.getElementById('username-error');
 
         submitBtn.disabled = false;
         submitBtn.textContent = 'Start Playing';
         input.disabled = false;
-        randomBtn.disabled = false;
 
         errorDiv.textContent = error.message || 'Failed to save username. Please try again.';
         errorDiv.style.display = 'block';

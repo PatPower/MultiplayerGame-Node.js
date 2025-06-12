@@ -26,8 +26,7 @@ html
                 p(style="color: #666; margin-bottom: 20px;") Choose a username that will be displayed on your character:
                 input(id="username-input" type="text" placeholder="Enter your username..." style="padding: 10px; font-size: 16px; border: 2px solid #ddd; border-radius: 5px; width: 100%; margin-bottom: 15px; box-sizing: border-box;")
                 div(id="username-error" style="color: red; margin-bottom: 15px; display: none;")
-                button(id="username-submit" style="background: #4CAF50; color: white; padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-right: 10px;") Start Playing
-                button(id="username-random" style="background: #2196F3; color: white; padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;") Random Name
+                button(id="username-submit" style="background: #4CAF50; color: white; padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;") Start Playing
                 
         div(id="auth-info" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px; z-index: 1000;")
             if devMode
@@ -42,7 +41,7 @@ html
         
         div(id="viewport")
             h1(id="title") Patland
-            p(id="subheader") WASD to move, hover then (e) to interact, hover then right click to open menu
+            p(id="subheader") WASD to move, approach objects and press E or click to interact. Right click to open menus.
             canvas(id="tileMarker")
             div(id="screen1")
                 canvas(id="background")
