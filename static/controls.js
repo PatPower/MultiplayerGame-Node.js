@@ -93,7 +93,7 @@ $(document).click(function (event) {
         console.log("  DOM element:", $(event.target).attr("id"));
         console.log("  calculated slot:", slot);
         console.log("  item at slot:", currPlayer.inventory[slot]);
-        
+
         var actionId = getActionId(slot);
         if (actionId) {
             if (currentSelectedSlot == -1 || slot != currentSelectedSlot) {
@@ -124,16 +124,16 @@ $(document).mousemove(function (e) {
     if (e && e.pageX && e.pageY) {
         mousePos.x = e.pageX;
         mousePos.y = e.pageY;
-        
+
         mousePos.i = Math.floor((mousePos.x - $('#overlay').offset().left - 4) / BOXSIDE);
         mousePos.j = Math.floor((mousePos.y - $('#overlay').offset().top - 4) / BOXSIDE);
     }
-    
+
     // Wait for the screen to finish loading
     if (!windowLoaded) {
         return;
     }
-    
+
     if (lastI != mousePos.i || lastJ != mousePos.j) {
         // If on map
         if (mousePos.i >= 0 && NUMCOL > mousePos.i && mousePos.j >= 0 && NUMROW > mousePos.j) {
@@ -142,7 +142,7 @@ $(document).mousemove(function (e) {
         lastI = mousePos.i;
         lastJ = mousePos.j;
     }
-    
+
     if ($('#tooltip').is(":visible")) {
         $('#tooltip').css({
             left: mousePos.x + 12,
@@ -167,6 +167,12 @@ function updateCursorType(mousePos) {
     if (mousePos.i < 0 || NUMCOL <= mousePos.i || mousePos.j < 0 || NUMROW <= mousePos.j) {
         return;
     }
+
+    // Check if required data is loaded
+    if (!structureJson || !currPlayer || !currPlayer.inventory) {
+        return;
+    }
+
     // TODO: have different mouse cursors for different situations
     var structObj = structHasActionAtMousePos(mousePos);
     if (structObj) {
@@ -191,15 +197,26 @@ function updateCursorType(mousePos) {
         if (currentSelectedSlot != -1 && checkIfInteractible(mousePos)) {
             document.body.style.cursor = 'grabbing';
             var selectedBuild = $("#selectedBuild");
-            var structSrc = structureJson[getItemObj(currPlayer.inventory[currentSelectedSlot].id).placeableStructId].sprite;
-            // Sets the src to the one selected
-            selectedBuild.attr("src", structSrc);
-            selectedBuild.css({
-                visibility: "visible",
-                left: $('#overlay').offset().left + 4 + BOXSIDE * mousePos.i,
-                top: $('#overlay').offset().top + 4 + BOXSIDE * mousePos.j,
-                opacity: 0.6
-            });
+
+            // Check if current player has valid inventory and selected item
+            var selectedItem = currPlayer.inventory[currentSelectedSlot];
+            if (selectedItem) {
+                var itemObj = getItemObj(selectedItem.id);
+                if (itemObj && itemObj.placeableStructId !== null && itemObj.placeableStructId !== undefined) {
+                    var structureObj = structureJson[itemObj.placeableStructId];
+                    if (structureObj && structureObj.sprite) {
+                        var structSrc = structureObj.sprite;
+                        // Sets the src to the one selected
+                        selectedBuild.attr("src", structSrc);
+                        selectedBuild.css({
+                            visibility: "visible",
+                            left: $('#overlay').offset().left + 4 + BOXSIDE * mousePos.i,
+                            top: $('#overlay').offset().top + 4 + BOXSIDE * mousePos.j,
+                            opacity: 0.6
+                        });
+                    }
+                }
+            }
         } else {
             document.body.style.cursor = 'default';
             // If the mouse is hovered out of the building area while build mode is on
