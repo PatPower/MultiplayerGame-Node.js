@@ -9801,5 +9801,154 @@
     "createdAt": "2025-06-12T05:25:37.105Z",
     "lastLogin": "2025-06-12T05:25:37.105Z",
     "lastSaved": "2025-06-12T05:25:37.107Z"
+  },
+  "dev_1749706655952_eryq42dzl": {
+    "userId": "dev_1749706655952_eryq42dzl",
+    "email": "cleverplayer111@dev.local",
+    "name": "CleverPlayer111",
+    "username": "CleverPlayer111",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      {
+        "id": 3,
+        "durability": 50
+      },
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 20,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 13,
+      "j": 50
+    },
+    "color": "purple",
+    "createdAt": "2025-06-12T05:37:35.976Z",
+    "lastLogin": "2025-06-12T05:37:35.976Z",
+    "lastSaved": "2025-06-12T05:37:49.476Z"
+  },
+  "dev_1749706881967_blhry97jx": {
+    "userId": "dev_1749706881967_blhry97jx",
+    "email": "strongpioneer448@dev.local",
+    "name": "StrongPioneer448",
+    "username": "StrongPioneer448",
+    "inventory": [
+      {
+        "id": 0,
+        "durability": 50
+      },
+      null,
+      null,
+      {
+        "id": 1,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "durability": 50
+      },
+      {
+        "id": 6,
+        "durability": 50
+      },
+      {
+        "id": 2,
+        "reqDurability": -1
+      },
+      {
+        "id": 2,
+        "reqDurability": -1
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      {
+        "id": 2,
+        "reqDurability": -1
+      },
+      null,
+      {
+        "id": 5,
+        "reqDurability": -1
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "inventorySize": 36,
+    "skills": {
+      "mining": {
+        "level": 1,
+        "experience": 0
+      },
+      "woodcutting": {
+        "level": 1,
+        "experience": 0
+      }
+    },
+    "position": {
+      "i": 61,
+      "j": 30
+    },
+    "color": "pink",
+    "createdAt": "2025-06-12T05:41:22.087Z",
+    "lastLogin": "2025-06-12T05:41:22.087Z",
+    "lastSaved": "2025-06-12T05:42:47.941Z"
   }
 }

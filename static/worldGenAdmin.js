@@ -74,6 +74,8 @@ window.worldGenAdmin = {
             treeSpawnRate: 0.05,
             rockSpawnRate: 0.03,
             monumentSpawnRate: 0.001,
+            bagsPerMonumentMin: 1,
+            bagsPerMonumentMax: 2,
             treeClusterStrength: 0.3,
             rockClusterStrength: 0.2
         },
@@ -83,6 +85,8 @@ window.worldGenAdmin = {
             treeSpawnRate: 0.15,
             rockSpawnRate: 0.12,
             monumentSpawnRate: 0.002,
+            bagsPerMonumentMin: 1,
+            bagsPerMonumentMax: 3,
             treeClusterStrength: 0.7,
             rockClusterStrength: 0.6
         },
@@ -92,6 +96,8 @@ window.worldGenAdmin = {
             treeSpawnRate: 0.25,
             rockSpawnRate: 0.20,
             monumentSpawnRate: 0.005,
+            bagsPerMonumentMin: 2,
+            bagsPerMonumentMax: 4,
             treeClusterStrength: 0.9,
             rockClusterStrength: 0.8
         },
@@ -101,6 +107,8 @@ window.worldGenAdmin = {
             treeSpawnRate: 0.35,
             rockSpawnRate: 0.05,
             monumentSpawnRate: 0.001,
+            bagsPerMonumentMin: 1,
+            bagsPerMonumentMax: 2,
             treeClusterStrength: 1.2,
             rockClusterStrength: 0.3
         },
@@ -110,6 +118,8 @@ window.worldGenAdmin = {
             treeSpawnRate: 0.05,
             rockSpawnRate: 0.30,
             monumentSpawnRate: 0.003,
+            bagsPerMonumentMin: 1,
+            bagsPerMonumentMax: 3,
             treeClusterStrength: 0.3,
             rockClusterStrength: 1.0
         },
@@ -119,6 +129,8 @@ window.worldGenAdmin = {
             treeSpawnRate: 0.08,
             rockSpawnRate: 0.08,
             monumentSpawnRate: 0.008,
+            bagsPerMonumentMin: 2,
+            bagsPerMonumentMax: 5,
             treeClusterStrength: 0.4,
             rockClusterStrength: 0.4
         }
@@ -150,7 +162,9 @@ window.worldGenAdmin = {
   Example: worldGenAdmin.updateRates({
     treeSpawnRate: 0.2,
     rockSpawnRate: 0.15,
-    monumentSpawnRate: 0.003
+    monumentSpawnRate: 0.003,
+    bagsPerMonumentMin: 1,
+    bagsPerMonumentMax: 3
   })
 
 🎨 Presets:
@@ -163,9 +177,15 @@ window.worldGenAdmin = {
 📋 Spawn Rate Guidelines:
   • Values are between 0.0 (0%) and 1.0 (100%)
   • treeSpawnRate: 0.1-0.3 recommended
-  • rockSpawnRate: 0.1-0.3 recommended  
+  • rockSpawnRate: 0.1-0.3 recommended
   • monumentSpawnRate: 0.001-0.01 recommended (very rare)
+  • bagsPerMonumentMin/Max: 1-5 recommended (bags per monument)
   • clusterStrength: 0.0-2.0 (higher = more clustering)
+
+🎒 Bag Changes:
+  • Bags no longer spawn randomly in the world
+  • Bags now only spawn inside monuments
+  • Each monument contains 1-3 bags by default (configurable)
 
 ⚠️  Note: Changes only take effect after regenerating the world!
         `);

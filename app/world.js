@@ -503,6 +503,8 @@ World.prototype.getWorldGenerationSettings = function () {
         treeSpawnRate: config.TREE_SPAWN_RATE,
         rockSpawnRate: config.ROCK_SPAWN_RATE,
         monumentSpawnRate: config.MONUMENT_SPAWN_RATE,
+        bagsPerMonumentMin: config.BAGS_PER_MONUMENT_MIN,
+        bagsPerMonumentMax: config.BAGS_PER_MONUMENT_MAX,
         treeClusterStrength: config.TREE_CLUSTER_STRENGTH,
         rockClusterStrength: config.ROCK_CLUSTER_STRENGTH,
         clusterRadius: config.CLUSTER_RADIUS,

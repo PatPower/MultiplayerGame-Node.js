@@ -18,6 +18,10 @@ var Settings = {
         ROCK_SPAWN_RATE: 0.04,        // 4% chance per tile (reduced from 12%)
         MONUMENT_SPAWN_RATE: 0.0008,  // 0.08% chance per tile (reduced from 0.2%)
 
+        // Monument bag spawning settings
+        BAGS_PER_MONUMENT_MIN: 1,      // Minimum bags per monument
+        BAGS_PER_MONUMENT_MAX: 3,      // Maximum bags per monument
+
         // Clustering settings (higher values = more clustering)
         TREE_CLUSTER_STRENGTH: 0.3,   // Reduced clustering (was 0.7)
         ROCK_CLUSTER_STRENGTH: 0.25,  // Reduced clustering (was 0.6)

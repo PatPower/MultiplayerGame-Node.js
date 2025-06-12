@@ -109,6 +109,7 @@ WorldGenerator.prototype.generateTreesAndRocks = function (worldStructureMap) {
  * @param {Array} worldStructureMap 
  */
 WorldGenerator.prototype.createMonument = function (startI, startJ, size, worldStructureMap) {
+    var config = Settings.WORLD_GENERATION;
     var monument = {
         i: startI,
         j: startJ,
@@ -125,8 +126,52 @@ WorldGenerator.prototype.createMonument = function (startI, startJ, size, worldS
         }
     }
 
+    // Spawn bags inside the monument
+    var bagCount = this.spawnBagsInMonument(startI, startJ, size, worldStructureMap);
+
     this.monuments.push(monument);
-    console.log(`🏛️ Created monument at (${startI}, ${startJ}) with size ${size}x${size}`);
+    console.log(`🏛️ Created monument at (${startI}, ${startJ}) with size ${size}x${size} containing ${bagCount} bags`);
+};
+
+/**
+ * Spawns bags inside a monument's interior
+ * @param {number} startI - Starting i coordinate of monument
+ * @param {number} startJ - Starting j coordinate of monument
+ * @param {number} size - Size of the monument
+ * @param {Array} worldStructureMap 
+ * @returns {number} Number of bags spawned
+ */
+WorldGenerator.prototype.spawnBagsInMonument = function (startI, startJ, size, worldStructureMap) {
+    var config = Settings.WORLD_GENERATION;
+    var bagCount = 0;
+    
+    // Calculate number of bags to spawn in this monument
+    var bagsToSpawn = this.randomInt(config.BAGS_PER_MONUMENT_MIN, config.BAGS_PER_MONUMENT_MAX);
+    
+    // Get all available interior positions (excluding the walls)
+    var interiorPositions = [];
+    for (var i = startI + 1; i < startI + size - 1 && i < Settings.WORLDLIMIT; i++) {
+        for (var j = startJ + 1; j < startJ + size - 1 && j < Settings.WORLDLIMIT; j++) {
+            if (!worldStructureMap[i][j]) { // Only add empty positions
+                interiorPositions.push({ i: i, j: j });
+            }
+        }
+    }
+    
+    // Randomly select positions for bags
+    for (var b = 0; b < bagsToSpawn && interiorPositions.length > 0; b++) {
+        var randomIndex = Math.floor(Math.random() * interiorPositions.length);
+        var position = interiorPositions[randomIndex];
+        
+        // Place the bag
+        worldStructureMap[position.i][position.j] = { id: 2, health: 1, owner: "game" }; // Bag structure
+        bagCount++;
+        
+        // Remove this position from available positions
+        interiorPositions.splice(randomIndex, 1);
+    }
+    
+    return bagCount;
 };
 
 /**
@@ -234,6 +279,16 @@ WorldGenerator.prototype.updateSpawnRates = function (rates) {
     if (rates.monumentSpawnRate !== undefined) {
         config.MONUMENT_SPAWN_RATE = Math.max(0, Math.min(1, rates.monumentSpawnRate));
         console.log(`🏛️ Monument spawn rate updated to: ${config.MONUMENT_SPAWN_RATE}`);
+    }
+
+    if (rates.bagsPerMonumentMin !== undefined) {
+        config.BAGS_PER_MONUMENT_MIN = Math.max(0, Math.min(10, rates.bagsPerMonumentMin));
+        console.log(`🎒 Bags per monument (min) updated to: ${config.BAGS_PER_MONUMENT_MIN}`);
+    }
+
+    if (rates.bagsPerMonumentMax !== undefined) {
+        config.BAGS_PER_MONUMENT_MAX = Math.max(config.BAGS_PER_MONUMENT_MIN, Math.min(10, rates.bagsPerMonumentMax));
+        console.log(`🎒 Bags per monument (max) updated to: ${config.BAGS_PER_MONUMENT_MAX}`);
     }
 
     if (rates.treeClusterStrength !== undefined) {

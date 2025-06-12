@@ -54,72 +54,20 @@
         "sprite": "/static/img/structures/bag.png",
         "actions": {
             "a1": {
-                "name": "Increase Inventory Size",
+                "name": "Use Bag (+8 Inventory Slots)",
                 "cond": {
                     "item": [],
                     "skill": {},
                     "pFlag": []
                 },
                 "result": {
-                    "destroy": false,
+                    "destroy": true,
                     "degradeItems": [],
                     "updatePFlag": [],
                     "expGain": [],
                     "removeItem": [],
                     "drop": [],
-                    "addToInvSize": 5
-                }
-            },
-            "a2": {
-                "name": "Get Rocks",
-                "cond": {
-                    "item": [],
-                    "skill": {},
-                    "pFlag": []
-                },
-                "result": {
-                    "destroy": false,
-                    "degradeItems": [],
-                    "updatePFlag": [],
-                    "expGain": [],
-                    "removeItem": [],
-                    "drop": [
-                        {
-                            "id": 2,
-                            "reqDurability": -1
-                        },
-                        {
-                            "id": 2,
-                            "reqDurability": -1
-                        }
-                    ],
-                    "addToInvSize": 0
-                }
-            },
-            "a3": {
-                "name": "Get Brick Walls",
-                "cond": {
-                    "item": [],
-                    "skill": {},
-                    "pFlag": []
-                },
-                "result": {
-                    "destroy": false,
-                    "degradeItems": [],
-                    "updatePFlag": [],
-                    "expGain": [],
-                    "removeItem": [],
-                    "drop": [
-                        {
-                            "id": 3,
-                            "reqDurability": -1
-                        },
-                        {
-                            "id": 3,
-                            "reqDurability": -1
-                        }
-                    ],
-                    "addToInvSize": 0
+                    "addToInvSize": 8
                 }
             }
         }
