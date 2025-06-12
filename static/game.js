@@ -58,6 +58,29 @@ async function initializeSocket() {
             checkUserNameSetup(socket);
         });
 
+        socket.on('connection_rejected', function (data) {
+            console.error('🚫 Connection rejected:', data.reason);
+
+            // Hide any loading indicators
+            const loadingElements = document.querySelectorAll('.loading, #username-modal');
+            loadingElements.forEach(el => {
+                if (el) el.style.display = 'none';
+            });
+
+            // Show user-friendly error message
+            const errorMessage = data.message || 'Connection was rejected by the server.';
+            alert('❌ ' + errorMessage);
+
+            // Optionally reload the page after a delay to give user time to close other tabs
+            if (data.reason === 'duplicate_connection') {
+                setTimeout(() => {
+                    if (confirm('Would you like to reload the page to try connecting again?')) {
+                        window.location.reload();
+                    }
+                }, 2000);
+            }
+        });
+
         socket.on('auth_error', function (error) {
             console.error('❌ Authentication error:', error);
             alert('Authentication failed. Please refresh the page and try again.');

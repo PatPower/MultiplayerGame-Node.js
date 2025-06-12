@@ -144,10 +144,10 @@ WorldGenerator.prototype.createMonument = function (startI, startJ, size, worldS
 WorldGenerator.prototype.spawnBagsInMonument = function (startI, startJ, size, worldStructureMap) {
     var config = Settings.WORLD_GENERATION;
     var bagCount = 0;
-    
+
     // Calculate number of bags to spawn in this monument
     var bagsToSpawn = this.randomInt(config.BAGS_PER_MONUMENT_MIN, config.BAGS_PER_MONUMENT_MAX);
-    
+
     // Get all available interior positions (excluding the walls)
     var interiorPositions = [];
     for (var i = startI + 1; i < startI + size - 1 && i < Settings.WORLDLIMIT; i++) {
@@ -157,20 +157,20 @@ WorldGenerator.prototype.spawnBagsInMonument = function (startI, startJ, size, w
             }
         }
     }
-    
+
     // Randomly select positions for bags
     for (var b = 0; b < bagsToSpawn && interiorPositions.length > 0; b++) {
         var randomIndex = Math.floor(Math.random() * interiorPositions.length);
         var position = interiorPositions[randomIndex];
-        
+
         // Place the bag
         worldStructureMap[position.i][position.j] = { id: 2, health: 1, owner: "game" }; // Bag structure
         bagCount++;
-        
+
         // Remove this position from available positions
         interiorPositions.splice(randomIndex, 1);
     }
-    
+
     return bagCount;
 };
 

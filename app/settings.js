@@ -16,7 +16,7 @@ var Settings = {
         // Spawn rates (0.0 to 1.0, where 1.0 = 100% chance)
         TREE_SPAWN_RATE: 0.05,        // 5% chance per tile (reduced from 15%)
         ROCK_SPAWN_RATE: 0.04,        // 4% chance per tile (reduced from 12%)
-        MONUMENT_SPAWN_RATE: 0.0008,  // 0.08% chance per tile (reduced from 0.2%)
+        MONUMENT_SPAWN_RATE: 0.001,  // 1% chance per tile (reduced from 0.2%)
 
         // Monument bag spawning settings
         BAGS_PER_MONUMENT_MIN: 1,      // Minimum bags per monument
