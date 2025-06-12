@@ -88,7 +88,7 @@ class Database {
                 "mining": { level: 1, experience: 0 },
                 "woodcutting": { level: 1, experience: 0 }
             },
-            position: { i: 10, j: 7 },
+            position: { i: 200, j: 200 }, // Changed from { i: 10, j: 7 } to center of 400x400 world
             color: this.generatePlayerColor(),
             createdAt: new Date().toISOString(),
             lastLogin: new Date().toISOString()
