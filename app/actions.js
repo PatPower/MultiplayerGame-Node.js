@@ -41,6 +41,12 @@ Action.prototype.doAction = async function (playerId, structId, actionId, locati
                         return { result: false, msg: "You need to select a pickaxe to mine!" };
                     }
                     console.log("✅ Player has pickaxe selected, mining allowed");
+                } else if (structureAction.name === "Chop") {
+                    // Check if player has an axe selected
+                    if (player.selectedItemId !== 6) {
+                        return { result: false, msg: "You need to select an axe to chop!" };
+                    }
+                    console.log("✅ Player has axe selected, chopping allowed");
                 }
 
                 // CONDITIONS:
