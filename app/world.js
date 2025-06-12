@@ -118,10 +118,16 @@ World.prototype.createPlayer = async function (id, user) {
     var player;
     
     try {
+        console.log('🌍 World.createPlayer called:');
+        console.log('  Socket ID:', id);
+        console.log('  User:', user);
+        
         // Try to load existing player data from database
+        console.log('📂 Checking for existing player data...');
         var savedPlayer = await this.database.getPlayer(user.id);
         
         if (savedPlayer) {
+            console.log('✅ Found existing player data');
             // Load existing player
             player = {
                 id: id,
@@ -133,13 +139,16 @@ World.prototype.createPlayer = async function (id, user) {
                 inventory: savedPlayer.inventory,
                 inventorySize: savedPlayer.inventorySize,
                 skills: savedPlayer.skills,
-                color: savedPlayer.color
+                color: savedPlayer.color,
+                selectedSlot: -1,
+                selectedItemId: null
             };
             
             // Update last login
             savedPlayer.lastLogin = new Date().toISOString();
             await this.database.savePlayer(user.id, savedPlayer);
         } else {
+            console.log('🆕 Creating new player data');
             // Create new player in database
             var newPlayerData = await this.database.createPlayer(user.id, user.email, user.name);
             
@@ -153,15 +162,28 @@ World.prototype.createPlayer = async function (id, user) {
                 inventory: newPlayerData.inventory,
                 inventorySize: newPlayerData.inventorySize,
                 skills: newPlayerData.skills,
-                color: newPlayerData.color
+                color: newPlayerData.color,
+                selectedSlot: -1,
+                selectedItemId: null
             };
         }
         
+        console.log('📍 Player object created:', {
+            id: player.id,
+            position: { i: player.i, j: player.j },
+            inventorySize: player.inventorySize,
+            name: player.name
+        });
+        
+        console.log('🏗️ Setting up player in world...');
         this.setPlayer(id, player);
         this.addPlayerLocation(player);
         this.createPFlag(id);
         
+        console.log('📡 Emitting setup event...');
         socketController.setup(this.getPlayer(id), this.getLocal2DPlayerDict(player), this.getLocal2DGround(player), this.getLocal2DStructure(player), {});
+        
+        console.log('👥 Notifying other players...');
         var range = getIJRange(player.i, player.j);
         for (var i = range.lefti; i <= range.righti; i++) {
             for (var j = range.topj; j <= range.bottomj; j++) {
@@ -169,16 +191,26 @@ World.prototype.createPlayer = async function (id, user) {
                     for (othplayer of worldPlayerMap[i][j]) {
                         if (othplayer.id != player.id) {
                             socketController.playerJoin(othplayer, this.getPlayer(id));
+                            
+                            // Send existing player's selection state to the new player
+                            if (othplayer.selectedItemId !== null && othplayer.selectedItemId !== undefined) {
+                                socketController.playerSelectionUpdate(this.getPlayer(id), othplayer.id, othplayer.selectedItemId);
+                            }
                         }
                     }
                 }
             }
         }
+        
+        console.log('⏰ Initializing movement log...');
         this.moveLog[id] = [];
         this.moveLog[id].push((new Date).getTime());
         
+        console.log('✅ Player creation and setup complete!');
+        
     } catch (error) {
-        console.error('Error creating/loading player:', error);
+        console.error('❌ Error in createPlayer:', error);
+        console.error('Stack trace:', error.stack);
         throw error;
     }
 }
@@ -410,8 +442,8 @@ function initializeTestMap() {
     worldStructureMap[10][6] = { id: 3, health: 10, owner: "game" };
     worldGroundMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
     worldPlayerMap = [...Array(Settings.WORLDLIMIT)].map(e => Array(Settings.WORLDLIMIT));
-    for (i = 0; i < Settings.WORLDLIMIT; i++) {
-        for (j = 0; j < Settings.WORLDLIMIT; j++) {
+    for (var i = 0; i < Settings.WORLDLIMIT; i++) {
+        for (var j = 0; j < Settings.WORLDLIMIT; j++) {
             worldPlayerMap[i][j] = []
             worldGroundMap[i][j] = 0;
         }
@@ -524,6 +556,109 @@ World.prototype.addPlayerItem = async function (player, itemObj) {
         }
     }
     return -1;
+}
+
+/**
+ * Verifies if a player has a specific item at a given slot or anywhere in inventory
+ * @param {*} player The player object
+ * @param {*} itemId The ID of the item to verify
+ * @param {*} invSlot Optional - specific slot to check (0-based index)
+ * @returns {Object|boolean} Returns item info object {slot, durability} if found, false if not found
+ */
+World.prototype.verifyPlayerItem = function (player, itemId, invSlot) {
+    if (!player || !player.inventory) {
+        return false;
+    }
+    
+    // If specific slot is provided, check only that slot
+    if (typeof invSlot !== 'undefined' && invSlot !== null) {
+        if (invSlot >= 0 && invSlot < player.inventory.length) {
+            var item = player.inventory[invSlot];
+            if (item && item.id === itemId) {
+                return {
+                    slot: invSlot,
+                    durability: item.durability || 0,
+                    item: item
+                };
+            }
+        }
+        return false;
+    }
+    
+    // Otherwise, search entire inventory for the item
+    for (var i = 0; i < player.inventory.length; i++) {
+        var item = player.inventory[i];
+        if (item && item.id === itemId) {
+            return {
+                slot: i,
+                durability: item.durability || 0,
+                item: item
+            };
+        }
+    }
+    
+    return false;
+}
+
+/**
+ * Updates the player's inventory on the client side
+ * @param {*} player 
+ * @param {*} inventoryChanges 
+ */
+World.prototype.playerInventoryUpdate = function (player, inventoryChanges) {
+    if (inventoryChanges && inventoryChanges.length > 0) {
+        socketController.playerInventoryUpdate(player, inventoryChanges);
+    }
+}
+
+/**
+ * Updates a player's selected item and broadcasts to other players
+ * @param {*} playerId The socket ID of the player
+ * @param {*} selectedSlot The inventory slot selected (-1 for none)
+ * @param {*} itemId The ID of the selected item (null if deselecting)
+ */
+World.prototype.updatePlayerSelection = function (playerId, selectedSlot, itemId) {
+    console.log('🔧 DEBUG: updatePlayerSelection called');
+    console.log('  Player ID:', playerId);
+    console.log('  Selected Slot:', selectedSlot);
+    console.log('  Item ID:', itemId);
+    
+    var player = this.getPlayer(playerId);
+    if (!player) {
+        console.log('❌ DEBUG: Player not found for ID:', playerId);
+        return;
+    }
+    
+    console.log('✅ DEBUG: Player found:', player.name);
+    console.log('  Player position:', { i: player.i, j: player.j });
+    
+    // Update player's selection data
+    player.selectedSlot = selectedSlot;
+    player.selectedItemId = itemId;
+    
+    console.log('📝 DEBUG: Updated player selection state');
+    console.log('  New selectedSlot:', player.selectedSlot);
+    console.log('  New selectedItemId:', player.selectedItemId);
+    
+    // Broadcast to other players in range
+    var range = getIJRange(player.i, player.j);
+    console.log('📡 DEBUG: Broadcasting to players in range:', range);
+    
+    var playersNotified = 0;
+    for (var i = range.lefti; i <= range.righti; i++) {
+        for (var j = range.topj; j <= range.bottomj; j++) {
+            if (worldPlayerMap[i][j].length > 0) {
+                for (othPlayer of worldPlayerMap[i][j]) {
+                    if (othPlayer.id != player.id) {
+                        console.log('📤 DEBUG: Sending selection update to player:', othPlayer.name, '(ID:', othPlayer.id, ')');
+                        socketController.playerSelectionUpdate(othPlayer, player.id, itemId);
+                        playersNotified++;
+                    }
+                }
+            }
+        }
+    }
+    console.log('✅ DEBUG: Total players notified about selection:', playersNotified);
 }
 
 /**

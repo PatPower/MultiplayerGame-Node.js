@@ -38,6 +38,17 @@ class Database {
         return data[userId] || null;
     }
 
+    async getPlayerByUsername(username) {
+        const data = await this.loadPlayerData();
+        // Search through all players to find one with matching username
+        for (const userId in data) {
+            if (data[userId].username === username) {
+                return data[userId];
+            }
+        }
+        return null;
+    }
+
     async savePlayer(userId, playerData) {
         const data = await this.loadPlayerData();
         data[userId] = {
@@ -57,14 +68,22 @@ class Database {
             userId: userId,
             email: email,
             name: name,
+            username: name, // Use the provided name as the username
             inventory: [
-                { id: 0, durability: 50 }, 
-                null, 
-                { id: 3, durability: 50 }, 
-                { id: 1, durability: 50 }, 
-                { id: 2, durability: 50 }
+                { id: 0, durability: 50 },
+                null,
+                { id: 3, durability: 50 },
+                { id: 1, durability: 50 },
+                { id: 2, durability: 50 },
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
             ],
-            inventorySize: 5,
+            inventorySize: 12,
             skills: {
                 "mining": { level: 1, experience: 0 },
                 "woodcutting": { level: 1, experience: 0 }

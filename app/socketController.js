@@ -6,26 +6,57 @@ module.exports = function (socketIo, world, auth, database) {
     if (!io) {
         action = new Action(world);
         io = socketIo
+        
+        const DEV_MODE = process.env.DEV_MODE === 'true' || process.env.NODE_ENV === 'development';
+        
         // Add the WebSocket handlers with authentication
         io.on('connection', async function (socket) {
             try {
-                // Authenticate the socket connection
-                const user = await auth.authenticateSocket(socket);
-                console.log('Authenticated user connected:', user.email);
+                let user;
+                
+                if (DEV_MODE) {
+                    // In dev mode, generate a random user for each socket connection
+                    const adjectives = ['Swift', 'Brave', 'Wise', 'Bold', 'Clever', 'Strong', 'Quick', 'Sharp', 'Bright', 'Noble', 'Wild', 'Free', 'Cool', 'Fast', 'Smart'];
+                    const nouns = ['Explorer', 'Builder', 'Miner', 'Crafter', 'Hunter', 'Warrior', 'Trader', 'Pioneer', 'Adventurer', 'Hero', 'Coder', 'Gamer', 'Player', 'Ninja', 'Wizard'];
+                    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+                    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+                    const number = Math.floor(Math.random() * 1000);
+                    const username = `${adjective}${noun}${number}`;
+                    
+                    user = {
+                        id: `dev_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                        email: `${username.toLowerCase()}@dev.local`,
+                        name: username,
+                        username: username,
+                        isDev: true
+                    };
+                    console.log('🔧 Dev mode socket: Generated user', user.username);
+                } else {
+                    // Authenticate the socket connection normally
+                    user = await auth.authenticateSocket(socket);
+                    console.log('✅ Authenticated user connected:', user.email);
+                }
                 
                 socket.user = user;
                 
                 socket.on('new player', async function (pname) {
+                    console.log('🎮 "new player" event received for:', user.email);
+                    console.log('  Player name:', pname);
+                    console.log('  Socket ID:', socket.id);
+                    
                     try {
                         // Use authenticated user data instead of just the provided name
+                        console.log('🏗️ Creating player...');
                         await world.createPlayer(socket.id, user);
+                        console.log('✅ Player creation completed successfully');
                     } catch (error) {
-                        console.error('Error creating player:', error);
+                        console.error('❌ Error creating player:', error);
                         socket.emit('error', 'Failed to create player');
                     }
                 });
                 
                 socket.on('disconnect', async function () {
+                    console.log('👋 Player disconnecting:', user.email);
                     try {
                         await world.disconnectPlayer(socket.id);
                     } catch (error) {
@@ -37,19 +68,29 @@ module.exports = function (socketIo, world, auth, database) {
                     world.movePlayer(socket.id, data);
                 });
                 
-                socket.on('pAction', function (id, actionId, location) {
-                    var response = action.doAction(socket.id, id, actionId, location);
-                    // If a condition is not met
-                    if (!response.result) {
-                        module.exports.message(socket.id, response.msg);
+                socket.on('pAction', async function (id, actionId, location) {
+                    try {
+                        var response = await action.doAction(socket.id, id, actionId, location);
+                        // If a condition is not met
+                        if (!response.result) {
+                            module.exports.message(socket.id, response.msg);
+                        }
+                    } catch (error) {
+                        console.error('Error in pAction:', error);
+                        module.exports.message(socket.id, 'Action failed');
                     }
                 });
                 
-                socket.on('invAction', function (id, actionId, invSlot) {
-                    var response = action.doInvAction(socket.id, id, actionId, invSlot);
-                    // If a condition is not met
-                    if (!response.result) {
-                        module.exports.message(socket.id, response.msg);
+                socket.on('invAction', async function (id, actionId, invSlot) {
+                    try {
+                        var response = await action.doInvAction(socket.id, id, actionId, invSlot);
+                        // If a condition is not met
+                        if (!response.result) {
+                            module.exports.message(socket.id, response.msg);
+                        }
+                    } catch (error) {
+                        console.error('Error in invAction:', error);
+                        module.exports.message(socket.id, 'Action failed');
                     }
                 });
                 
@@ -70,6 +111,14 @@ module.exports = function (socketIo, world, auth, database) {
                     }
                 });
                 
+                socket.on('itemSelection', function (selectedSlot, itemId) {
+                    try {
+                        world.updatePlayerSelection(socket.id, selectedSlot, itemId);
+                    } catch (error) {
+                        console.error('Error updating player selection:', error);
+                    }
+                });
+                
             } catch (error) {
                 console.error('Authentication failed:', error);
                 socket.emit('auth_error', 'Authentication failed');
@@ -84,21 +133,26 @@ module.exports.playerJoin = function (othPlayer, player) {
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
-    io.to(othplayer.id).emit('playerJoin', player);
+    io.to(othPlayer.id).emit('playerJoin', player);
+    
+    // Also send the current selection state of the joining player to others in range
+    if (player.selectedItemId !== null && player.selectedItemId !== undefined) {
+        io.to(othPlayer.id).emit('playerSelectionUpdate', player.id, player.selectedItemId);
+    }
 }
 
 module.exports.playerRemove = function (othPlayer, dcPlayerObj) {
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
-    io.to(othplayer.id).emit('playerRemove', dcPlayerObj);
+    io.to(othPlayer.id).emit('playerRemove', dcPlayerObj);
 }
 
 module.exports.othPlayerMove = function (othPlayer, oldPlayer, data) {
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
-    io.to(othplayer.id).emit('othPlayerMove', oldPlayer, data);
+    io.to(othPlayer.id).emit('othPlayerMove', oldPlayer, data);
 }
 
 module.exports.moveCurrPlayer = function (player, localPlayerDict2D, localGround2D, localStructure2D) {
@@ -112,8 +166,17 @@ module.exports.setup = function (currPlayer, localPlayerDict2D, localGround2D, l
     if (!io) {
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
+    
+    console.log('📡 socketController.setup called:');
+    console.log('  Player ID:', currPlayer.id);
+    console.log('  Player position:', { i: currPlayer.i, j: currPlayer.j });
+    console.log('  Player inventory size:', currPlayer.inventorySize);
+    console.log('  Local players count:', Object.keys(localPlayerDict2D).length);
+    console.log('  Emitting setup event to socket:', currPlayer.id);
+    
     io.to(currPlayer.id).emit('setup', currPlayer, localPlayerDict2D, localGround2D, localStructure2D, defaultActions);
-
+    
+    console.log('✅ Setup event emitted successfully');
 }
 module.exports.message = function (id, msg) {
     if (!io) {
@@ -152,4 +215,17 @@ module.exports.playerInventorySizeUpdate = function (player, inventorySize, newI
         throw new Error("Error: Can't use this function until io is properly initalized");
     }
     io.to(player.id).emit('playerInventorySizeUpdate', inventorySize, newInventory);
+}
+
+module.exports.playerSelectionUpdate = function (othPlayer, playerId, selectedItemId) {
+    if (!io) {
+        throw new Error("Error: Can't use this function until io is properly initalized");
+    }
+    console.log('📡 DEBUG: socketController.playerSelectionUpdate called');
+    console.log('  Target player:', othPlayer.name, '(ID:', othPlayer.id, ')');
+    console.log('  Source player ID:', playerId);
+    console.log('  Selected item ID:', selectedItemId);
+    
+    io.to(othPlayer.id).emit('playerSelectionUpdate', playerId, selectedItemId);
+    console.log('✅ DEBUG: playerSelectionUpdate event emitted to socket:', othPlayer.id);
 }

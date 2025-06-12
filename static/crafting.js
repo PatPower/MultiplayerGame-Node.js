@@ -80,11 +80,13 @@ function makeCraftItemDroppable(id, craftItemPos) {
             // Show the item is being used for crafting
 
             // Gets the position of the inv item being used
-            var itemPos = parseInt(draggedItemId.slice(4));
-            console.log(itemPos);
+            var itemPos = parseInt(draggedItemId.slice(4)); // This is 1-based (item1, item2, etc.)
+            console.log("Dragged item DOM ID:", draggedItemId, "Position:", itemPos);
 
-            var invX = (itemPos - 1) % 4;
-            var invY = Math.floor((itemPos - 1) / 4);
+            // Convert to 0-based inventory slot
+            var invSlot = itemPos - 1;
+            var invX = invSlot % 4;
+            var invY = Math.floor(invSlot / 4);
 
             // Adds black tint over item being used
             var img = document.createElement("img");
@@ -99,8 +101,8 @@ function makeCraftItemDroppable(id, craftItemPos) {
             });
 
             // Disable dragging/dropping for the used item
-            preventDragging("#item" + draggedItemId.slice(4));
-            $("#item" + draggedItemId.slice(4)).droppable("disable");
+            preventDragging("#item" + itemPos); // Use original 1-based ID
+            $("#item" + itemPos).droppable("disable");
 
             // Disable dragging/dropping for overlay
             preventDragging("#itemOverlay" + craftItemPos);
@@ -108,9 +110,8 @@ function makeCraftItemDroppable(id, craftItemPos) {
             // Set the src to of the crafting box to the dragged from item
             $(this).attr("src", ui.draggable.attr("src"));
 
-            craftingItemIdList[craftItemPos] =
-                currPlayer.inventory[itemPos - 1].id;
-            craftingItemPosList[craftItemPos] = itemPos;
+            craftingItemIdList[craftItemPos] = currPlayer.inventory[invSlot].id; // Use 0-based slot
+            craftingItemPosList[craftItemPos] = itemPos; // Store 1-based for re-enabling
         },
     });
 }

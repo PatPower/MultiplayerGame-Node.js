@@ -1,10 +1,11 @@
-
 var invElement = document.getElementById("inv");
 var itemArea = document.getElementById("itemArea");
 var invCxt = setupInventory(invElement);
 var currentSelectedSlot = -1;
 var buildAnimationId = -1;
 var itemJson = [];
+var inventoryInitialized = false;
+var pendingInventoryUpdates = [];
 
 invTitle(invCxt)
 
@@ -39,21 +40,55 @@ function setupInventory(canvas) {
  * inventoryChanges: [ { item: { id: int, durability: int }, pos: int } , ... ]
  */
 function updateInventory(inventoryChanges) {
-    for (invChange of inventoryChanges) {
-        var i = invChange.pos + 1;
-        var img = itemArea.childNodes[i];
-        var oldItemObj = currPlayer.inventory[invChange.pos];
-        currPlayer.inventory[invChange.pos] = invChange.item;
-        if (invChange.item) {
-            img.src = getItemIcon(invChange.item.id);
-            makeDraggable("#item" + i);
-            enableDragging("#item" + i);
-        } else {
-            img.src = getItemIcon(-1);
+    // If inventory isn't initialized yet, queue the updates
+    if (!inventoryInitialized) {
+        console.log('📦 Inventory not initialized yet, queueing update:', inventoryChanges);
+        pendingInventoryUpdates.push(inventoryChanges);
+        return;
+    }
 
-            preventDragging("#item" + i);
+    // Check if inventory is initialized first
+    if (!itemArea || !currPlayer || !currPlayer.inventory) {
+        console.warn('Inventory not initialized yet, skipping update');
+        return;
+    }
+
+    console.log('📦 Processing inventory update:', inventoryChanges);
+
+    for (invChange of inventoryChanges) {
+        console.log('🔍 Processing change:', invChange);
+        var i = invChange.pos + 1;
+        var targetElementId = 'item' + i;
+        console.log('🎯 Updating DOM element:', targetElementId, 'for inventory position:', invChange.pos);
+
+        // Use getElementById instead of childNodes to avoid indexing issues
+        var img = document.getElementById(targetElementId);
+        console.log('🔗 DOM element before update:', img);
+
+        // Check if the DOM element exists
+        if (!img) {
+            console.warn(`Inventory slot ${targetElementId} DOM element not found, skipping update for position ${invChange.pos}`);
+            continue;
         }
-        makeDroppable("#item" + i);
+
+        var oldItemObj = currPlayer.inventory[invChange.pos];
+        console.log('🔄 Updating inventory array: position', invChange.pos, 'from', oldItemObj, 'to', invChange.item);
+        currPlayer.inventory[invChange.pos] = invChange.item;
+
+        if (invChange.item) {
+            console.log('🆕 Setting new item icon:', getItemIcon(invChange.item.id));
+            img.src = getItemIcon(invChange.item.id);
+            makeDraggable("#" + targetElementId);
+            enableDragging("#" + targetElementId);
+        } else {
+            console.log('🗑️ Setting empty icon');
+            img.src = getItemIcon(-1);
+            preventDragging("#" + targetElementId);
+        }
+        makeDroppable("#" + targetElementId);
+
+        console.log('✅ DOM element after update:', img);
+
         // If item is being removed from inv and is currently selected, select the same item in inv or deselect
         if (invChange.pos == currentSelectedSlot) {
             if (invChange.item == null) {
@@ -72,15 +107,27 @@ function updateInventory(inventoryChanges) {
 }
 
 function updateInvSize(newInventorySize) {
+    // Check if inventory is initialized first
+    if (!itemArea || !currPlayer) {
+        console.warn('Inventory not initialized yet, skipping size update');
+        return;
+    }
+
     var oldInvSize = currPlayer.inventorySize;
     var difference = newInventorySize - oldInvSize;
     if (difference == 0) {
         return;
     } else if (difference > 0) {
         // Unlock inv spots
-        for (var i = oldInvSize + 1; i < newInventorySize + 1; i++) {
+        for (var i = oldInvSize + 1; i <= newInventorySize; i++) {
+            var img = document.getElementById('item' + i);
 
-            var img = itemArea.childNodes[i];
+            // Check if the DOM element exists
+            if (!img) {
+                console.warn(`Inventory slot item${i} DOM element not found for size update`);
+                continue;
+            }
+
             img.setAttribute("class", "item");
             img.setAttribute("id", "item" + i);
             img.src = getItemIcon(-1);
@@ -90,7 +137,14 @@ function updateInvSize(newInventorySize) {
     } else {
         // Lock inv spots
         for (var i = oldInvSize; i > newInventorySize; i--) {
-            var img = itemArea.childNodes[i];
+            var img = document.getElementById('item' + i);
+
+            // Check if the DOM element exists
+            if (!img) {
+                console.warn(`Inventory slot item${i} DOM element not found for size update`);
+                continue;
+            }
+
             img.setAttribute("class", "lockeditemslot");
             img.setAttribute("id", "item" + i);
             img.src = getItemIcon(-2);
@@ -103,6 +157,18 @@ function updateInvSize(newInventorySize) {
 }
 
 function initalizeInvItems() {
+    console.log('🏗️ Initializing inventory items...');
+    console.log('📋 Player inventory contents:');
+    for (let i = 0; i < currPlayer.inventory.length; i++) {
+        const item = currPlayer.inventory[i];
+        if (item) {
+            console.log(`  Slot ${i}: ${getItemObj(item.id)?.name || 'Unknown'} (ID: ${item.id})`);
+        } else {
+            console.log(`  Slot ${i}: Empty`);
+        }
+    }
+    console.log('📋 DOM elements being created:');
+
     invLockIcon();
     for (var i = 1; i <= currPlayer.inventorySize; i++) {
         var item = currPlayer.inventory[i - 1];
@@ -110,10 +176,13 @@ function initalizeInvItems() {
         img.setAttribute("class", "item");
         img.setAttribute("id", "item" + i);
         if (item) {
+            const itemName = getItemObj(item.id)?.name || 'Unknown';
+            console.log(`  DOM item${i} → Slot ${i - 1}: ${itemName} (ID: ${item.id})`);
             img.src = getItemIcon(item.id);
             itemArea.append(img);
             makeDraggable("#item" + i);
         } else {
+            console.log(`  DOM item${i} → Slot ${i - 1}: Empty`);
             img.src = getItemIcon(-1);
             itemArea.append(img);
             preventDragging("#item" + i);
@@ -128,57 +197,71 @@ function initalizeInvItems() {
         itemArea.append(img);
         preventDragging("#item" + i);
     }
+
+    // Mark inventory as initialized
+    inventoryInitialized = true;
+    console.log('✅ Inventory initialization complete!');
+
+    // Process any queued updates
+    if (pendingInventoryUpdates.length > 0) {
+        console.log('📦 Processing', pendingInventoryUpdates.length, 'queued inventory updates');
+        for (var update of pendingInventoryUpdates) {
+            updateInventory(update);
+        }
+        pendingInventoryUpdates = []; // Clear the queue
+    }
 }
 
 function invLockIcon() {
-    var img = document.createElement('img');
-    img.setAttribute("id", "lockimg");
-    img.src = getItemIcon(-3);
-    var invSpaceLeft = MAXINVSPACE - currPlayer.inventorySize
-    var rowsLeft = Math.floor(invSpaceLeft / 4)
-    if (invSpaceLeft >= 4) {
-        var x = (4 * INVBOXSIDE) / 2 - INVBOXSIDE / 2
-    } else {
-        var x = INVWIDTH / 2 + (INVWIDTH - invSpaceLeft * INVBOXSIDE) / 2 - INVBOXSIDE / 2
+    // Temporarily disable lock icon creation to debug positioning issue
+    console.log('🔒 Lock icon creation disabled for debugging');
+
+    // Clean up any existing lock icons
+    var existingLockIcon = document.getElementById("lockimg");
+    if (existingLockIcon) {
+        existingLockIcon.remove();
+        console.log('🗑️ Removed existing lock icon');
     }
-    if (rowsLeft >= 1) {
-        var y = 600 / 2 + (600 - (INVBOXSIDE * rowsLeft)) / 2 - INVBOXSIDE / 2
-    } else {
-        var y = 600 - BOXSIDE
-    }
-    img.style.marginLeft = x + 'px';
-    img.style.marginTop = y + 'px';
-    itemArea.append(img);
-    $("lockimg").on('dragstart', function (event) {
-        event.preventDefault();
+
+    // Also check for any lockimg elements that might be floating around
+    var lockimgs = document.querySelectorAll('.lockimg');
+    lockimgs.forEach(function (img) {
+        img.remove();
+        console.log('🗑️ Removed floating lock icon');
     });
-    if (currPlayer.inventorySize >= 60) {
-        img.style.visibility = 'hidden';
-    }
+
+    // Don't create any new lock icons for now
+    return;
 }
 
 function updateInvLockIcon() {
     var img = document.getElementById("lockimg");
+
+    // Check if the lock icon element exists
+    if (!img) {
+        console.warn('Lock icon element not found, skipping update');
+        return;
+    }
+
     if (currPlayer.inventorySize >= 60) {
         img.style.visibility = 'hidden';
-        return
+        return;
     } else {
         img.style.visibility = 'visible';
     }
-    var invSpaceLeft = MAXINVSPACE - currPlayer.inventorySize
-    var rowsLeft = Math.floor(invSpaceLeft / 4)
-    if (invSpaceLeft >= 4) {
-        var x = (4 * INVBOXSIDE) / 2 - INVBOXSIDE / 2
-    } else {
-        var x = INVWIDTH / 2 + (INVWIDTH - invSpaceLeft * INVBOXSIDE) / 2 - INVBOXSIDE / 2
-    }
-    if (rowsLeft >= 1) {
-        var y = 600 / 2 + (600 - (INVBOXSIDE * rowsLeft)) / 2 - INVBOXSIDE / 2
-    } else {
-        var y = 600 - BOXSIDE
-    }
-    img.style.marginLeft = x + 'px';
-    img.style.marginTop = y + 'px';
+
+    // Calculate position relative to the inventory area
+    var nextSlot = currPlayer.inventorySize; // 0-based index of next slot to unlock
+    var invX = nextSlot % 4; // Column (0-3)
+    var invY = Math.floor(nextSlot / 4); // Row
+
+    // Position the lock icon over the next slot to be unlocked
+    var x = invX * INVBOXSIDE + INVBOXSIDE / 2 - 11; // Center horizontally (22px width / 2 = 11)
+    var y = invY * INVBOXSIDE + INVBOXSIDE / 2 - 11; // Center vertically (22px height / 2 = 11)
+
+    // Use left/top instead of marginLeft/marginTop for absolute positioning
+    img.style.left = x + 'px';
+    img.style.top = y + 'px';
 }
 
 
@@ -236,7 +319,7 @@ function getItemObj(id) {
 }
 
 function selectInvItem(slot) {
-    console.log("ION")
+    console.log("📦 DEBUG: selectInvItem called with slot:", slot);
 
     var rect = $(itemArea).offset();
     var invX = slot % 4;
@@ -248,8 +331,36 @@ function selectInvItem(slot) {
         top: rect.top + invY * INVBOXSIDE,
         left: rect.left + invX * INVBOXSIDE,
     });
-    animateBuildingArea();
+    animateReach();
     currentSelectedSlot = slot;
+
+    // Get the selected item ID
+    var selectedItemId = null;
+    if (currPlayer.inventory[slot]) {
+        selectedItemId = currPlayer.inventory[slot].id;
+    }
+
+    console.log("🎯 DEBUG: Item selection details:");
+    console.log("  Slot:", slot);
+    console.log("  Item ID:", selectedItemId);
+    console.log("  Current player inventory:", currPlayer.inventory);
+
+    // Redraw current player immediately to show the selected item icon
+    if (window.projectSquare && window.currPlayer) {
+        window.projectSquare(window.currPlayer, {});
+    }
+
+    // Notify server about selection
+    if (window.socket) {
+        console.log("📡 DEBUG: Sending itemSelection to server");
+        console.log("  Socket exists:", !!window.socket);
+        console.log("  Sending slot:", slot);
+        console.log("  Sending itemId:", selectedItemId);
+        window.socket.emit('itemSelection', slot, selectedItemId);
+        console.log("✅ DEBUG: itemSelection event emitted");
+    } else {
+        console.log("❌ DEBUG: No socket available to send selection");
+    }
 }
 
 function deselectInvItem() {
@@ -266,13 +377,18 @@ function deselectInvItem() {
         clearInterval(buildAnimationId);
         buildAnimationId = -1;
 
-        // Restore the effected overlay canvas
-        ovlycxt.clearRect(BOXSIDE * (HORIZONTALRADIUS - 1), BOXSIDE * (VERTICALRADIUS - 1), BOXSIDE * 3, BOXSIDE * 3);
-        for (var i = HORIZONTALRADIUS - 1; i <= HORIZONTALRADIUS + 1; i++) {
-            for (var j = VERTICALRADIUS - 1; j <= VERTICALRADIUS + 1; j++) {
-                ovlycxt.strokeRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
-            }
-        }
+        // Clear the build animation canvas instead of overlay
+        window.buildAnimcxt.clearRect(BOXSIDE * (HORIZONTALRADIUS - 1), BOXSIDE * (VERTICALRADIUS - 1), BOXSIDE * 3, BOXSIDE * 3);
+    }
+
+    // Redraw current player immediately to remove the selected item icon
+    if (window.projectSquare && window.currPlayer) {
+        window.projectSquare(window.currPlayer, {});
+    }
+
+    // Notify server about deselection
+    if (window.socket) {
+        window.socket.emit('itemSelection', -1, null);
     }
 }
 
@@ -292,7 +408,7 @@ function isSlotPlaceable(slot) {
     return false;
 }
 
-function animateBuildingArea() {
+function animateReach() {
     // Stop building animation if one is one already
     if (buildAnimationId != -1) {
         clearInterval(buildAnimationId);
@@ -310,17 +426,16 @@ function animateBuildingArea() {
             alphaChange = -alphaChange;
         }
 
-        ovlycxt.globalAlpha = alpha;
-        ovlycxt.fillStyle = "red";
-        ovlycxt.clearRect(BOXSIDE * (HORIZONTALRADIUS - 1), BOXSIDE * (VERTICALRADIUS - 1), BOXSIDE * 3, BOXSIDE * 3);
-        ovlycxt.fillRect(BOXSIDE * (HORIZONTALRADIUS - 1), BOXSIDE * (VERTICALRADIUS - 1), BOXSIDE * 3, BOXSIDE * 3);
-        ovlycxt.globalAlpha = 1;
-        ovlycxt.clearRect(BOXSIDE * (HORIZONTALRADIUS), BOXSIDE * (VERTICALRADIUS), BOXSIDE, BOXSIDE);
-        for (var i = HORIZONTALRADIUS - 1; i <= HORIZONTALRADIUS + 1; i++) {
-            for (var j = VERTICALRADIUS - 1; j <= VERTICALRADIUS + 1; j++) {
-                ovlycxt.strokeRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
-            }
-        }
+        // Use the build animation canvas instead of overlay
+        window.buildAnimcxt.globalAlpha = alpha;
+        window.buildAnimcxt.fillStyle = "red";
+        window.buildAnimcxt.clearRect(BOXSIDE * (HORIZONTALRADIUS - 1), BOXSIDE * (VERTICALRADIUS - 1), BOXSIDE * 3, BOXSIDE * 3);
+        window.buildAnimcxt.fillRect(BOXSIDE * (HORIZONTALRADIUS - 1), BOXSIDE * (VERTICALRADIUS - 1), BOXSIDE * 3, BOXSIDE * 3);
+        window.buildAnimcxt.globalAlpha = 1;
+        window.buildAnimcxt.clearRect(BOXSIDE * (HORIZONTALRADIUS), BOXSIDE * (VERTICALRADIUS), BOXSIDE, BOXSIDE);
+
+        // Redraw player names on overlay (this will also redraw the grid)
+        drawPlayerNames();
 
         alpha += alphaChange;
     }
@@ -341,4 +456,40 @@ function getActionId(slot) {
         }
     }
     return;
+}
+
+/**
+ * Shows a highlight over the first pickaxe found in the inventory
+ */
+function highlightPickaxe() {
+    // Find the first pickaxe (item id 0) in the inventory
+    var pickaxeSlot = -1;
+    for (var i = 0; i < currPlayer.inventory.length; i++) {
+        if (currPlayer.inventory[i] && currPlayer.inventory[i].id === 0) {
+            pickaxeSlot = i;
+            break;
+        }
+    }
+
+    if (pickaxeSlot !== -1) {
+        // Calculate position relative to the inventory area
+        var rect = $(itemArea).offset();
+        var invX = pickaxeSlot % 4;
+        var invY = Math.floor(pickaxeSlot / 4);
+
+        $("#pickaxeHighlight").css({
+            visibility: "visible",
+            top: rect.top + invY * INVBOXSIDE,
+            left: rect.left + invX * INVBOXSIDE,
+        });
+    }
+}
+
+/**
+ * Hides the pickaxe highlight
+ */
+function hidePickaxeHighlight() {
+    $("#pickaxeHighlight").css({
+        visibility: "hidden"
+    });
 }

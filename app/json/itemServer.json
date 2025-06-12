@@ -7,6 +7,9 @@
         "Durability": 50,
         "actions": {
             "a1": {
+                "name": "Select"
+            },
+            "a2": {
                 "name": "DefaultDrop"
             }
         }
@@ -80,6 +83,35 @@
             "a1": {
                 "name": "Select",
                 "structId": 4
+            },
+            "a2": {
+                "name": "DefaultDrop"
+            }
+        }
+    },
+    {
+        "id": 4,
+        "name": "Backpack",
+        "icon": "/static/img/items/1.png",
+        "placeableStructId": null,
+        "Durability": 50,
+        "actions": {
+            "a1": {
+                "name": "Expand Inventory",
+                "cond": {
+                    "item": [],
+                    "skill": {},
+                    "pFlag": []
+                },
+                "result": {
+                    "destroy": true,
+                    "degradeItems": [],
+                    "updatePFlag": [],
+                    "expGain": [],
+                    "removeItem": [],
+                    "drop": [],
+                    "addToInvSize": 5
+                }
             },
             "a2": {
                 "name": "DefaultDrop"

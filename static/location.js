@@ -130,7 +130,7 @@ function addOtherPlayerToLocationMap(trueRange, player) {
 
 // Gets the relative coordinates of the other player from the player
 function getRelativeCoords(othPlayer) {
-    var trueRange = getTrueRange(currPlayer);
+    var trueRange = getTrueRange(window.currPlayer || currPlayer);
     var relI = othPlayer.i - trueRange.truelefti;
     var relJ = othPlayer.j - trueRange.truetopj;
     return { i: relI, j: relJ };
@@ -142,7 +142,7 @@ function getRelativeCoords(othPlayer) {
  * @param {*} othObj An object with coordiantes relative to the currPlayer
  * @param {*} player Location of a player. Will be currPlayer if not specified
  */
-function getGlobalCoords(othObj, player = currPlayer) {
+function getGlobalCoords(othObj, player = window.currPlayer || currPlayer) {
     var middleLoc = getMiddleLocation();
     var iOffset = othObj.i - middleLoc.i;
     var jOffset = othObj.j - middleLoc.j;

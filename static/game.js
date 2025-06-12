@@ -1,14 +1,22 @@
-// Get Cloudflare Access JWT token from headers (if available)
+// Get Cloudflare Access JWT token from current session
 function getCloudflareToken() {
-    // In a real Cloudflare Access setup, the JWT would be automatically included in requests
-    // For now, we'll check if it's available in the page or make a request to get it
+    // Since we're already authenticated and on the page, we need to extract
+    // the JWT token that Cloudflare sent with the original request
+    // We'll make a simple request and capture the token from the page context
     return fetch('/api/user', {
         method: 'GET',
         credentials: 'include'
     }).then(response => {
         if (response.ok) {
-            // Token is valid, extract it from headers if needed
-            return response.headers.get('cf-access-jwt-assertion') || 'authenticated';
+            return response.json().then(userData => {
+                // Check if we're in dev mode
+                if (userData.devMode) {
+                    console.log('🔧 Dev mode detected, bypassing authentication');
+                    return 'dev-mode-token';
+                }
+                // Return a special token that indicates authenticated session
+                return 'cf-access-authenticated';
+            });
         }
         throw new Error('Not authenticated');
     }).catch(error => {
@@ -25,35 +33,204 @@ async function initializeSocket() {
             throw new Error('No authentication token available');
         }
 
+        console.log('🔌 Initializing Socket.IO connection...');
+        console.log('  Using token:', token);
+
         // Create socket connection with authentication
         const socket = io({
             auth: {
-                token: token
+                token: token,
+                authenticated: true
+            },
+            // Force socket.io to include credentials/cookies
+            withCredentials: true,
+            // Add extra headers if needed
+            extraHeaders: {
+                'X-Authenticated': 'true'
             }
         });
 
-        socket.on('connect', function() {
-            console.log('Connected to server with authentication');
-            // Use authenticated user name instead of prompting
-            const userName = window.authenticatedUser ? window.authenticatedUser.name : 'Anonymous';
-            socket.emit('new player', userName);
+        socket.on('connect', function () {
+            console.log('✅ Connected to server with authentication');
+            console.log('🔍 Checking window.authenticatedUser:', window.authenticatedUser);
+
+            // Check if user needs to choose a username
+            checkUserNameSetup(socket);
         });
 
-        socket.on('auth_error', function(error) {
-            console.error('Authentication error:', error);
+        socket.on('auth_error', function (error) {
+            console.error('❌ Authentication error:', error);
             alert('Authentication failed. Please refresh the page and try again.');
         });
 
-        socket.on('error', function(error) {
-            console.error('Game error:', error);
+        socket.on('error', function (error) {
+            console.error('❌ Game error:', error);
             alert('Game error: ' + error);
         });
 
         return socket;
     } catch (error) {
-        console.error('Failed to initialize socket:', error);
+        console.error('❌ Failed to initialize socket:', error);
         alert('Failed to connect. Please ensure you are properly authenticated.');
         return null;
+    }
+}
+
+// Check if user needs to set up their username
+async function checkUserNameSetup(socket) {
+    try {
+        // Check if user already has a saved username
+        const response = await fetch('/api/user/profile', {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const userData = await response.json();
+            if (userData.hasUsername) {
+                // User already has a username, proceed with game
+                console.log('👤 User already has username:', userData.username);
+                if (userData.devMode) {
+                    console.log('🔧 Dev mode: Starting game immediately');
+                }
+                socket.emit('new player', userData.username);
+            } else {
+                // User needs to choose a username (shouldn't happen in dev mode)
+                console.log('👤 User needs to choose username');
+                showUsernameModal(socket);
+            }
+        } else {
+            // Fallback - show username modal
+            showUsernameModal(socket);
+        }
+    } catch (error) {
+        console.error('Error checking username:', error);
+        // Fallback - show username modal
+        showUsernameModal(socket);
+    }
+}
+
+// Show the username selection modal
+function showUsernameModal(socket) {
+    const modal = document.getElementById('username-modal');
+    const input = document.getElementById('username-input');
+    const submitBtn = document.getElementById('username-submit');
+    const randomBtn = document.getElementById('username-random');
+    const errorDiv = document.getElementById('username-error');
+
+    // Show the modal
+    modal.style.display = 'flex';
+
+    // Focus on input
+    setTimeout(() => input.focus(), 100);
+
+    // Generate random username function
+    function generateRandomUsername() {
+        const adjectives = ['Swift', 'Brave', 'Wise', 'Bold', 'Clever', 'Strong', 'Quick', 'Sharp', 'Bright', 'Noble'];
+        const nouns = ['Explorer', 'Builder', 'Miner', 'Crafter', 'Hunter', 'Warrior', 'Trader', 'Pioneer', 'Adventurer', 'Hero'];
+        const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+        const noun = nouns[Math.floor(Math.random() * nouns.length)];
+        const number = Math.floor(Math.random() * 1000);
+        return `${adjective}${noun}${number}`;
+    }
+
+    // Handle random name button
+    randomBtn.addEventListener('click', function () {
+        input.value = generateRandomUsername();
+        input.focus();
+    });
+
+    // Handle form submission
+    function submitUsername() {
+        const username = input.value.trim();
+
+        // Validate username
+        if (!username) {
+            showError('Please enter a username');
+            return;
+        }
+
+        if (username.length < 3) {
+            showError('Username must be at least 3 characters long');
+            return;
+        }
+
+        if (username.length > 10) {
+            showError('Username must be 10 characters or less');
+            return;
+        }
+
+        if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+            showError('Username can only contain letters, numbers, underscores, and hyphens');
+            return;
+        }
+
+        // Disable form while submitting
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating...';
+        input.disabled = true;
+        randomBtn.disabled = true;
+
+        // Save username and start game
+        saveUsernameAndStart(socket, username);
+    }
+
+    function showError(message) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        input.focus();
+    }
+
+    // Handle submit button click
+    submitBtn.addEventListener('click', submitUsername);
+
+    // Handle Enter key press
+    input.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            submitUsername();
+        }
+    });
+}
+
+// Save username and start the game
+async function saveUsernameAndStart(socket, username) {
+    try {
+        const response = await fetch('/api/user/username', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ username: username })
+        });
+
+        if (response.ok) {
+            // Hide modal
+            document.getElementById('username-modal').style.display = 'none';
+
+            // Start the game
+            console.log('👤 Username saved, starting game with:', username);
+            socket.emit('new player', username);
+        } else {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to save username');
+        }
+    } catch (error) {
+        console.error('Error saving username:', error);
+
+        // Re-enable form
+        const submitBtn = document.getElementById('username-submit');
+        const input = document.getElementById('username-input');
+        const randomBtn = document.getElementById('username-random');
+        const errorDiv = document.getElementById('username-error');
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Start Playing';
+        input.disabled = false;
+        randomBtn.disabled = false;
+
+        errorDiv.textContent = error.message || 'Failed to save username. Please try again.';
+        errorDiv.style.display = 'block';
     }
 }
 
@@ -64,9 +241,10 @@ initializeSocket().then(socket => {
     // Replace the global socket variable
     window.socket = socket;
 
-    var currPlayer = {}; // Current Player Object
-    var playerList = {};
-    var defaultActions = {};
+    // Make these variables globally accessible
+    window.currPlayer = {}; // Current Player Object
+    window.playerList = {};
+    window.defaultActions = {};
 
     // Setup the canvases
     var bgcxt;
@@ -74,6 +252,7 @@ initializeSocket().then(socket => {
     var pcxt;
     var opcxt;
     var ovlycxt;
+    var buildAnimcxt;
 
     /** 
      * Server sends info needed to setup client
@@ -85,25 +264,62 @@ initializeSocket().then(socket => {
      * {structureId: actionId}
     */
     socket.on('setup', function (currentPlayer, pList, ground2D, structure2D, defaultActs) {
-        currPlayer = currentPlayer;
-        playerList = pList;
-        defaultActions = defaultActs;
+        // IMPORTANT: Set global variables FIRST before calling any functions that depend on them
+        window.currPlayer = currentPlayer;
+        window.playerList = pList;
+        window.defaultActions = defaultActs;
+
+        // Also set local variables for backward compatibility
+        var currPlayer = currentPlayer;
+        var playerList = pList;
+        var defaultActions = defaultActs;
+
+        console.log('✅ Set currPlayer globally:', window.currPlayer);
+
+        console.log('🗺️ Loading location map...');
         loadLocationMap(ground2D, structure2D, pList, currPlayer);
+
+        console.log('🎨 Setting up canvases...');
         bgcxt = setupBackground(document.getElementById('background'));
         strcxt = setupStructure(document.getElementById('structure'));
         opcxt = setupOtherPlayers(document.getElementById('otherPlayers'));
+        buildAnimcxt = setupBuildAnimation(document.getElementById('buildAnimation'));
         ovlycxt = setupOverlay(document.getElementById('overlay'));
         pcxt = setupCurrentPlayer(document.getElementById('player'));
+
+        // Make canvas contexts globally accessible
+        window.bgcxt = bgcxt;
+        window.strcxt = strcxt;
+        window.opcxt = opcxt;
+        window.buildAnimcxt = buildAnimcxt;
+        window.ovlycxt = ovlycxt;
+        window.pcxt = pcxt;
+
+        console.log('🎯 Setting up game elements...');
         updateTileMarker(currPlayer);
-        projectSquares(pList);
+        projectSquares(pList);  // Now currPlayer is defined globally
         projectSquare(currentPlayer, {});
+
+        // Draw player names on top of grid lines
+        drawPlayerNames();
+
+        console.log('🎒 Initializing inventory...');
         initalizeInvItems();
+
+        console.log('🔨 Setting up crafting area...');
         setupCraftingArea();
+
+        console.log('✅ Game setup complete!');
     });
 
     socket.on('moveCurrPlayer', function (player, pList, ground2D, structure2D) {
-        currPlayer = player
-        playerList = pList;
+        window.currPlayer = player;
+        window.playerList = pList;
+
+        // Also set local variables for backward compatibility
+        var currPlayer = player;
+        var playerList = pList;
+
         loadLocationMap(ground2D, structure2D, pList, currPlayer);
         updateBackgroundCanvas();
         refreshStructureCanvas()
@@ -111,6 +327,9 @@ initializeSocket().then(socket => {
         updateTileMarker(currPlayer);
         updateCursorType(mousePos);
         $(document).mousemove();
+
+        // Redraw player names on top of grid lines
+        drawPlayerNames();
     });
 
     /**
@@ -140,11 +359,15 @@ initializeSocket().then(socket => {
         // Other player moves out of view
         if (checkIfNewCoordsOutBounds(othP, movement)) {
             removePlayer(othP);
+            // Redraw player names after removing player
+            drawPlayerNames();
             return;
         }
         // Other player moves in view
         if (!playerList[othP.id]) {
             addPlayer(getNewCoordsLocation(othP, movement));
+            // Redraw player names after adding player
+            drawPlayerNames();
             return;
         }
         var relCoords = getRelativeCoords(othP)
@@ -166,14 +389,21 @@ initializeSocket().then(socket => {
         projectSquare(newP, getNewCoordsLocation(relCoords, movement));
         // Move the player in the locationMap
         movePlayer(othP, movement);
+
+        // Redraw player names on top of grid lines
+        drawPlayerNames();
     });
 
     socket.on('playerJoin', function (playerObj) {
         addPlayer(playerObj);
+        // Redraw player names on top of grid lines
+        drawPlayerNames();
     });
 
     socket.on('playerRemove', function (playerObj) {
         removePlayer(playerObj);
+        // Redraw player names on top of grid lines
+        drawPlayerNames();
     });
 
     /**
@@ -194,6 +424,25 @@ initializeSocket().then(socket => {
         updateInvSize(inventorySize);
         currPlayer.inventory = newInventory;
     })
+
+    socket.on('playerSelectionUpdate', function (playerId, selectedItemId) {
+        // Update the player's selection data in our local playerList
+        if (window.playerList[playerId]) {
+            window.playerList[playerId].selectedItemId = selectedItemId;
+
+            console.log('  New selectedItemId:', window.playerList[playerId].selectedItemId);
+            console.log('🎨 DEBUG: Calling projectSquares to redraw players');
+
+            // Redraw all players to show the updated selection
+            projectSquares(window.playerList);
+            drawPlayerNames();
+
+            console.log('✅ DEBUG: Player selection update complete');
+        } else {
+            console.log('❌ DEBUG: Player not found in playerList');
+            console.log('  Available players:', Object.keys(window.playerList));
+        }
+    });
 
     // TODO: make a socket that gets responses for invalid movement or actions done
 
@@ -256,7 +505,8 @@ initializeSocket().then(socket => {
                     bgcxt.fillStyle = locationMap[i][j].ground.backgroundColor;
                     bgcxt.fillRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
                 } else {
-                    bgcxt.clearRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
+                    // Fill void areas with black and add stars
+                    drawVoidWithStars(bgcxt, BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
                 }
             }
         }
@@ -306,16 +556,30 @@ initializeSocket().then(socket => {
         return canvas.getContext('2d');
     }
 
+    function setupBuildAnimation(canvas) {
+        // Build Animation
+        canvas.width = CWIDTH;
+        canvas.height = CHEIGHT;
+        var buildAnimcxt = canvas.getContext('2d');
+        // Clear the canvas
+        buildAnimcxt.clearRect(0, 0, CWIDTH, CHEIGHT);
+        return buildAnimcxt;
+    }
+
     function updateBackgroundCanvas() {
         // Background
-        //bgcxt.clearRect(0, 0, canvas.width, canvas.height);
+        // Fill entire canvas with black first for void areas
+        bgcxt.fillStyle = "black";
+        bgcxt.fillRect(0, 0, CWIDTH, CHEIGHT);
+
         for (var i = 0; i < NUMCOL; i++) {
             for (var j = 0; j < NUMROW; j++) {
                 if (locationMap[i][j].ground.backgroundColor) {
                     bgcxt.fillStyle = locationMap[i][j].ground.backgroundColor;
                     bgcxt.fillRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
                 } else {
-                    bgcxt.clearRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
+                    // Fill void areas with black and add stars
+                    drawVoidWithStars(bgcxt, BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
                 }
             }
         }
@@ -351,16 +615,125 @@ initializeSocket().then(socket => {
         if (playerObj.id != currPlayer.id) {
             opcxt.fillStyle = playerObj.color;
             opcxt.fillRect(BOXSIDE * relCoords.i, BOXSIDE * relCoords.j, BOXSIDE, BOXSIDE);
-            opcxt.fillStyle = 'blue';
-            opcxt.font = "12px Arial";
-            opcxt.fillText(playerObj.name, BOXSIDE * relCoords.i, BOXSIDE * relCoords.j + 10);
-        } else { // Current players
-            pcxt.fillStyle = 'cyan';
-            pcxt.fillRect(BOXSIDE * 10, BOXSIDE * 7, BOXSIDE, BOXSIDE);
-            pcxt.fillStyle = 'blue'
-            pcxt.font = "12px Arial";
-            pcxt.fillText(playerObj.name, BOXSIDE * 10, BOXSIDE * 7 + 10);
+
+            // Draw selected item icon if player has something selected
+            if (playerObj.selectedItemId !== null) {
+                drawSelectedItemOnPlayer(opcxt, playerObj.selectedItemId, relCoords.i, relCoords.j);
+            }
+        } else { // Current player
+            redrawCurrentPlayer();
         }
+    }
+
+    // Helper function to draw selected item icon on a player
+    function drawSelectedItemOnPlayer(context, itemId, gridI, gridJ) {
+        // Get the item icon
+        var itemIcon = getItemIcon(itemId);
+        if (!itemIcon) return;
+
+        // Create an image element and draw it
+        var img = new Image();
+        img.onload = function () {
+            // Draw the item icon in the center of the player square with doubled size
+            var iconSize = BOXSIDE * 0.8; // 80% of box size (doubled from 40%)
+            var iconX = BOXSIDE * gridI + BOXSIDE / 2 - iconSize / 2; // Center horizontally
+            var iconY = BOXSIDE * gridJ + BOXSIDE / 2 - iconSize / 2; // Center vertically
+
+            // Draw a semi-transparent background
+            context.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            context.fillRect(iconX - 2, iconY - 2, iconSize + 4, iconSize + 4);
+
+            // Draw the item icon
+            context.drawImage(img, iconX, iconY, iconSize, iconSize);
+        };
+        img.src = itemIcon;
+        console.log('🖼️ Drawing item icon for ID:', itemId, 'at grid position:', gridI, gridJ);
+    }
+
+    // Helper function to redraw current player
+    function redrawCurrentPlayer() {
+        // Clear the current player area
+        pcxt.clearRect(BOXSIDE * 10, BOXSIDE * 7, BOXSIDE, BOXSIDE);
+
+        // Draw the player square
+        pcxt.fillStyle = 'cyan';
+        pcxt.fillRect(BOXSIDE * 10, BOXSIDE * 7, BOXSIDE, BOXSIDE);
+
+        // Show mining pickaxe icon if currently mining
+        if (showingMiningIcon) {
+            drawSelectedItemOnPlayer(pcxt, 0, 10, 7); // Item ID 0 is the pickaxe
+        }
+        // Otherwise show selected item icon if current player has something selected
+        else if (currentSelectedSlot !== -1 && currPlayer.inventory[currentSelectedSlot]) {
+            drawSelectedItemOnPlayer(pcxt, currPlayer.inventory[currentSelectedSlot].id, 10, 7);
+        }
+    }
+
+    // New function to draw all player names on the overlay canvas (above grid lines)
+    function drawPlayerNames() {
+        // Clear the entire overlay canvas first
+        ovlycxt.clearRect(0, 0, CWIDTH, CHEIGHT);
+
+        // Redraw the grid lines only on non-void areas
+        ovlycxt.strokeStyle = 'black';
+        ovlycxt.lineWidth = 1;
+        for (var i = 0; i < NUMCOL; i++) {
+            for (var j = 0; j < NUMROW; j++) {
+                // Only draw grid lines where there's ground (not void)
+                if (locationMap[i][j].ground.backgroundColor) {
+                    ovlycxt.strokeRect(BOXSIDE * i, BOXSIDE * j, BOXSIDE, BOXSIDE);
+                }
+            }
+        }
+
+        // Draw names for other players
+        for (var playerId in window.playerList) {
+            var playerObj = window.playerList[playerId];
+            if (playerObj.id != window.currPlayer.id) {
+                var relCoords = getRelativeCoords(playerObj);
+                drawPlayerName(ovlycxt, playerObj.name, relCoords.i, relCoords.j);
+            }
+        }
+
+        // Draw name for current player
+        if (window.currPlayer && window.currPlayer.name) {
+            drawPlayerName(ovlycxt, window.currPlayer.name, 10, 7);
+        }
+    }
+
+    // Helper function to draw a single player name
+    function drawPlayerName(context, name, gridI, gridJ) {
+        // Save the current context state
+        context.save();
+
+        // Set up text properties
+        context.font = "bold 12px Arial";
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+
+        var nameX = BOXSIDE * gridI + BOXSIDE / 2; // Center horizontally
+        var nameY = BOXSIDE * gridJ - 10; // Position above the player
+
+        // Draw a semi-transparent background rectangle for better readability
+        var textWidth = context.measureText(name).width;
+        var padding = 2;
+        var textHeight = 12; // Font size
+
+        // Calculate background rectangle position
+        var bgX = nameX - textWidth / 2 - padding;
+        var bgY = nameY - textHeight / 2 - padding;
+        var bgWidth = textWidth + padding * 2;
+        var bgHeight = textHeight + padding * 2;
+
+        context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        context.fillRect(bgX, bgY, bgWidth, bgHeight);
+
+        // Draw the text in white
+        context.fillStyle = 'white';
+        context.fillText(name, nameX, nameY);
+
+        // Restore the context state
+        context.restore();
     }
     /**
      * 
@@ -475,8 +848,8 @@ initializeSocket().then(socket => {
     function getDefaultAction(structId) {
         var structObj = getStructureObj({ id: structId, health: 0, owner: "game" });
         if (structObj) {
-            if (structId in defaultActions) {
-                var defAction = "a" + defaultActions[structId];
+            if (structId in window.defaultActions) {
+                var defAction = "a" + window.defaultActions[structId];
                 if (structObj.actions[defAction]) {
                     return defAction
                 }
@@ -487,4 +860,124 @@ initializeSocket().then(socket => {
         }
         return null
     }
+
+    // Make functions globally accessible for other scripts
+    window.sendPlayerAction = sendPlayerAction;
+    window.sendPlayerInvAction = sendPlayerInvAction;
+    window.emitMovement = emitMovement;
+    window.emitItemSwap = emitItemSwap;
+    window.emitBuild = emitBuild;
+    window.defaultAction = defaultAction;
+    window.getDefaultAction = getDefaultAction;
+    window.getNewCoordsLocation = getNewCoordsLocation;
+    window.checkIfNewCoordsOutBounds = checkIfNewCoordsOutBounds;
+
+    // Additional functions that other scripts may need
+    window.addPlayer = addPlayer;
+    window.removePlayer = removePlayer;
+    window.projectSquare = projectSquare;
+    window.removeProjectedPlayer = removeProjectedPlayer;
+    window.projectStructure = projectStructure;
+    window.removeProjectedStructure = removeProjectedStructure;
+    window.updateBackgroundCanvas = updateBackgroundCanvas;
+    window.refreshStructureCanvas = refreshStructureCanvas;
+    window.projectSquares = projectSquares;
+    window.setupBackground = setupBackground;
+    window.setupStructure = setupStructure;
+    window.setupOverlay = setupOverlay;
+    window.setupCurrentPlayer = setupCurrentPlayer;
+    window.setupOtherPlayers = setupOtherPlayers;
+    window.drawPlayerNames = drawPlayerNames;
+
+    // Mining action tracking
+    var miningActionTimeout = null;
+    var showingMiningIcon = false;
 });
+
+// Add logout functionality
+$(document).ready(function () {
+    $('#logout-btn').click(function () {
+        if (confirm('Are you sure you want to logout?')) {
+            // Disconnect from the game socket
+            if (window.socket) {
+                window.socket.disconnect();
+            }
+
+            // Clear Cloudflare Access session by redirecting to logout URL
+            window.location.href = '/cdn-cgi/access/logout';
+        }
+    });
+});
+
+// Helper function to draw void areas with black background and stars
+function drawVoidWithStars(context, x, y, width, height) {
+    // Fill with black background
+    context.fillStyle = "black";
+    context.fillRect(x, y, width, height);
+
+    // Generate a deterministic pattern of stars based on position
+    // This ensures stars stay in the same place when redrawing
+    var gridI = Math.floor(x / BOXSIDE);
+    var gridJ = Math.floor(y / BOXSIDE);
+    var seed = gridI * 31 + gridJ * 17; // Simple hash for deterministic randomness
+
+    // Generate different types of stars
+    var totalStars = 4 + (seed % 4); // 4-7 stars per tile
+
+    for (var i = 0; i < totalStars; i++) {
+        // Use the seed to generate consistent star positions
+        var starSeed = seed + i * 47;
+        var starX = x + ((starSeed * 13) % width);
+        var starY = y + ((starSeed * 23) % height);
+
+        // Determine star type based on seed
+        var starType = (starSeed * 3) % 100;
+
+        if (starType < 70) {
+            // Distant small white stars (70% chance)
+            context.fillStyle = "rgba(255, 255, 255, 0.6)";
+            var starSize = 0.5 + ((starSeed * 7) % 1);
+            context.beginPath();
+            context.arc(starX, starY, starSize, 0, 2 * Math.PI);
+            context.fill();
+
+        } else if (starType < 90) {
+            // Medium bright white stars (20% chance)
+            context.fillStyle = "rgba(255, 255, 255, 0.9)";
+            var starSize = 0.8 + ((starSeed * 5) % 1);
+            context.beginPath();
+            context.arc(starX, starY, starSize, 0, 2 * Math.PI);
+            context.fill();
+
+        } else {
+            // Bright white stars with glow (10% chance)
+            var starSize = 1 + ((starSeed * 11) % 0.8);
+
+            // Draw outer glow
+            context.fillStyle = "rgba(255, 255, 255, 0.3)";
+            context.beginPath();
+            context.arc(starX, starY, starSize + 0.5, 0, 2 * Math.PI);
+            context.fill();
+
+            // Draw bright center
+            context.fillStyle = "rgba(255, 255, 255, 1)";
+            context.beginPath();
+            context.arc(starX, starY, starSize, 0, 2 * Math.PI);
+            context.fill();
+        }
+    }
+
+    // Add some very faint distant stars for extra depth
+    var microStars = 2 + (seed % 3); // 2-4 micro stars
+    context.fillStyle = "rgba(255, 255, 255, 0.2)";
+
+    for (var j = 0; j < microStars; j++) {
+        var microSeed = seed + j * 83 + 1000;
+        var microX = x + ((microSeed * 19) % width);
+        var microY = y + ((microSeed * 29) % height);
+
+        context.beginPath();
+        context.arc(microX, microY, 0.3, 0, 2 * Math.PI);
+        context.fill();
+    }
+}

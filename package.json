@@ -16,5 +16,8 @@
     "nodemon": "^2.0.2",
     "pug": "^2.0.4",
     "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.28.0"
   }
 }

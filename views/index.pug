@@ -9,19 +9,34 @@ html
         
         script(src="https://code.jquery.com/ui/1.12.1/jquery-ui.js")
         script(src="https://kit.fontawesome.com/b6abf5ebcd.js" crossorigin="anonymous")
-        script(src="/static/const.js")
-        script(src="/static/location.js") 
-        script(src="/static/onGameJoin.js")
-        link(rel='stylesheet', href='/static/css/index.css')
+        - var timestamp = Date.now()
+        script(src=`/static/const.js?v=${timestamp}`)
+        script(src=`/static/location.js?v=${timestamp}`) 
+        script(src=`/static/onGameJoin.js?v=${timestamp}`)
+        link(rel='stylesheet', href=`/static/css/index.css?v=${timestamp}`)
         
         // Pass user data to client
         script.
             window.authenticatedUser = !{JSON.stringify(user || null)};
     body
+        <!-- Username Selection Modal -->
+        div(id="username-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;")
+            div(style="background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 400px; margin: 20px;")
+                h2(style="margin-top: 0; color: #333;") Welcome to Patland!
+                p(style="color: #666; margin-bottom: 20px;") Choose a username that will be displayed on your character:
+                input(id="username-input" type="text" placeholder="Enter your username..." style="padding: 10px; font-size: 16px; border: 2px solid #ddd; border-radius: 5px; width: 100%; margin-bottom: 15px; box-sizing: border-box;")
+                div(id="username-error" style="color: red; margin-bottom: 15px; display: none;")
+                button(id="username-submit" style="background: #4CAF50; color: white; padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-right: 10px;") Start Playing
+                button(id="username-random" style="background: #2196F3; color: white; padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;") Random Name
+                
         div(id="auth-info" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px; z-index: 1000;")
+            if devMode
+                div(style="background: #ff9800; color: white; padding: 5px; margin-bottom: 5px; border-radius: 3px; text-align: center; font-weight: bold;") 🔧 DEV MODE
             if user
                 div Welcome, #{user.name}!
                 div Email: #{user.email}
+                if !devMode
+                    button(id="logout-btn" style="margin-top: 10px; padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;") Logout
             else
                 div Not authenticated
         
@@ -34,6 +49,7 @@ html
                 canvas(id="structure")
                 canvas(id="otherPlayers")
                 canvas(id="player")
+                canvas(id="buildAnimation")
                 canvas(id="overlay")
             div(id="rightside")
                 div(id="itemArea")
@@ -41,15 +57,16 @@ html
                 div(id="craftingSide")
                     canvas(id="crafting")
                     div(id="craftingArea")
-        script(src="/static/controls.js")
-        script(src="/static/game.js")
-        script(src="/static/customContextMenu.js")
-        script(src="/static/coordinateInfo.js")
-        script(src="/static/inventory.js")
-        script(src="/static/crafting.js")
+        script(src=`/static/controls.js?v=${timestamp}`)
+        script(src=`/static/game.js?v=${timestamp}`)
+        script(src=`/static/customContextMenu.js?v=${timestamp}`)
+        script(src=`/static/coordinateInfo.js?v=${timestamp}`)
+        script(src=`/static/inventory.js?v=${timestamp}`)
+        script(src=`/static/crafting.js?v=${timestamp}`)
 
         img(id="click" src="/static/img/circle.png")
         img(id="select" src="/static/img/select.png")
+        img(id="pickaxeHighlight" src="/static/img/select.png" style="visibility: hidden; position: absolute; width: 40px; height: 40px; top: 0; left: 0; z-index: 6; pointer-events: none; background: rgba(255, 0, 0, 0.2); border: none;")
         img(id="selectedBuild")
         div(id="tooltip")
             p(id="tooltiptext")

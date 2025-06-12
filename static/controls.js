@@ -71,6 +71,10 @@ $(document).click(function (event) {
                 console.log("Error: Undefined action ID (controls)")
                 return
             }
+            console.log("🔨 BUILD DEBUG:");
+            console.log("  selectedSlot:", currentSelectedSlot);
+            console.log("  selectedItem:", currPlayer.inventory[currentSelectedSlot]);
+            console.log("  itemId:", getSelectedItemId());
             emitBuild(getSelectedItemId(), currentSelectedActionId, currentSelectedSlot, getGlobalCoords({ i: mousePos.i, j: mousePos.j }))
         } else {
             // If left clicked outside of buildable region and on map
@@ -85,6 +89,11 @@ $(document).click(function (event) {
     var j = Math.floor(y / BOXSIDE);
     if (i >= 0 && i < INVNUMCOL && j >= 0 && j < NUMROW && $(event.target).attr("id")) {
         var slot = parseInt($(event.target).attr("id").slice(4)) - 1;
+        console.log("📦 INVENTORY CLICK DEBUG:");
+        console.log("  DOM element:", $(event.target).attr("id"));
+        console.log("  calculated slot:", slot);
+        console.log("  item at slot:", currPlayer.inventory[slot]);
+
         var actionId = getActionId(slot);
         if (actionId) {
             if (currentSelectedSlot == -1 || slot != currentSelectedSlot) {
@@ -111,17 +120,20 @@ $("#click").hide();
 
 // Keeps track of the mouse position at all times
 $(document).mousemove(function (e) {
-    // If the mousemove have valid coordinates
-    if (e.pageX && e.pageY) {
+    // Check if event object exists and has valid coordinates
+    if (e && e.pageX && e.pageY) {
         mousePos.x = e.pageX;
         mousePos.y = e.pageY;
+
+        mousePos.i = Math.floor((mousePos.x - $('#overlay').offset().left - 4) / BOXSIDE);
+        mousePos.j = Math.floor((mousePos.y - $('#overlay').offset().top - 4) / BOXSIDE);
     }
-    mousePos.i = Math.floor((mousePos.x - $('#overlay').offset().left - 4) / BOXSIDE);
-    mousePos.j = Math.floor((mousePos.y - $('#overlay').offset().top - 4) / BOXSIDE);
+
     // Wait for the screen to finish loading
     if (!windowLoaded) {
         return;
     }
+
     if (lastI != mousePos.i || lastJ != mousePos.j) {
         // If on map
         if (mousePos.i >= 0 && NUMCOL > mousePos.i && mousePos.j >= 0 && NUMROW > mousePos.j) {
@@ -130,6 +142,7 @@ $(document).mousemove(function (e) {
         lastI = mousePos.i;
         lastJ = mousePos.j;
     }
+
     if ($('#tooltip').is(":visible")) {
         $('#tooltip').css({
             left: mousePos.x + 12,
@@ -154,6 +167,12 @@ function updateCursorType(mousePos) {
     if (mousePos.i < 0 || NUMCOL <= mousePos.i || mousePos.j < 0 || NUMROW <= mousePos.j) {
         return;
     }
+
+    // Check if required data is loaded
+    if (!structureJson || !currPlayer || !currPlayer.inventory) {
+        return;
+    }
+
     // TODO: have different mouse cursors for different situations
     var structObj = structHasActionAtMousePos(mousePos);
     if (structObj) {
@@ -168,25 +187,72 @@ function updateCursorType(mousePos) {
         }
         if (!menuVisible) {
             $('#tooltip').show();
-            $("#tooltiptext").text(getActionName(structObj.id, getDefaultAction(structObj.id)) + " (e)");
+
+            // Get the action name
+            var actionName = getActionName(structObj.id, getDefaultAction(structObj.id));
+            var tooltipText = actionName + " (e)";
+
+            // Check if this is a mining action and if player has pickaxe selected
+            if (actionName === "Mine") {
+                // Check if player has a pickaxe (item id 0) selected
+                var hasPickaxeSelected = false;
+                if (currentSelectedSlot !== -1 && currPlayer.inventory[currentSelectedSlot] && currPlayer.inventory[currentSelectedSlot].id === 0) {
+                    hasPickaxeSelected = true;
+                }
+
+                if (!hasPickaxeSelected) {
+                    tooltipText = "Select pickaxe to Mine";
+                    // Show pickaxe highlight
+                    if (typeof highlightPickaxe === 'function') {
+                        highlightPickaxe();
+                    }
+                } else {
+                    // Hide pickaxe highlight if it's showing
+                    if (typeof hidePickaxeHighlight === 'function') {
+                        hidePickaxeHighlight();
+                    }
+                }
+            } else {
+                // Hide pickaxe highlight for non-mining actions
+                if (typeof hidePickaxeHighlight === 'function') {
+                    hidePickaxeHighlight();
+                }
+            }
+
+            $("#tooltiptext").text(tooltipText);
         }
     } else {
         if ($('#tooltip').is(":visible")) {
             $('#tooltip').hide();
+            // Hide pickaxe highlight when tooltip is hidden
+            if (typeof hidePickaxeHighlight === 'function') {
+                hidePickaxeHighlight();
+            }
         }
         // If in building mode and is hovering over a buildable area
         if (currentSelectedSlot != -1 && checkIfInteractible(mousePos)) {
             document.body.style.cursor = 'grabbing';
             var selectedBuild = $("#selectedBuild");
-            var structSrc = structureJson[getItemObj(currPlayer.inventory[currentSelectedSlot].id).placeableStructId].sprite;
-            // Sets the src to the one selected
-            selectedBuild.attr("src", structSrc);
-            selectedBuild.css({
-                visibility: "visible",
-                left: $('#overlay').offset().left + 4 + BOXSIDE * mousePos.i,
-                top: $('#overlay').offset().top + 4 + BOXSIDE * mousePos.j,
-                opacity: 0.6
-            });
+
+            // Check if current player has valid inventory and selected item
+            var selectedItem = currPlayer.inventory[currentSelectedSlot];
+            if (selectedItem) {
+                var itemObj = getItemObj(selectedItem.id);
+                if (itemObj && itemObj.placeableStructId !== null && itemObj.placeableStructId !== undefined) {
+                    var structureObj = structureJson[itemObj.placeableStructId];
+                    if (structureObj && structureObj.sprite) {
+                        var structSrc = structureObj.sprite;
+                        // Sets the src to the one selected
+                        selectedBuild.attr("src", structSrc);
+                        selectedBuild.css({
+                            visibility: "visible",
+                            left: $('#overlay').offset().left + 4 + BOXSIDE * mousePos.i,
+                            top: $('#overlay').offset().top + 4 + BOXSIDE * mousePos.j,
+                            opacity: 0.6
+                        });
+                    }
+                }
+            }
         } else {
             document.body.style.cursor = 'default';
             // If the mouse is hovered out of the building area while build mode is on
