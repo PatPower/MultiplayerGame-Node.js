@@ -7,9 +7,9 @@ function updateTileMarker(player) {
     for (var i = 0; i < NUMCOL; i++) {
         var adjust = 8;
         if (i == HORIZONTALRADIUS) {
-            tmcxt.font = "bold 18px Arial";
+            tmcxt.font = "bold 15px Arial";
         } else {
-            tmcxt.font = "12px Arial";
+            tmcxt.font = "11px Arial";
         }
         if (player.i < 10) {
             adjust = 4;
@@ -18,9 +18,9 @@ function updateTileMarker(player) {
     }
     for (var j = 0; j < NUMROW; j++) {
         if (j == VERTICALRADIUS) {
-            tmcxt.font = "bold 18px Arial";
+            tmcxt.font = "bold 15px Arial";
         } else {
-            tmcxt.font = "12px Arial";
+            tmcxt.font = "11px Arial";
         }
         tmcxt.fillText(player.j - VERTICALRADIUS + j, 0, (BOXSIDE * j) + OUTERMARGINTOP + BOXSIDE / 2 + 10);
     }

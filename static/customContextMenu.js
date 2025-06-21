@@ -50,30 +50,6 @@ $(function () {
         },
         zIndex: 4,
     });
-
-    // Crafting
-    $.contextMenu({
-        selector: ".craftitem",
-        autoHide: true,
-        hideOnSecondTrigger: true,
-        position: function (opt, x, y) {
-            opt.$menu.css({ top: y, left: x - 30 });
-        },
-        build: function ($triggerElement, e) {
-            var craftVal = $triggerElement.attr("id").slice(9);
-            if (craftVal == "Tool") return findMenuObjCrafting(0);
-            else return findMenuObjCrafting(parseInt(craftVal));
-        },
-        events: {
-            show: function (options) {
-                menuVisible = true;
-            },
-            hide: function (options) {
-                menuVisible = false;
-            },
-        },
-        zIndex: 4,
-    });
 });
 
 function findMenuObj(x, y) {
@@ -185,48 +161,6 @@ function findMenuObjInv(invSlot) {
             };
         }
     }
-    menuDict["items"] = itemsDict;
-    return menuDict;
-}
-
-/**
- *
- * @param {*} invSlot slot of the inventory (starting from 0)
- */
-function findMenuObjCrafting(craftingSlot) {
-    var itemsDict = {};
-    var menuDict = {};
-    var itemObj;
-    var itemName = "";
-    console.log(craftingSlot);
-    console.log(craftingItemIdList[craftingSlot]);
-    itemObj = getItemObj(craftingItemIdList[craftingSlot]);
-    itemName = itemObj.name;
-    console.log(itemName);
-    itemsDict["itemName"] = {
-        name: `${itemName}`,
-        visible: function (key, opt) {
-            // If item has a name
-            return Boolean(itemObj);
-        },
-        icon: "far fa-list-alt",
-    };
-    if (itemObj) {
-        itemsDict["Remove"] = {
-            name: "Remove",
-            icon: "fas fa-hammer",
-            callback: function (key, opt) {
-                RemoveCraftingItem(craftingSlot)
-            },
-        };
-    }
-    itemsDict["sep1"] = "---------";
-    itemsDict["quit"] = {
-        name: "quit",
-        icon: function () {
-            return "context-menu-icon context-menu-icon-quit";
-        },
-    };
     menuDict["items"] = itemsDict;
     return menuDict;
 }

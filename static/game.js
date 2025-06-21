@@ -309,9 +309,6 @@ initializeSocket().then(socket => {
         console.log('🎒 Initializing inventory...');
         initalizeInvItems();
 
-        console.log('🔨 Setting up crafting area...');
-        setupCraftingArea();
-
         console.log('✅ Game setup complete!');
     });
 

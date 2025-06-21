@@ -70,12 +70,12 @@ class Database {
             name: name,
             username: name, // Use the provided name as the username
             inventory: [
-                { id: 0, durability: 50 },
+                { id: 0, durability: 50 }, // Pickaxe
+                { id: 6, durability: 50 }, // Hatchet
                 null,
-                { id: 3, durability: 50 },
-                { id: 1, durability: 50 },
-                { id: 2, durability: 50 },
-                { id: 6, durability: 50 },
+                null,
+                null,
+                null,
                 null,
                 null,
                 null,
@@ -121,6 +121,41 @@ class Database {
             player.skills = skills;
             await this.savePlayer(userId, player);
         }
+    }
+
+    async migrateAllPlayersInventory() {
+        const data = await this.loadPlayerData();
+        let migrationCount = 0;
+
+        for (const userId in data) {
+            const player = data[userId];
+
+            // Update inventory to only have pickaxe and hatchet
+            player.inventory = [
+                { id: 0, durability: 50 }, // Pickaxe
+                { id: 1, durability: 50 }, // Hatchet
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ];
+            player.inventorySize = 12;
+
+            migrationCount++;
+        }
+
+        if (migrationCount > 0) {
+            await this.savePlayerData(data);
+            console.log(`Successfully migrated ${migrationCount} players to new inventory system`);
+        }
+
+        return migrationCount;
     }
 
     generatePlayerColor() {

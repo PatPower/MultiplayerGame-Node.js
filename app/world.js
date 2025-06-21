@@ -16,6 +16,23 @@ function World(database) {
     this.moveLog = {};
     this.worldGenerator = new (require('./worldGenerator.js'))();
     initializeTestMap();
+
+    // Run inventory migration for existing players
+    this.migrateExistingPlayers();
+}
+
+World.prototype.migrateExistingPlayers = async function () {
+    try {
+        console.log('🔄 Running inventory migration for existing players...');
+        const migrationCount = await this.database.migrateAllPlayersInventory();
+        if (migrationCount > 0) {
+            console.log('✅ Inventory migration completed successfully');
+        } else {
+            console.log('ℹ️ No players found to migrate');
+        }
+    } catch (error) {
+        console.error('❌ Error during inventory migration:', error);
+    }
 }
 
 World.prototype.getStructureMap = function () {
