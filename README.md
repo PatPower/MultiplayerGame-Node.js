@@ -1,7 +1,7 @@
 # MultiplayerGame-Node.js
 A game where you survive in a 2d world
 
-Current version: https://www.patland.live/
+Current version: https://patland.patentli.xyz
 
 Current Features:
 - Multiplayer
